@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/my_authn_authz/config"
 	"github.com/ucho456job/my_authn_authz/internal/constants"
@@ -32,5 +34,6 @@ func main() {
 
 	e.POST(constants.LOGIN_ENDPOINT, loginHandler.Login)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	port := ":" + os.Getenv("PORT")
+	e.Logger.Fatal(e.Start(port))
 }
