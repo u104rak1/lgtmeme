@@ -34,7 +34,7 @@ func main() {
 
 	e.Static("/", "view/out")
 
-	e.GET(constants.HEALTH_ENDPOINT, healthHandler.CheckHealth)
+	e.HEAD(constants.HEALTH_ENDPOINT, healthHandler.CheckHealth)
 	e.POST(constants.LOGIN_ENDPOINT, loginHandler.Login)
 
 	port := ":" + os.Getenv("PORT")
