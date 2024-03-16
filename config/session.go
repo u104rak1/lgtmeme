@@ -35,6 +35,8 @@ func InitSessionStore() {
 	if err != nil {
 		panic(err)
 	}
+
+	Store.DefaultMaxAge = 60 * 60
 }
 
 func SessionMiddleware() echo.MiddlewareFunc {

@@ -11,6 +11,7 @@ require (
 	github.com/labstack/echo-contrib v0.15.0
 	github.com/labstack/echo/v4 v4.11.4
 	golang.org/x/crypto v0.21.0
+	golang.org/x/exp v0.0.0-20240314144324-c7f7c6466f7f
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.7
 )
