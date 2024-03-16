@@ -4,7 +4,6 @@ COPY view/package.json view/yarn.lock ./
 RUN yarn install
 COPY view/ .
 RUN yarn build
-RUN yarn export
 
 FROM golang:1.21.4 AS go-build
 WORKDIR /go/src/app
