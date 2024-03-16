@@ -8,7 +8,24 @@ const LoginPage = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log(username, password);
+
+    const formData = new URLSearchParams();
+    formData.append("username", username);
+    formData.append("password", password);
+
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData.toString(),
+      });
+      const result = await response.json();
+      alert(JSON.stringify(result));
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   return (

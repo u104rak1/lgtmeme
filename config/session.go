@@ -10,7 +10,7 @@ import (
 
 var Store *redistore.RediStore
 
-func initSessionStore() {
+func InitSessionStore() {
 	host := os.Getenv("REDIS_HOST")
 	port := os.Getenv("REDIS_PORT")
 	address := host + ":" + port
