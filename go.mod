@@ -4,6 +4,7 @@ go 1.21.4
 
 require (
 	github.com/boj/redistore v0.0.0-20180917114910-cd5dcc76aeff
+	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.2.2
 	github.com/joho/godotenv v1.5.1
@@ -16,7 +17,6 @@ require (
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/gomodule/redigo v2.0.0+incompatible // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
