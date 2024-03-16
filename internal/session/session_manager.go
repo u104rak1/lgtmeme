@@ -5,8 +5,10 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
+	"github.com/ucho456job/my_authn_authz/config"
 	"github.com/ucho456job/my_authn_authz/internal/constants"
 
 	"github.com/labstack/echo/v4"
@@ -14,6 +16,7 @@ import (
 
 type SessionManager interface {
 	SaveLoginSession(c echo.Context, userID string) error
+	CheckHealthForRedis(key string) (string, error)
 }
 
 type DefaultSessionManager struct{}
@@ -32,7 +35,6 @@ func (dsm *DefaultSessionManager) SaveLoginSession(c echo.Context, userID string
 	session.Values["isLogin"] = true
 	session.Options = &sessions.Options{
 		Path:     "/",
-		MaxAge:   60 * 60,
 		HttpOnly: true,
 	}
 
@@ -47,4 +49,16 @@ func (dsm *DefaultSessionManager) SaveLoginSession(c echo.Context, userID string
 	}
 
 	return session.Save(c.Request(), c.Response())
+}
+
+func (dsm *DefaultSessionManager) CheckHealthForRedis(key string) (string, error) {
+	conn := config.Store.Pool.Get()
+	defer conn.Close()
+
+	value, err := redis.String(conn.Do("GET", key))
+	if err != nil {
+		return "", err
+	}
+
+	return value, nil
 }

@@ -16,6 +16,7 @@ func main() {
 	config.InitEnv()
 	config.InitDB()
 	config.InitSessionStore()
+	config.InitLogger()
 
 	// Init repository
 	userRepo := repository.NewGormUserRepository(config.DB)
@@ -24,14 +25,16 @@ func main() {
 	sessionManager := session.NewDefaultSessionManager()
 
 	// Init handler
+	healthHandler := handler.NewHealthHandler(userRepo, sessionManager, config.Logger)
 	loginHandler := handler.NewSessionHandler(userRepo, sessionManager)
 
 	e := echo.New()
 
-	e.Use(config.SessionMiddleware())
+	e.Use(config.SessionMiddleware(), config.LoggerMiddleware)
 
 	e.Static("/", "view/out")
 
+	e.GET(constants.HEALTH_ENDPOINT, healthHandler.CheckHealth)
 	e.POST(constants.LOGIN_ENDPOINT, loginHandler.Login)
 
 	port := ":" + os.Getenv("PORT")
