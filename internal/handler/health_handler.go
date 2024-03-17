@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"os"
 
 	"golang.org/x/exp/slog"
 
@@ -30,7 +29,7 @@ func NewHealthHandler(healthCheckRepository repository.HealthCheckRepository, se
 }
 
 func (h *healthHandler) CheckHealth(c echo.Context) error {
-	key := os.Getenv("HEALTH_CHECK_KEY")
+	key := "healthCheckKey"
 
 	postgresValue, err := h.healthCheckRepository.CheckHealthForPostgres(key)
 	if err != nil {

@@ -10,4 +10,4 @@ make migrate_up
 
 make insert_data
 
-docker exec -it my_authn_authz_redis redis-cli SET $HEALTH_CHECK_KEY redisValue
+docker exec -it my_authn_authz_redis redis-cli SET healthCheckKey redisValue
