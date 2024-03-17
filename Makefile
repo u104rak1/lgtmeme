@@ -1,4 +1,4 @@
-.PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data run view_build help
+.PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data run view_build development_start help
 
 dependencies_start: ## Start the postgres and redis
 	@docker compose --env-file .env.local -f ./docker/docker-compose.local.yaml up -d
@@ -26,7 +26,10 @@ run: ## Run the application
 	@ECHO_MODE=local go run ./cmd/my_authn_authz/main.go
 
 view_build: ## Build the view files
-	@cd ./view && yarn build
+	@cd ./view && yarn install && yarn build
+
+development_start: ## Start the development environment
+	@bash -c './script/start_development.sh'
 
 migrate_up_for_prod: ## Run the migrations for production
 	@bash -c 'source .env.prod && migrate -path ./db/migrations -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" up'

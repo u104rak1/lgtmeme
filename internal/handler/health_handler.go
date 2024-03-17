@@ -16,34 +16,34 @@ type HealthHandler interface {
 }
 
 type healthHandler struct {
-	userRepository repository.UserRepository
-	sessionManager session.SessionManager
-	logger         *slog.Logger
+	healthCheckRepository repository.HealthCheckRepository
+	sessionManager        session.SessionManager
+	logger                *slog.Logger
 }
 
-func NewHealthHandler(userRepository repository.UserRepository, sessionManager session.SessionManager, logger *slog.Logger) *healthHandler {
+func NewHealthHandler(healthCheckRepository repository.HealthCheckRepository, sessionManager session.SessionManager, logger *slog.Logger) *healthHandler {
 	return &healthHandler{
-		userRepository: userRepository,
-		sessionManager: sessionManager,
-		logger:         logger,
+		healthCheckRepository: healthCheckRepository,
+		sessionManager:        sessionManager,
+		logger:                logger,
 	}
 }
 
 func (h *healthHandler) CheckHealth(c echo.Context) error {
-	healthCheckKey := os.Getenv("HEALTH_CHECK_KEY")
+	key := os.Getenv("HEALTH_CHECK_KEY")
 
-	user, err := h.userRepository.FindByName(healthCheckKey)
+	postgresValue, err := h.healthCheckRepository.CheckHealthForPostgres(key)
 	if err != nil {
 		h.logger.Error("Failed to check helath for postgres", "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Invalid username or password"})
 	}
 
-	value, err := h.sessionManager.CheckHealthForRedis(healthCheckKey)
+	redisValue, err := h.sessionManager.CheckHealthForRedis(key)
 	if err != nil {
 		h.logger.Error("Failed to check health for redis", "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to check health for redis"})
 	}
 
-	h.logger.Info("Server, Postgres and Redis are healthy", "postgres_value", user.ID.String(), "redis_value", value)
+	h.logger.Info("Server, Postgres and Redis are healthy", "postgresValue", postgresValue, "redisValue", redisValue)
 	return c.String(http.StatusOK, "Server is healthy!")
 }
