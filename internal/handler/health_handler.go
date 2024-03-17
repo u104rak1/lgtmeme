@@ -15,27 +15,27 @@ type HealthHandler interface {
 	CheckHealth(c echo.Context) error
 }
 
-type DefaultHealthHandler struct {
+type healthHandler struct {
 	userRepository repository.UserRepository
 	sessionManager session.SessionManager
 	logger         *slog.Logger
 }
 
-func NewHealthHandler(userRepository repository.UserRepository, sessionManager session.SessionManager, logger *slog.Logger) *DefaultHealthHandler {
-	return &DefaultHealthHandler{
+func NewHealthHandler(userRepository repository.UserRepository, sessionManager session.SessionManager, logger *slog.Logger) *healthHandler {
+	return &healthHandler{
 		userRepository: userRepository,
 		sessionManager: sessionManager,
 		logger:         logger,
 	}
 }
 
-func (h *DefaultHealthHandler) CheckHealth(c echo.Context) error {
+func (h *healthHandler) CheckHealth(c echo.Context) error {
 	healthCheckKey := os.Getenv("HEALTH_CHECK_KEY")
 
 	user, err := h.userRepository.FindByName(healthCheckKey)
 	if err != nil {
 		h.logger.Error("Failed to check helath for postgres", "error", err.Error())
-		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid username or password"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Invalid username or password"})
 	}
 
 	value, err := h.sessionManager.CheckHealthForRedis(healthCheckKey)
