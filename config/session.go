@@ -1,9 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/boj/redistore"
+	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
@@ -11,16 +13,30 @@ import (
 var Store *redistore.RediStore
 
 func InitSessionStore() {
-	host := os.Getenv("REDIS_HOST")
-	port := os.Getenv("REDIS_PORT")
-	address := host + ":" + port
+	var err error
 	secretKey := os.Getenv("SESSION_SECRET_KEY")
 
-	var err error
-	Store, err = redistore.NewRediStore(10, "tcp", address, "", []byte(secretKey))
+	if os.Getenv("ECHO_MODE") == "production" {
+		redisURL := os.Getenv("REDIS_URL")
+
+		Store, err = redistore.NewRediStoreWithPool(&redis.Pool{
+			Dial: func() (redis.Conn, error) {
+				return redis.DialURL(redisURL)
+			},
+		}, []byte(secretKey))
+	} else {
+		host := os.Getenv("REDIS_HOST")
+		port := os.Getenv("REDIS_PORT")
+		address := fmt.Sprintf("%s:%s", host, port)
+
+		Store, err = redistore.NewRediStore(10, "tcp", address, "", []byte(secretKey))
+	}
+
 	if err != nil {
 		panic(err)
 	}
+
+	Store.DefaultMaxAge = 60 * 60
 }
 
 func SessionMiddleware() echo.MiddlewareFunc {

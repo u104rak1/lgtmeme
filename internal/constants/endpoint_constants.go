@@ -1,5 +1,6 @@
 package constants
 
 const (
-	LOGIN_ENDPOINT = "/api/login"
+	HEALTH_ENDPOINT = "/api/health"
+	LOGIN_ENDPOINT  = "/api/login"
 )
