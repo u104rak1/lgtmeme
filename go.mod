@@ -4,19 +4,20 @@ go 1.21.4
 
 require (
 	github.com/boj/redistore v0.0.0-20180917114910-cd5dcc76aeff
+	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.2.2
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo-contrib v0.15.0
 	github.com/labstack/echo/v4 v4.11.4
 	golang.org/x/crypto v0.21.0
+	golang.org/x/exp v0.0.0-20240314144324-c7f7c6466f7f
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.7
 )
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/gomodule/redigo v2.0.0+incompatible // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
