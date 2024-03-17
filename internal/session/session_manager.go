@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/ucho456job/my_authn_authz/config"
-	"github.com/ucho456job/my_authn_authz/internal/constants"
+	"github.com/ucho456job/my_authn_authz/internal/constant"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,21 +19,21 @@ type SessionManager interface {
 	CheckHealthForRedis(key string) (string, error)
 }
 
-type DefaultSessionManager struct{}
+type sessionManager struct{}
 
-func NewDefaultSessionManager() SessionManager {
-	return &DefaultSessionManager{}
+func NewSessionManager() SessionManager {
+	return &sessionManager{}
 }
 
-func (dsm *DefaultSessionManager) SaveLoginSession(c echo.Context, userID string) error {
-	session, err := session.Get(constants.LOGIN_SESSION_NAME, c)
+func (sm *sessionManager) SaveLoginSession(c echo.Context, userID string) error {
+	sess, err := session.Get(constant.LOGIN_SESSION_NAME, c)
 	if err != nil {
 		return err
 	}
 
-	session.Values["userId"] = userID
-	session.Values["isLogin"] = true
-	session.Options = &sessions.Options{
+	sess.Values["userId"] = userID
+	sess.Values["isLogin"] = true
+	sess.Options = &sessions.Options{
 		Path:     "/",
 		HttpOnly: true,
 	}
@@ -44,18 +44,18 @@ func (dsm *DefaultSessionManager) SaveLoginSession(c echo.Context, userID string
 	}
 
 	if secure {
-		session.Options.Secure = true
-		session.Options.SameSite = http.SameSiteNoneMode
+		sess.Options.Secure = true
+		sess.Options.SameSite = http.SameSiteNoneMode
 	}
 
-	return session.Save(c.Request(), c.Response())
+	return sess.Save(c.Request(), c.Response())
 }
 
-func (dsm *DefaultSessionManager) CheckHealthForRedis(key string) (string, error) {
+func (sm *sessionManager) CheckHealthForRedis(key string) (value string, err error) {
 	conn := config.Store.Pool.Get()
 	defer conn.Close()
 
-	value, err := redis.String(conn.Do("GET", key))
+	value, err = redis.String(conn.Do("GET", key))
 	if err != nil {
 		return "", err
 	}

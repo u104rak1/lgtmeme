@@ -7,38 +7,44 @@ import (
 	"github.com/ucho456job/my_authn_authz/internal/repository"
 	"github.com/ucho456job/my_authn_authz/internal/session"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/exp/slog"
 )
 
 type LoginHandler interface {
 	Login(c echo.Context)
 }
 
-type DefaultLoginHandler struct {
+type loginHandler struct {
 	userRepository repository.UserRepository
 	sessionManager session.SessionManager
+	logger         *slog.Logger
 }
 
-func NewSessionHandler(userRepository repository.UserRepository, sessionManager session.SessionManager) *DefaultLoginHandler {
-	return &DefaultLoginHandler{
+func NewLoginHandler(userRepository repository.UserRepository, sessionManager session.SessionManager, logger *slog.Logger) *loginHandler {
+	return &loginHandler{
 		userRepository: userRepository,
 		sessionManager: sessionManager,
+		logger:         logger,
 	}
 }
 
-func (h *DefaultLoginHandler) Login(c echo.Context) error {
+func (h *loginHandler) Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
 	user, err := h.userRepository.FindByName(username)
 	if err != nil {
+		h.logger.Warn("Failed to find user", "error", err.Error())
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid username or password"})
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		h.logger.Warn("Failed to compare password", "error", err.Error())
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid username or password"})
 	}
 
 	if err := h.sessionManager.SaveLoginSession(c, user.ID.String()); err != nil {
+		h.logger.Error("Failed to save login session", "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to save session"})
 	}
 

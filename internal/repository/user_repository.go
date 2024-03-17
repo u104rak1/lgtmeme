@@ -9,15 +9,15 @@ type UserRepository interface {
 	FindByName(name string) (*model.User, error)
 }
 
-type GormUserRepository struct {
+type userRepository struct {
 	DB *gorm.DB
 }
 
-func NewGormUserRepository(db *gorm.DB) UserRepository {
-	return &GormUserRepository{DB: db}
+func NewUserRepository(db *gorm.DB) UserRepository {
+	return &userRepository{DB: db}
 }
 
-func (r *GormUserRepository) FindByName(name string) (*model.User, error) {
+func (r *userRepository) FindByName(name string) (*model.User, error) {
 	var user model.User
 	if err := r.DB.Where("name = ?", name).First(&user).Error; err != nil {
 		return nil, err
