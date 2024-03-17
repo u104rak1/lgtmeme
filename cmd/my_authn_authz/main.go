@@ -19,14 +19,15 @@ func main() {
 	config.InitLogger()
 
 	// Init repository
+	healthCheckRepo := repository.NewHealthCheckRepository(config.DB)
 	userRepo := repository.NewUserRepository(config.DB)
 
 	// Init session manager
-	sessionManager := session.NewSessionManager()
+	sessManager := session.NewSessionManager()
 
 	// Init handler
-	healthHandler := handler.NewHealthHandler(userRepo, sessionManager, config.Logger)
-	loginHandler := handler.NewLoginHandler(userRepo, sessionManager, config.Logger)
+	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManager, config.Logger)
+	loginHandler := handler.NewLoginHandler(userRepo, sessManager, config.Logger)
 
 	e := echo.New()
 

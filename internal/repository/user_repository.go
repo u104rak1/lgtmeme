@@ -19,7 +19,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 
 func (r *userRepository) FindByName(name string) (*model.User, error) {
 	var user model.User
-	if err := r.DB.Where("name = ?", name).First(&user).Error; err != nil {
+	if err := r.DB.Model(&model.User{}).Where("name = ?", name).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
