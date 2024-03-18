@@ -6,13 +6,13 @@ dependencies_start: ## Start the postgres and redis
 dependencies_stop: ## Stop the postgres and redis
 	@docker compose --env-file .env.local -f ./docker/docker-compose.local.yaml down
 
-migrate_up: ## Run the migrations
-	@bash -c 'source .env.local && migrate -path ./db/migrations -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" up'
+migrate_up: ## Run the migration
+	@bash -c 'source .env.local && migrate -path ./db/migration -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" up'
 
-migrate_down: ## Rollback the migrations
-	@bash -c 'source .env.local && migrate -path ./db/migrations -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" down'
+migrate_down: ## Rollback the migration
+	@bash -c 'source .env.local && migrate -path ./db/migration -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" down'
 
-migrate_reset: ## Reset the migrations
+migrate_reset: ## Reset the migration
 	$(MAKE) migrate_down
 	$(MAKE) migrate_up
 
@@ -31,11 +31,11 @@ view_build: ## Build the view files
 development_start: ## Start the development environment
 	@bash -c './script/start_development.sh'
 
-migrate_up_for_prod: ## Run the migrations for production
-	@bash -c 'source .env.prod && migrate -path ./db/migrations -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" up'
+migrate_up_for_prod: ## Run the migration for production
+	@bash -c 'source .env.prod && migrate -path ./db/migration -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" up'
 
-migrate_down_for_prod: ## Rollback the migrations for production
-	@bash -c 'source .env.prod && migrate -path ./db/migrations -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" down'
+migrate_down_for_prod: ## Rollback the migration for production
+	@bash -c 'source .env.prod && migrate -path ./db/migration -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" down'
 
 help: ## Show Makefile options
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
