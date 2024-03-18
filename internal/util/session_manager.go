@@ -1,4 +1,4 @@
-package session
+package util
 
 import (
 	"net/http"
@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/ucho456job/my_authn_authz/config"
-	"github.com/ucho456job/my_authn_authz/internal/constant"
 
 	"github.com/labstack/echo/v4"
 )
@@ -26,7 +25,7 @@ func NewSessionManager() SessionManager {
 }
 
 func (sm *sessionManager) SaveLoginSession(c echo.Context, userID string) error {
-	sess, err := session.Get(constant.LOGIN_SESSION_NAME, c)
+	sess, err := session.Get(LOGIN_SESSION_NAME, c)
 	if err != nil {
 		return err
 	}
