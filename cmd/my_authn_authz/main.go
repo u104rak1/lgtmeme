@@ -5,10 +5,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/my_authn_authz/config"
-	"github.com/ucho456job/my_authn_authz/internal/constant"
 	"github.com/ucho456job/my_authn_authz/internal/handler"
 	"github.com/ucho456job/my_authn_authz/internal/repository"
-	"github.com/ucho456job/my_authn_authz/internal/session"
+	"github.com/ucho456job/my_authn_authz/internal/util"
 )
 
 func main() {
@@ -23,7 +22,7 @@ func main() {
 	userRepo := repository.NewUserRepository(config.DB)
 
 	// Init session manager
-	sessManager := session.NewSessionManager()
+	sessManager := util.NewSessionManager()
 
 	// Init handler
 	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManager, config.Logger)
@@ -35,8 +34,8 @@ func main() {
 
 	e.Static("/", "view/out")
 
-	e.HEAD(constant.HEALTH_ENDPOINT, healthHandler.CheckHealth)
-	e.POST(constant.LOGIN_ENDPOINT, loginHandler.Login)
+	e.HEAD(util.HEALTH_ENDPOINT, healthHandler.CheckHealth)
+	e.POST(util.LOGIN_ENDPOINT, loginHandler.Login)
 
 	port := ":" + os.Getenv("PORT")
 	e.Logger.Fatal(e.Start(port))
