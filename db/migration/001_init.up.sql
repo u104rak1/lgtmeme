@@ -2,14 +2,15 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS health_checks (
-    "key" VARCHAR(20) PRIMARY KEY,
-    "value" VARCHAR(20) NOT NULL
+    key VARCHAR(20) PRIMARY KEY,
+    value VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS users (
-    "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "name" VARCHAR(20) UNIQUE,
-    "password" TEXT NOT NULL
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(20) UNIQUE,
+    password TEXT NOT NULL,
+    role VARCHAR(20)
 );
 
 CREATE TABLE IF NOT EXISTS oauth_clients (
