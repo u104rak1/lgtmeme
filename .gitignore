@@ -1,1 +1,2 @@
+/cmd/my_authn_authz/__debug*
 .env.prod
