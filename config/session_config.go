@@ -2,15 +2,19 @@ package config
 
 import (
 	"fmt"
+	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/boj/redistore"
 	"github.com/gomodule/redigo/redis"
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
 var Store *redistore.RediStore
+var Pool *redis.Pool
 
 func InitSessionStore() {
 	var err error
@@ -36,7 +40,22 @@ func InitSessionStore() {
 		panic(err)
 	}
 
-	Store.DefaultMaxAge = 60 * 60
+	secure, err := strconv.ParseBool(os.Getenv("COOKIE_SECURE"))
+	if err != nil {
+		panic(err)
+	}
+
+	Store.Options = &sessions.Options{
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   60 * 60,
+		Secure:   secure,
+	}
+	if secure {
+		Store.Options.SameSite = http.SameSiteNoneMode
+	}
+
+	Pool = Store.Pool
 }
 
 func SessionMiddleware() echo.MiddlewareFunc {

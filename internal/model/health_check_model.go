@@ -1,9 +1,6 @@
 package model
 
-import "github.com/google/uuid"
-
 type HealthCheck struct {
-	ID    uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
-	Key   string    `gorm:"type:varchar(20);not null"`
-	Value string    `gorm:"type:varchar(20);not null"`
+	Key   string `gorm:"column:key;type:varchar(20);not null;primary_key"`
+	Value string `gorm:"column:value;type:varchar(20);not null"`
 }

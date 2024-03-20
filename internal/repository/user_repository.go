@@ -7,6 +7,7 @@ import (
 
 type UserRepository interface {
 	FindByName(name string) (*model.User, error)
+	ExistsByID(userID string) (bool, error)
 }
 
 type userRepository struct {
@@ -23,4 +24,12 @@ func (r *userRepository) FindByName(name string) (*model.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *userRepository) ExistsByID(userID string) (bool, error) {
+	var count int64
+	if err := r.DB.Model(&model.User{}).Where("id = ?", userID).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }
