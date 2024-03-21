@@ -16,6 +16,7 @@ func main() {
 	config.InitDB()
 	config.InitSessionStore()
 	config.InitLogger()
+	validator := config.InitValidator()
 
 	// Init repository
 	healthCheckRepo := repository.NewHealthCheckRepository(config.DB)
@@ -29,6 +30,8 @@ func main() {
 	loginHandler := handler.NewLoginHandler(userRepo, sessManagerRepo)
 
 	e := echo.New()
+
+	e.Validator = validator
 
 	e.Use(config.SessionMiddleware(), config.LoggerMiddleware)
 
