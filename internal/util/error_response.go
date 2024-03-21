@@ -8,7 +8,7 @@ import (
 	"github.com/ucho456job/my_authn_authz/internal/dto"
 )
 
-func RedirectWithErrorForAuthz(c echo.Context, q dto.AuthoraizationQuery, errCode, errDescription string) error {
+func RedirectWithErrorForAuthz(c echo.Context, q dto.AuthorizationQuery, errCode, errDescription string) error {
 	redirectURL, err := url.Parse(q.RedirectURI)
 	if err != nil {
 		return InternalServerErrorResponse(c, err)

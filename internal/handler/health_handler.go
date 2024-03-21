@@ -31,13 +31,13 @@ func NewHealthHandler(healthCheckRepository repository.HealthCheckRepository, se
 func (h *healthHandler) CheckHealth(c echo.Context) error {
 	key := "healthCheckKey"
 
-	postgresValue, err := h.healthCheckRepository.CheckHealthForPostgres(key)
+	postgresValue, err := h.healthCheckRepository.CheckHealthForPostgres(c, key)
 	if err != nil {
 		h.logger.Error("Failed to check helath for postgres", "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Invalid username or password"})
 	}
 
-	redisValue, err := h.sessionManager.CheckHealthForRedis(key)
+	redisValue, err := h.sessionManager.CheckHealthForRedis(c, key)
 	if err != nil {
 		h.logger.Error("Failed to check health for redis", "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to check health for redis"})
