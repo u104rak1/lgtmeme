@@ -32,7 +32,7 @@ func (h *loginHandler) Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
-	user, err := h.userRepository.FindByName(username)
+	user, err := h.userRepository.FindByName(c, username)
 	if err != nil {
 		h.logger.Warn("Failed to find user", "error", err.Error())
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid username or password"})
@@ -43,7 +43,7 @@ func (h *loginHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid username or password"})
 	}
 
-	if err := h.sessionManager.SaveLoginSession(c, user.ID.String()); err != nil {
+	if err := h.sessionManager.CacheLoginSession(c, user.ID.String()); err != nil {
 		h.logger.Error("Failed to save login session", "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to save session"})
 	}
