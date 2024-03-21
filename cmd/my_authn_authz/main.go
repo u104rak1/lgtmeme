@@ -25,8 +25,8 @@ func main() {
 
 	// Init handler
 	authzHandler := handler.NewAuthorizationHandler(oauthClientRepo, userRepo, sessManagerRepo)
-	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManagerRepo, config.Logger)
-	loginHandler := handler.NewLoginHandler(userRepo, sessManagerRepo, config.Logger)
+	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManagerRepo)
+	loginHandler := handler.NewLoginHandler(userRepo, sessManagerRepo)
 
 	e := echo.New()
 
