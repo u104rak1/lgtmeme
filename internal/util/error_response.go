@@ -30,6 +30,15 @@ func RedirectWithErrorForAuthz(c echo.Context, q dto.AuthorizationQuery, errCode
 	return c.Redirect(http.StatusFound, redirectURL.String())
 }
 
+// 400 Bad Request
+func BadRequestResponse(c echo.Context, err error) error {
+	config.Logger.Warn("Bad request", "error", err.Error())
+	return c.JSON(http.StatusBadRequest, map[string]string{
+		"errorCode":    "bad_request",
+		"errorMessage": err.Error(),
+	})
+}
+
 // 401 Unauthorized
 func UnauthorizedErrorResponse(c echo.Context, err error) error {
 	config.Logger.Warn("Unauthorized", "error", err.Error())

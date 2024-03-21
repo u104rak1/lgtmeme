@@ -34,7 +34,7 @@ func NewAuthorizationHandler(
 }
 
 func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
-	q := dto.AuthorizationQuery{
+	q := &dto.AuthorizationQuery{
 		ResponseType: c.QueryParam("response_type"),
 		ClientID:     c.QueryParam("client_id"),
 		RedirectURI:  c.QueryParam("redirect_uri"),
@@ -43,42 +43,42 @@ func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
 		Nonce:        c.QueryParam("nonce"),
 	}
 
-	if q.ResponseType == "" || q.ClientID == "" || q.RedirectURI == "" {
-		return util.RedirectWithErrorForAuthz(c, q, "invalid_request", "Missing required parameters")
+	if err := c.Validate(q); err != nil {
+		return util.BadRequestResponse(c, err)
 	}
 
-	exists, err := h.oauthClientRepository.ExistsForAuthz(c, q)
+	exists, err := h.oauthClientRepository.ExistsForAuthz(c, *q)
 	if err != nil {
-		return util.RedirectWithErrorForAuthz(c, q, "server_error", "An internal server error occurred")
+		return util.RedirectWithErrorForAuthz(c, *q, "server_error", "An internal server error occurred")
 	}
 	if !exists {
-		return util.RedirectWithErrorForAuthz(c, q, "invalid_request", "Client ID or Redirect URI or scope are incorrect")
+		return util.RedirectWithErrorForAuthz(c, *q, "invalid_request", "Client ID or Redirect URI or scope are incorrect")
 	}
 
 	userID, isLogin, err := h.sessionManager.LoadLoginSession(c)
 	if err != nil {
-		return util.RedirectWithErrorForAuthz(c, q, "server_error", "Failed to get login session")
+		return util.RedirectWithErrorForAuthz(c, *q, "server_error", "Failed to get login session")
 	}
 	if !isLogin {
-		if err := h.sessionManager.CachePreAuthnSession(c, q); err != nil {
-			return util.RedirectWithErrorForAuthz(c, q, "server_error", "Failed to save pre authentication session")
+		if err := h.sessionManager.CachePreAuthnSession(c, *q); err != nil {
+			return util.RedirectWithErrorForAuthz(c, *q, "server_error", "Failed to save pre authentication session")
 		}
 		return c.Redirect(http.StatusFound, util.LOGIN_SCREEN_ENDPOINT)
 	}
 
 	exists, err = h.userRepository.ExistsByID(c, userID)
 	if err != nil || !exists {
-		return util.RedirectWithErrorForAuthz(c, q, "access_denied", "User does not exist")
+		return util.RedirectWithErrorForAuthz(c, *q, "access_denied", "User does not exist")
 	}
 
 	authzCode := uuid.New().String()
-	if err := h.sessionManager.CacheAuthzCodeWithCtx(c, q, authzCode, userID); err != nil {
-		return util.RedirectWithErrorForAuthz(c, q, "server_error", "Failed to save authorization code")
+	if err := h.sessionManager.CacheAuthzCodeWithCtx(c, *q, authzCode, userID); err != nil {
+		return util.RedirectWithErrorForAuthz(c, *q, "server_error", "Failed to save authorization code")
 	}
 
 	redirectURL, err := url.Parse(q.RedirectURI)
 	if err != nil {
-		return util.RedirectWithErrorForAuthz(c, q, "server_error", "Failed to parse redirect URI")
+		return util.RedirectWithErrorForAuthz(c, *q, "server_error", "Failed to parse redirect URI")
 	}
 	query := redirectURL.Query()
 	query.Set("code", authzCode)
