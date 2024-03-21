@@ -20,15 +20,13 @@ func main() {
 	// Init repository
 	healthCheckRepo := repository.NewHealthCheckRepository(config.DB)
 	oauthClientRepo := repository.NewOauthClientRepository(config.DB)
+	sessManagerRepo := repository.NewSessionManager(config.Store, config.Pool)
 	userRepo := repository.NewUserRepository(config.DB)
 
-	// Init session manager
-	sessManager := util.NewSessionManager(config.Store, config.Pool)
-
 	// Init handler
-	authzHandler := handler.NewAuthorizationHandler(oauthClientRepo, userRepo, sessManager)
-	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManager, config.Logger)
-	loginHandler := handler.NewLoginHandler(userRepo, sessManager, config.Logger)
+	authzHandler := handler.NewAuthorizationHandler(oauthClientRepo, userRepo, sessManagerRepo)
+	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManagerRepo, config.Logger)
+	loginHandler := handler.NewLoginHandler(userRepo, sessManagerRepo, config.Logger)
 
 	e := echo.New()
 

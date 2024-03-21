@@ -18,10 +18,14 @@ type AuthorizationHandler interface {
 type authorizationHandler struct {
 	oauthClientRepository repository.OauthClientRepository
 	userRepository        repository.UserRepository
-	sessionManager        util.SessionManager
+	sessionManager        repository.SessionManager
 }
 
-func NewAuthorizationHandler(oauthClientRepository repository.OauthClientRepository, userRepository repository.UserRepository, sessionManager util.SessionManager) *authorizationHandler {
+func NewAuthorizationHandler(
+	oauthClientRepository repository.OauthClientRepository,
+	userRepository repository.UserRepository,
+	sessionManager repository.SessionManager,
+) *authorizationHandler {
 	return &authorizationHandler{
 		oauthClientRepository: oauthClientRepository,
 		userRepository:        userRepository,

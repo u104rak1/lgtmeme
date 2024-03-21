@@ -5,7 +5,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/my_authn_authz/internal/repository"
-	"github.com/ucho456job/my_authn_authz/internal/util"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/exp/slog"
 )
@@ -16,11 +15,15 @@ type LoginHandler interface {
 
 type loginHandler struct {
 	userRepository repository.UserRepository
-	sessionManager util.SessionManager
+	sessionManager repository.SessionManager
 	logger         *slog.Logger
 }
 
-func NewLoginHandler(userRepository repository.UserRepository, sessionManager util.SessionManager, logger *slog.Logger) *loginHandler {
+func NewLoginHandler(
+	userRepository repository.UserRepository,
+	sessionManager repository.SessionManager,
+	logger *slog.Logger,
+) *loginHandler {
 	return &loginHandler{
 		userRepository: userRepository,
 		sessionManager: sessionManager,
