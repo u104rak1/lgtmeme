@@ -1,4 +1,4 @@
-package util
+package repository
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"github.com/boj/redistore"
 	"github.com/gomodule/redigo/redis"
 	"github.com/ucho456job/my_authn_authz/internal/dto"
+	"github.com/ucho456job/my_authn_authz/internal/util"
 
 	"github.com/labstack/echo/v4"
 )
@@ -31,7 +32,7 @@ func NewSessionManager(store *redistore.RediStore, pool *redis.Pool) SessionMana
 }
 
 func (sm *sessionManager) CacheLoginSession(c echo.Context, userID string) error {
-	sess, err := sm.store.Get(c.Request(), LOGIN_SESSION_NAME)
+	sess, err := sm.store.Get(c.Request(), util.LOGIN_SESSION_NAME)
 	if err != nil {
 		return err
 	}
@@ -43,7 +44,7 @@ func (sm *sessionManager) CacheLoginSession(c echo.Context, userID string) error
 }
 
 func (sm *sessionManager) LoadLoginSession(c echo.Context) (userID string, isLogin bool, err error) {
-	sess, err := sm.store.Get(c.Request(), LOGIN_SESSION_NAME)
+	sess, err := sm.store.Get(c.Request(), util.LOGIN_SESSION_NAME)
 	if err != nil {
 		return "", false, err
 	}
@@ -72,7 +73,7 @@ func (sm *sessionManager) LoadLoginSession(c echo.Context) (userID string, isLog
 }
 
 func (sm *sessionManager) CachePreAuthnSession(c echo.Context, q dto.AuthorizationQuery) error {
-	sess, err := sm.store.Get(c.Request(), PRE_AUTHN_SESSION_NAME)
+	sess, err := sm.store.Get(c.Request(), util.PRE_AUTHN_SESSION_NAME)
 	if err != nil {
 		return err
 	}
