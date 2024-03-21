@@ -11,11 +11,11 @@ import (
 )
 
 type SessionManager interface {
-	SaveLoginSession(c echo.Context, userID string) error
-	GetLoginSession(c echo.Context) (userID string, isLogin bool, err error)
-	CachePreAuthnSession(c echo.Context, q dto.AuthoraizationQuery) error
-	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthoraizationQuery, authzCode, userID string) error
-	CheckHealthForRedis(key string) (string, error)
+	CacheLoginSession(c echo.Context, userID string) error
+	LoadLoginSession(c echo.Context) (userID string, isLogin bool, err error)
+	CachePreAuthnSession(c echo.Context, q dto.AuthorizationQuery) error
+	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, authzCode, userID string) error
+	CheckHealthForRedis(c echo.Context, key string) (string, error)
 }
 
 type sessionManager struct {
@@ -30,7 +30,7 @@ func NewSessionManager(store *redistore.RediStore, pool *redis.Pool) SessionMana
 	}
 }
 
-func (sm *sessionManager) SaveLoginSession(c echo.Context, userID string) error {
+func (sm *sessionManager) CacheLoginSession(c echo.Context, userID string) error {
 	sess, err := sm.store.Get(c.Request(), LOGIN_SESSION_NAME)
 	if err != nil {
 		return err
@@ -42,7 +42,7 @@ func (sm *sessionManager) SaveLoginSession(c echo.Context, userID string) error 
 	return sess.Save(c.Request(), c.Response())
 }
 
-func (sm *sessionManager) GetLoginSession(c echo.Context) (userID string, isLogin bool, err error) {
+func (sm *sessionManager) LoadLoginSession(c echo.Context) (userID string, isLogin bool, err error) {
 	sess, err := sm.store.Get(c.Request(), LOGIN_SESSION_NAME)
 	if err != nil {
 		return "", false, err
@@ -71,7 +71,7 @@ func (sm *sessionManager) GetLoginSession(c echo.Context) (userID string, isLogi
 	return userID, isLogin, nil
 }
 
-func (sm *sessionManager) CachePreAuthnSession(c echo.Context, q dto.AuthoraizationQuery) error {
+func (sm *sessionManager) CachePreAuthnSession(c echo.Context, q dto.AuthorizationQuery) error {
 	sess, err := sm.store.Get(c.Request(), PRE_AUTHN_SESSION_NAME)
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ type AuthzCodeContext struct {
 	Nonce       string `json:"nonce"`
 }
 
-func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthoraizationQuery, authzCode, userID string) error {
+func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, authzCode, userID string) error {
 	saveData := AuthzCodeContext{
 		UserID:      userID,
 		ClientID:    q.ClientID,
@@ -120,7 +120,7 @@ func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.Authoraiza
 	return nil
 }
 
-func (sm *sessionManager) CheckHealthForRedis(key string) (value string, err error) {
+func (sm *sessionManager) CheckHealthForRedis(c echo.Context, key string) (value string, err error) {
 	conn := sm.pool.Get()
 	defer conn.Close()
 

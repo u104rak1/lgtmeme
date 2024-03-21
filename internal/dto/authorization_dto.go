@@ -1,6 +1,6 @@
 package dto
 
-type AuthoraizationQuery struct {
+type AuthorizationQuery struct {
 	ResponseType string
 	ClientID     string
 	RedirectURI  string

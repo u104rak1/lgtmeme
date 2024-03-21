@@ -30,7 +30,7 @@ func NewAuthorizationHandler(oauthClientRepository repository.OauthClientReposit
 }
 
 func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
-	q := dto.AuthoraizationQuery{
+	q := dto.AuthorizationQuery{
 		ResponseType: c.QueryParam("response_type"),
 		ClientID:     c.QueryParam("client_id"),
 		RedirectURI:  c.QueryParam("redirect_uri"),
@@ -51,7 +51,7 @@ func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
 		return util.RedirectWithErrorForAuthz(c, q, "invalid_request", "Client ID or Redirect URI or scope are incorrect")
 	}
 
-	userID, isLogin, err := h.sessionManager.GetLoginSession(c)
+	userID, isLogin, err := h.sessionManager.LoadLoginSession(c)
 	if err != nil {
 		return util.RedirectWithErrorForAuthz(c, q, "server_error", "Failed to get login session")
 	}
@@ -62,7 +62,7 @@ func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
 		return c.Redirect(http.StatusFound, util.LOGIN_SCREEN_ENDPOINT)
 	}
 
-	exists, err = h.userRepository.ExistsByID(userID)
+	exists, err = h.userRepository.ExistsByID(c, userID)
 	if err != nil || !exists {
 		return util.RedirectWithErrorForAuthz(c, q, "access_denied", "User does not exist")
 	}
