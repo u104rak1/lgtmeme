@@ -5,8 +5,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/my_authn_authz/internal/repository"
+	"github.com/ucho456job/my_authn_authz/internal/util"
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/exp/slog"
 )
 
 type LoginHandler interface {
@@ -16,18 +16,15 @@ type LoginHandler interface {
 type loginHandler struct {
 	userRepository repository.UserRepository
 	sessionManager repository.SessionManager
-	logger         *slog.Logger
 }
 
 func NewLoginHandler(
 	userRepository repository.UserRepository,
 	sessionManager repository.SessionManager,
-	logger *slog.Logger,
 ) *loginHandler {
 	return &loginHandler{
 		userRepository: userRepository,
 		sessionManager: sessionManager,
-		logger:         logger,
 	}
 }
 
@@ -37,18 +34,15 @@ func (h *loginHandler) Login(c echo.Context) error {
 
 	user, err := h.userRepository.FindByName(c, username)
 	if err != nil {
-		h.logger.Warn("Failed to find user", "error", err.Error())
-		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid username or password"})
+		return util.UnauthorizedErrorResponse(c, err)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		h.logger.Warn("Failed to compare password", "error", err.Error())
-		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid username or password"})
+		return util.UnauthorizedErrorResponse(c, err)
 	}
 
 	if err := h.sessionManager.CacheLoginSession(c, user.ID.String()); err != nil {
-		h.logger.Error("Failed to save login session", "error", err.Error())
-		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to save session"})
+		return util.InternalServerErrorResponse(c, err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
