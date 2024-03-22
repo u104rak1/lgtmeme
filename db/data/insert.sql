@@ -1,9 +1,9 @@
 -- master_scopes
 INSERT INTO master_scopes (code, description) VALUES
-('images_read', 'Permission to read images'),
-('images_create', 'Permission to create images'),
-('images_update', 'Permission to update images'),
-('images_delete', 'Permission to delete images');
+('images.read', 'Permission to read images'),
+('images.create', 'Permission to create images'),
+('images.update', 'Permission to update images'),
+('images.delete', 'Permission to delete images');
 
 -- master_application_types
 INSERT INTO master_application_types (type) VALUES
@@ -23,13 +23,13 @@ INSERT INTO oauth_clients (id, name, client_id, client_secret, redirect_uri, app
 ('4533d234-5f04-4a03-8171-f1f952736373', 'Owner Private Client', 'a74983c2-c578-41fd-993b-9e4716d244ac', 'owner_client_secret', 'http://localhost:3000/api/owner/callback', 'http://localhost:3000', 'confidential');
 
 INSERT INTO oauth_clients_scopes (client_id, scope_code) VALUES
-('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'images_read'),
-('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'images_create'),
-('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'images_update'),
-('4533d234-5f04-4a03-8171-f1f952736373', 'images_read'),
-('4533d234-5f04-4a03-8171-f1f952736373', 'images_create'),
-('4533d234-5f04-4a03-8171-f1f952736373', 'images_update'),
-('4533d234-5f04-4a03-8171-f1f952736373', 'images_delete');
+('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'images.read'),
+('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'images.create'),
+('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'images.update'),
+('4533d234-5f04-4a03-8171-f1f952736373', 'images.read'),
+('4533d234-5f04-4a03-8171-f1f952736373', 'images.create'),
+('4533d234-5f04-4a03-8171-f1f952736373', 'images.update'),
+('4533d234-5f04-4a03-8171-f1f952736373', 'images.delete');
 
 -- oauth_clients_application_types
 INSERT INTO oauth_clients_application_types (client_id, application_type) VALUES

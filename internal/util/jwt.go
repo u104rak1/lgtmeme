@@ -1,6 +1,8 @@
 package util
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"strings"
 	"time"
 
@@ -11,7 +13,7 @@ import (
 
 type JwtService interface {
 	GenerateAccessToken(userID uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error)
-	GenerateRefreshToken(userID uuid.UUID) (string, error)
+	GenerateRefreshToken() (string, error)
 	GenerateIDToken(oauthClient *model.OauthClient, user *model.User, nonce string) (string, error)
 }
 
@@ -60,21 +62,12 @@ func (s *jwtService) GenerateAccessToken(userID uuid.UUID, oauthClient *model.Oa
 	return tokenString, nil
 }
 
-func (s *jwtService) GenerateRefreshToken(userID uuid.UUID) (string, error) {
-	claims := jwt.MapClaims{
-		"sub": userID,
-		"iss": s.issuerURL,
-		"iat": time.Now().Unix(),
-		"jti": uuid.New().String(),
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(s.jwtKey)
-	if err != nil {
+func (s *jwtService) GenerateRefreshToken() (string, error) {
+	bytes := make([]byte, REFRESH_TOKEN_SIZE)
+	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
-
-	return tokenString, nil
+	return hex.EncodeToString(bytes), nil
 }
 
 func (s *jwtService) GenerateIDToken(oauthClient *model.OauthClient, user *model.User, nonce string) (string, error) {

@@ -81,7 +81,7 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 			return util.InternalServerErrorResponse(c, err)
 		}
 
-		refreshToken, err := h.jwtService.GenerateRefreshToken(authzCodeCtx.UserID)
+		refreshToken, err := h.jwtService.GenerateRefreshToken()
 		if err != nil {
 			return util.InternalServerErrorResponse(c, err)
 		}

@@ -1,4 +1,4 @@
-.PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data run view_build development_start help
+.PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data run view_build development_start auth_flow help
 
 dependencies_start: ## Start the postgres and redis
 	@docker compose --env-file .env.local -f ./docker/docker-compose.local.yaml up -d
@@ -30,6 +30,9 @@ view_build: ## Build the view files
 
 development_start: ## Start the development environment
 	@bash -c './script/start_development.sh'
+
+auth_flow: ## Try the authentication and authorization flow
+	@bash -c './script/auth_flow.sh'
 
 migrate_up_for_prod: ## Run the migration for production
 	@bash -c 'source .env.prod && migrate -path ./db/migration -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" up'
