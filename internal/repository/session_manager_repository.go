@@ -39,7 +39,7 @@ func (sm *sessionManager) CacheLoginSession(c echo.Context, userID uuid.UUID) er
 		return err
 	}
 
-	sess.Values["userId"] = userID
+	sess.Values["userId"] = userID.String()
 	sess.Values["isLogin"] = true
 
 	return sess.Save(c.Request(), c.Response())

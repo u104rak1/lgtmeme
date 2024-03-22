@@ -54,5 +54,5 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     client_id UUID NOT NULL,
     scopes TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (client_id) REFERENCES oauth_clients(id),
+    FOREIGN KEY (client_id) REFERENCES oauth_clients(client_id)
 );
