@@ -47,7 +47,7 @@ func (h *loginHandler) Login(c echo.Context) error {
 		return util.UnauthorizedErrorResponse(c, err)
 	}
 
-	if err := h.sessionManager.CacheLoginSession(c, user.ID.String()); err != nil {
+	if err := h.sessionManager.CacheLoginSession(c, user.ID); err != nil {
 		return util.InternalServerErrorResponse(c, err)
 	}
 

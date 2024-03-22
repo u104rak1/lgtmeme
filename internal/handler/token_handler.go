@@ -71,7 +71,7 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 
 		expiresIn := util.ACCESS_TOKEN_EXPIRES_IN
 
-		accessToken, err := h.jwtService.GenerateAccessToken(user.ID.String(), oauthClient, expiresIn)
+		accessToken, err := h.jwtService.GenerateAccessToken(user.ID, oauthClient, expiresIn)
 		if err != nil {
 			return util.InternalServerErrorResponse(c, err)
 		}
