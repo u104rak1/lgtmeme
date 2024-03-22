@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/my_authn_authz/internal/dto"
@@ -70,7 +69,7 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 			return util.NotFoundErrorResponse(c, err)
 		}
 
-		expiresIn := time.Now().Add(util.ACCESS_TOKEN_EXPIRES_IN)
+		expiresIn := util.ACCESS_TOKEN_EXPIRES_IN
 
 		accessToken, err := h.jwtService.GenerateAccessToken(user.ID.String(), oauthClient, expiresIn)
 		if err != nil {
@@ -92,7 +91,7 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"accessToken":  accessToken,
 			"tokenType":    "Bearer",
-			"expiresIn":    expiresIn.Second(),
+			"expiresIn":    expiresIn.Seconds(),
 			"refreshToken": refreshToken,
 			"idToken":      idToken,
 		})

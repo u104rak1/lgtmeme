@@ -10,7 +10,7 @@ import (
 )
 
 type JwtService interface {
-	GenerateAccessToken(userID string, oauthClient *model.OauthClient, expiresIn time.Time) (string, error)
+	GenerateAccessToken(userID string, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error)
 	GenerateRefreshToken(userID string) (string, error)
 	GenerateIDToken(oauthClient *model.OauthClient, user *model.User, nonce string) (string, error)
 }
@@ -32,7 +32,7 @@ type CustomClaims struct {
 	Scope string `json:"scope,omitempty"`
 }
 
-func (s *jwtService) GenerateAccessToken(userID string, oauthClient *model.OauthClient, expiresIn time.Time) (string, error) {
+func (s *jwtService) GenerateAccessToken(userID string, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error) {
 	scopes := []string{}
 	for _, scope := range oauthClient.Scopes {
 		scopes = append(scopes, scope.Code)
@@ -45,7 +45,7 @@ func (s *jwtService) GenerateAccessToken(userID string, oauthClient *model.Oauth
 		"azp":   oauthClient.ClientID,
 		"scope": scopesStr,
 		"iss":   s.issuerURL,
-		"exp":   expiresIn.Unix(),
+		"exp":   time.Now().Add(expiresIn).Unix(),
 		"iat":   time.Now().Unix(),
 		"jti":   uuid.New().String(),
 	}
