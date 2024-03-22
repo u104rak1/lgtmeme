@@ -16,20 +16,20 @@ type AuthorizationHandler interface {
 }
 
 type authorizationHandler struct {
-	oauthClientRepository repository.OauthClientRepository
-	userRepository        repository.UserRepository
-	sessionManager        repository.SessionManager
+	oauthClientRepository    repository.OauthClientRepository
+	userRepository           repository.UserRepository
+	sessionManagerRepository repository.SessionManager
 }
 
 func NewAuthorizationHandler(
 	oauthClientRepository repository.OauthClientRepository,
 	userRepository repository.UserRepository,
-	sessionManager repository.SessionManager,
+	sessionManagerRepository repository.SessionManager,
 ) *authorizationHandler {
 	return &authorizationHandler{
-		oauthClientRepository: oauthClientRepository,
-		userRepository:        userRepository,
-		sessionManager:        sessionManager,
+		oauthClientRepository:    oauthClientRepository,
+		userRepository:           userRepository,
+		sessionManagerRepository: sessionManagerRepository,
 	}
 }
 
@@ -55,12 +55,12 @@ func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
 		return util.RedirectWithErrorForAuthz(c, *q, "invalid_request", "Client ID or Redirect URI or scope are incorrect")
 	}
 
-	userID, isLogin, err := h.sessionManager.LoadLoginSession(c)
+	userID, isLogin, err := h.sessionManagerRepository.LoadLoginSession(c)
 	if err != nil {
 		return util.RedirectWithErrorForAuthz(c, *q, "server_error", "Failed to get login session")
 	}
 	if !isLogin {
-		if err := h.sessionManager.CachePreAuthnSession(c, *q); err != nil {
+		if err := h.sessionManagerRepository.CachePreAuthnSession(c, *q); err != nil {
 			return util.RedirectWithErrorForAuthz(c, *q, "server_error", "Failed to save pre authentication session")
 		}
 		return c.Redirect(http.StatusFound, util.LOGIN_SCREEN_ENDPOINT)
@@ -72,7 +72,7 @@ func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
 	}
 
 	authzCode := uuid.New().String()
-	if err := h.sessionManager.CacheAuthzCodeWithCtx(c, *q, authzCode, userID); err != nil {
+	if err := h.sessionManagerRepository.CacheAuthzCodeWithCtx(c, *q, authzCode, userID); err != nil {
 		return util.RedirectWithErrorForAuthz(c, *q, "server_error", "Failed to save authorization code")
 	}
 

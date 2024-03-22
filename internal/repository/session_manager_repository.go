@@ -16,6 +16,7 @@ type SessionManager interface {
 	LoadLoginSession(c echo.Context) (userID string, isLogin bool, err error)
 	CachePreAuthnSession(c echo.Context, q dto.AuthorizationQuery) error
 	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, authzCode, userID string) error
+	LoadAuthzCodeWithCtx(c echo.Context, code string) (*AuthzCodeContext, error)
 	CheckHealthForRedis(c echo.Context, key string) (string, error)
 }
 
@@ -119,6 +120,23 @@ func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.Authorizat
 	}
 
 	return nil
+}
+
+func (sm *sessionManager) LoadAuthzCodeWithCtx(c echo.Context, code string) (*AuthzCodeContext, error) {
+	conn := sm.pool.Get()
+	defer conn.Close()
+
+	value, err := redis.String(conn.Do("GET", code))
+	if err != nil {
+		return nil, err
+	}
+
+	var ctx AuthzCodeContext
+	if err := json.Unmarshal([]byte(value), &ctx); err != nil {
+		return nil, err
+	}
+
+	return &ctx, nil
 }
 
 func (sm *sessionManager) CheckHealthForRedis(c echo.Context, key string) (value string, err error) {

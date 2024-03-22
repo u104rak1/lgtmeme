@@ -25,13 +25,20 @@ func main() {
 	// Init repository
 	healthCheckRepo := repository.NewHealthCheckRepository(config.DB)
 	oauthClientRepo := repository.NewOauthClientRepository(config.DB)
+	refreshTokenRepo := repository.NewRefreshTokenRepository(config.DB)
 	sessManagerRepo := repository.NewSessionManager(config.Store, config.Pool)
 	userRepo := repository.NewUserRepository(config.DB)
+
+	// Init util
+	jwtKey := []byte(os.Getenv("JWT_SECRET"))
+	issuerURL := os.Getenv("BASE_URL")
+	jwtService := util.NewJwtService(jwtKey, issuerURL)
 
 	// Init handler
 	authzHandler := handler.NewAuthorizationHandler(oauthClientRepo, userRepo, sessManagerRepo)
 	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManagerRepo)
 	loginHandler := handler.NewLoginHandler(userRepo, sessManagerRepo)
+	tokenHandler := handler.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, sessManagerRepo, jwtService)
 
 	e := echo.New()
 
@@ -47,6 +54,7 @@ func main() {
 	e.GET(util.AUTHORAIZETION_ENDPOINT, authzHandler.AuthorizationHandle)
 	e.HEAD(util.HEALTH_ENDPOINT, healthHandler.CheckHealth)
 	e.POST(util.LOGIN_ENDPOINT, loginHandler.Login)
+	e.POST(util.TOKEN_ENDPOINT, tokenHandler.GenerateToken)
 
 	// Graceful shutdown
 	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
