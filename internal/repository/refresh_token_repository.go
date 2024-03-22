@@ -2,12 +2,13 @@ package repository
 
 import (
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/my_authn_authz/internal/model"
 	"gorm.io/gorm"
 )
 
 type RefreshTokenRepository interface {
-	CreateRefreshToken(userID uuid.UUID, clientID uuid.UUID, token, scope string) error
+	CreateRefreshToken(c echo.Context, userID uuid.UUID, clientID uuid.UUID, token, scope string) error
 }
 
 type refreshTokenRepository struct {
@@ -18,7 +19,7 @@ func NewRefreshTokenRepository(db *gorm.DB) RefreshTokenRepository {
 	return &refreshTokenRepository{DB: db}
 }
 
-func (r *refreshTokenRepository) CreateRefreshToken(userID uuid.UUID, clientID uuid.UUID, token, scope string) error {
+func (r *refreshTokenRepository) CreateRefreshToken(c echo.Context, userID uuid.UUID, clientID uuid.UUID, token, scope string) error {
 	refreshToken := model.RefreshToken{
 		Token:    token,
 		UserID:   userID,
