@@ -55,7 +55,8 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 		return util.BadRequestResponse(c, errors.New("invalid client_secret"))
 	}
 
-	if form.GrantType == "authorization_code" {
+	switch form.GrantType {
+	case "authorization_code":
 		authzCodeCtx, err := h.sessionManagerRepository.LoadAuthzCodeWithCtx(c, form.Code)
 		if err != nil {
 			return util.InternalServerErrorResponse(c, err)
@@ -97,6 +98,9 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 			"refreshToken": refreshToken,
 			"idToken":      idToken,
 		})
+	case "refresh_token":
+	case "client_credentials":
 	}
+
 	return nil
 }
