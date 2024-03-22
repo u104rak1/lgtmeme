@@ -12,7 +12,7 @@ import (
 )
 
 type JwtService interface {
-	GenerateAccessToken(userID uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error)
+	GenerateAccessToken(userID *uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error)
 	GenerateRefreshToken() (string, error)
 	GenerateIDToken(oauthClient *model.OauthClient, user *model.User, nonce string) (string, error)
 }
@@ -34,7 +34,7 @@ type CustomClaims struct {
 	Scope string `json:"scope,omitempty"`
 }
 
-func (s *jwtService) GenerateAccessToken(userID uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error) {
+func (s *jwtService) GenerateAccessToken(userID *uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error) {
 	scopes := []string{}
 	for _, scope := range oauthClient.Scopes {
 		scopes = append(scopes, scope.Code)
@@ -43,13 +43,16 @@ func (s *jwtService) GenerateAccessToken(userID uuid.UUID, oauthClient *model.Oa
 
 	claims := jwt.MapClaims{
 		"aud":   oauthClient.ApplicationURL,
-		"sub":   userID,
 		"azp":   oauthClient.ClientID,
 		"scope": scopesStr,
 		"iss":   s.issuerURL,
 		"exp":   time.Now().Add(expiresIn).Unix(),
 		"iat":   time.Now().Unix(),
 		"jti":   uuid.New().String(),
+	}
+
+	if userID != nil {
+		claims["sub"] = userID.String()
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

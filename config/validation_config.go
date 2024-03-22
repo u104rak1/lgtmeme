@@ -14,5 +14,18 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 func InitValidator() echo.Validator {
-	return &CustomValidator{validator: validator.New()}
+	v := validator.New()
+	v.RegisterValidation("grantType", isGrantTypeValid)
+	return &CustomValidator{validator: v}
+}
+
+func isGrantTypeValid(fl validator.FieldLevel) bool {
+	grantType := fl.Field().String()
+	allowedGrantTypes := []string{"authorization_code", "client_credentials", "refresh_token"}
+	for _, allowedGrantType := range allowedGrantTypes {
+		if grantType == allowedGrantType {
+			return true
+		}
+	}
+	return false
 }

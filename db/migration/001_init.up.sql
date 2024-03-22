@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS oauth_clients (
     name VARCHAR(30) NOT NULL,
     client_id UUID UNIQUE,
     client_secret VARCHAR(255) UNIQUE,
-    redirect_uri TEXT NOT NULL,
+    redirect_uri TEXT,
     application_url TEXT NOT NULL,
     client_type VARCHAR(50) NOT NULL
 );

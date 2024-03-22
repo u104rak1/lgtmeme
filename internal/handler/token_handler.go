@@ -55,7 +55,10 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 		return util.BadRequestResponse(c, errors.New("invalid client_secret"))
 	}
 
-	if form.GrantType == "authorization_code" {
+	expiresIn := util.ACCESS_TOKEN_EXPIRES_IN
+
+	switch form.GrantType {
+	case "authorization_code":
 		authzCodeCtx, err := h.sessionManagerRepository.LoadAuthzCodeWithCtx(c, form.Code)
 		if err != nil {
 			return util.InternalServerErrorResponse(c, err)
@@ -69,9 +72,7 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 			return util.NotFoundErrorResponse(c, err)
 		}
 
-		expiresIn := util.ACCESS_TOKEN_EXPIRES_IN
-
-		accessToken, err := h.jwtService.GenerateAccessToken(user.ID, oauthClient, expiresIn)
+		accessToken, err := h.jwtService.GenerateAccessToken(&user.ID, oauthClient, expiresIn)
 		if err != nil {
 			return util.InternalServerErrorResponse(c, err)
 		}
@@ -97,6 +98,52 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 			"refreshToken": refreshToken,
 			"idToken":      idToken,
 		})
+	case "refresh_token":
+		refreshTokenData, err := h.refreshTokenRepository.FindByToken(c, form.RefreshToken)
+		if err != nil {
+			return util.NotFoundErrorResponse(c, err)
+		}
+
+		exists, err := h.userRepository.ExistsByID(c, refreshTokenData.UserID)
+		if err != nil {
+			return util.InternalServerErrorResponse(c, err)
+		}
+		if !exists {
+			return util.NotFoundErrorResponse(c, errors.New("user not found"))
+		}
+
+		accessToken, err := h.jwtService.GenerateAccessToken(&refreshTokenData.UserID, oauthClient, expiresIn)
+		if err != nil {
+			return util.InternalServerErrorResponse(c, err)
+		}
+
+		newRefreshToken, err := h.jwtService.GenerateRefreshToken()
+		if err != nil {
+			return util.InternalServerErrorResponse(c, err)
+		}
+
+		if err := h.refreshTokenRepository.UpdateRefreshToken(c, refreshTokenData.UserID, form.ClientID, newRefreshToken, refreshTokenData.Scopes); err != nil {
+			return util.InternalServerErrorResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"accessToken":  accessToken,
+			"tokenType":    "Bearer",
+			"expiresIn":    expiresIn.Seconds(),
+			"refreshToken": newRefreshToken,
+		})
+	case "client_credentials":
+		accessToken, err := h.jwtService.GenerateAccessToken(nil, oauthClient, expiresIn)
+		if err != nil {
+			return util.InternalServerErrorResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"accessToken": accessToken,
+			"tokenType":   "Bearer",
+			"expiresIn":   expiresIn.Seconds(),
+		})
+	default:
+		return util.BadRequestResponse(c, errors.New("unsupported grant_type"))
 	}
-	return nil
 }
