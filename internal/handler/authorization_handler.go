@@ -34,9 +34,14 @@ func NewAuthorizationHandler(
 }
 
 func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
+	clientID, err := uuid.Parse(c.QueryParam("client_id"))
+	if err != nil {
+		return util.BadRequestResponse(c, err)
+	}
+
 	q := &dto.AuthorizationQuery{
 		ResponseType: c.QueryParam("response_type"),
-		ClientID:     c.QueryParam("client_id"),
+		ClientID:     clientID,
 		RedirectURI:  c.QueryParam("redirect_uri"),
 		Scope:        c.QueryParam("scope"),
 		State:        c.QueryParam("state"),
