@@ -86,7 +86,9 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 			return util.InternalServerErrorResponse(c, err)
 		}
 
-		// refreshTokenを保存
+		if err := h.refreshTokenRepository.CreateRefreshToken(c, user.ID, form.ClientID, refreshToken, authzCodeCtx.Scope); err != nil {
+			return util.InternalServerErrorResponse(c, err)
+		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"accessToken":  accessToken,
