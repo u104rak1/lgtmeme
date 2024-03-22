@@ -48,6 +48,15 @@ func UnauthorizedErrorResponse(c echo.Context, err error) error {
 	})
 }
 
+// 404 Not Found
+func NotFoundErrorResponse(c echo.Context, err error) error {
+	config.Logger.Warn("Not found", "error", err.Error())
+	return c.JSON(http.StatusNotFound, map[string]string{
+		"errorCode":    "not_found",
+		"errorMessage": err.Error(),
+	})
+}
+
 // 500 Internal Server Error
 func InternalServerErrorResponse(c echo.Context, err error) error {
 	config.Logger.Error("Internal server error", "error", err.Error())
