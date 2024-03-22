@@ -27,3 +27,8 @@ const (
 	ACCESS_TOKEN_EXPIRES_IN = time.Hour * 24
 	ID_TOKEN_EXPIRES_IN     = time.Minute * 10
 )
+
+// number
+const (
+	REFRESH_TOKEN_SIZE = 64
+)
