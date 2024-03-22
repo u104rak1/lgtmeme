@@ -16,6 +16,7 @@ type SessionManager interface {
 	CacheLoginSession(c echo.Context, userID uuid.UUID) error
 	LoadLoginSession(c echo.Context) (userID uuid.UUID, isLogin bool, err error)
 	CachePreAuthnSession(c echo.Context, q dto.AuthorizationQuery) error
+	LoadPreAuthnSession(c echo.Context) (query *dto.AuthorizationQuery, exists bool, err error)
 	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, authzCode string, userID uuid.UUID) error
 	LoadAuthzCodeWithCtx(c echo.Context, code string) (*AuthzCodeContext, error)
 	CheckHealthForRedis(c echo.Context, key string) (string, error)
@@ -86,13 +87,66 @@ func (sm *sessionManager) CachePreAuthnSession(c echo.Context, q dto.Authorizati
 	}
 
 	sess.Values["responseType"] = q.ResponseType
-	sess.Values["clientId"] = q.ClientID
-	sess.Values["redirectUri"] = q.RedirectURI
+	sess.Values["clientID"] = q.ClientID.String()
+	sess.Values["redirectURI"] = q.RedirectURI
 	sess.Values["scope"] = q.Scope
 	sess.Values["state"] = q.State
 	sess.Values["nonce"] = q.Nonce
 
 	return sess.Save(c.Request(), c.Response())
+}
+
+func (sm *sessionManager) LoadPreAuthnSession(c echo.Context) (query *dto.AuthorizationQuery, exists bool, err error) {
+	sess, err := sm.store.Get(c.Request(), util.PRE_AUTHN_SESSION_NAME)
+	if err != nil {
+		return nil, false, err
+	}
+
+	responseType, ok := sess.Values["responseType"].(string)
+	if !ok {
+		return nil, false, nil
+	}
+
+	clientIDStr, ok := sess.Values["clientID"].(string)
+	if !ok {
+		return nil, false, nil
+	}
+
+	clientID, err := uuid.Parse(clientIDStr)
+	if err != nil {
+		return nil, false, nil
+	}
+
+	redirectURI, ok := sess.Values["redirectURI"].(string)
+	if !ok {
+		return nil, false, nil
+	}
+
+	scope, ok := sess.Values["scope"].(string)
+	if !ok {
+		scope = ""
+	}
+
+	state, ok := sess.Values["state"].(string)
+	if !ok {
+		return nil, false, nil
+	}
+
+	nonce, ok := sess.Values["nonce"].(string)
+	if !ok {
+		nonce = ""
+	}
+
+	query = &dto.AuthorizationQuery{
+		ResponseType: responseType,
+		ClientID:     clientID,
+		RedirectURI:  redirectURI,
+		Scope:        scope,
+		State:        state,
+		Nonce:        nonce,
+	}
+
+	return query, true, nil
 }
 
 type AuthzCodeContext struct {

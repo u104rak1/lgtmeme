@@ -12,8 +12,10 @@ const (
 
 // screen endpoint & file path
 const (
-	LOGIN_SCREEN_ENDPOINT = "/login"
-	LOGIN_SCREEN_FILEPATH = "view/out/login.html"
+	LOGIN_SCREEN_ENDPOINT   = "/login"
+	LOGIN_SCREEN_FILEPATH   = "view/out/login.html"
+	PASSKEY_SCREEN_ENDPOINT = "/passkey"
+	PASSKEY_SCREEN_FILEPATH = "view/out/passkey.html"
 )
 
 // session name
