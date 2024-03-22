@@ -12,7 +12,7 @@ import (
 
 type OauthClientRepository interface {
 	ExistsForAuthz(c echo.Context, q dto.AuthorizationQuery) (bool, error)
-	FindByClientID(c echo.Context, clientID string) (*model.OauthClient, error)
+	FindByClientID(c echo.Context, clientID model.ClientID) (*model.OauthClient, error)
 }
 
 type oauthClientRepository struct {
@@ -49,7 +49,7 @@ func (r *oauthClientRepository) ExistsForAuthz(c echo.Context, q dto.Authorizati
 	return true, nil
 }
 
-func (r *oauthClientRepository) FindByClientID(c echo.Context, clientID string) (*model.OauthClient, error) {
+func (r *oauthClientRepository) FindByClientID(c echo.Context, clientID model.ClientID) (*model.OauthClient, error) {
 	var oauthClient model.OauthClient
 	if err := r.DB.Model(&model.OauthClient{}).Preload("Scopes").Preload("ApplicationTypes").Where("client_id = ?", clientID).First(&oauthClient).Error; err != nil {
 		return nil, err

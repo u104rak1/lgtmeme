@@ -7,9 +7,9 @@ import (
 )
 
 type UserRepository interface {
-	FindByID(c echo.Context, userID string) (*model.User, error)
+	FindByID(c echo.Context, userID model.UserID) (*model.User, error)
 	FindByName(c echo.Context, name string) (*model.User, error)
-	ExistsByID(c echo.Context, userID string) (bool, error)
+	ExistsByID(c echo.Context, userID model.UserID) (bool, error)
 }
 
 type userRepository struct {
@@ -20,7 +20,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{DB: db}
 }
 
-func (r *userRepository) FindByID(c echo.Context, userID string) (*model.User, error) {
+func (r *userRepository) FindByID(c echo.Context, userID model.UserID) (*model.User, error) {
 	var user model.User
 	if err := r.DB.Model(&model.User{}).Where("id = ?", userID).First(&user).Error; err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (r *userRepository) FindByName(c echo.Context, name string) (*model.User, e
 	return &user, nil
 }
 
-func (r *userRepository) ExistsByID(c echo.Context, userID string) (bool, error) {
+func (r *userRepository) ExistsByID(c echo.Context, userID model.UserID) (bool, error) {
 	var count int64
 	if err := r.DB.Model(&model.User{}).Where("id = ?", userID).Count(&count).Error; err != nil {
 		return false, err

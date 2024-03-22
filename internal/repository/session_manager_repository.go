@@ -6,16 +6,17 @@ import (
 	"github.com/boj/redistore"
 	"github.com/gomodule/redigo/redis"
 	"github.com/ucho456job/my_authn_authz/internal/dto"
+	"github.com/ucho456job/my_authn_authz/internal/model"
 	"github.com/ucho456job/my_authn_authz/internal/util"
 
 	"github.com/labstack/echo/v4"
 )
 
 type SessionManager interface {
-	CacheLoginSession(c echo.Context, userID string) error
-	LoadLoginSession(c echo.Context) (userID string, isLogin bool, err error)
+	CacheLoginSession(c echo.Context, userID model.UserID) error
+	LoadLoginSession(c echo.Context) (userID model.UserID, isLogin bool, err error)
 	CachePreAuthnSession(c echo.Context, q dto.AuthorizationQuery) error
-	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, authzCode, userID string) error
+	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, userID model.UserID, authzCode string) error
 	LoadAuthzCodeWithCtx(c echo.Context, code string) (*AuthzCodeContext, error)
 	CheckHealthForRedis(c echo.Context, key string) (string, error)
 }
@@ -32,7 +33,7 @@ func NewSessionManager(store *redistore.RediStore, pool *redis.Pool) SessionMana
 	}
 }
 
-func (sm *sessionManager) CacheLoginSession(c echo.Context, userID string) error {
+func (sm *sessionManager) CacheLoginSession(c echo.Context, userID model.UserID) error {
 	sess, err := sm.store.Get(c.Request(), util.LOGIN_SESSION_NAME)
 	if err != nil {
 		return err
@@ -44,20 +45,25 @@ func (sm *sessionManager) CacheLoginSession(c echo.Context, userID string) error
 	return sess.Save(c.Request(), c.Response())
 }
 
-func (sm *sessionManager) LoadLoginSession(c echo.Context) (userID string, isLogin bool, err error) {
+func (sm *sessionManager) LoadLoginSession(c echo.Context) (userID model.UserID, isLogin bool, err error) {
 	sess, err := sm.store.Get(c.Request(), util.LOGIN_SESSION_NAME)
 	if err != nil {
-		return "", false, err
+		return model.UserID{}, false, err
 	}
 
 	val, ok := sess.Values["userId"]
 	if !ok {
-		return "", false, nil
+		return model.UserID{}, false, nil
 	}
 
-	userID, ok = val.(string)
+	userIDStr, ok := val.(string)
 	if !ok {
-		return "", false, nil
+		return model.UserID{}, false, nil
+	}
+
+	userID, err = model.ParseUserID(userIDStr)
+	if err != nil {
+		return model.UserID{}, false, err
 	}
 
 	isLoginVal, ok := sess.Values["isLogin"]
@@ -90,14 +96,14 @@ func (sm *sessionManager) CachePreAuthnSession(c echo.Context, q dto.Authorizati
 }
 
 type AuthzCodeContext struct {
-	UserID      string `json:"userId"`
-	ClientID    string `json:"clientId"`
-	Scope       string `json:"scope"`
-	RedirectURI string `json:"redirectUri"`
-	Nonce       string `json:"nonce"`
+	UserID      model.UserID   `json:"userId"`
+	ClientID    model.ClientID `json:"clientId"`
+	Scope       string         `json:"scope"`
+	RedirectURI string         `json:"redirectUri"`
+	Nonce       string         `json:"nonce"`
 }
 
-func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, authzCode, userID string) error {
+func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, userID model.UserID, authzCode string) error {
 	saveData := AuthzCodeContext{
 		UserID:      userID,
 		ClientID:    q.ClientID,

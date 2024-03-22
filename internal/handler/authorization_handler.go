@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/my_authn_authz/internal/dto"
+	"github.com/ucho456job/my_authn_authz/internal/model"
 	"github.com/ucho456job/my_authn_authz/internal/repository"
 	"github.com/ucho456job/my_authn_authz/internal/util"
 )
@@ -34,9 +35,14 @@ func NewAuthorizationHandler(
 }
 
 func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
+	clientID, err := model.ParseClientID(c.QueryParam("client_id"))
+	if err != nil {
+		return util.BadRequestResponse(c, err)
+	}
+
 	q := &dto.AuthorizationQuery{
 		ResponseType: c.QueryParam("response_type"),
-		ClientID:     c.QueryParam("client_id"),
+		ClientID:     clientID,
 		RedirectURI:  c.QueryParam("redirect_uri"),
 		Scope:        c.QueryParam("scope"),
 		State:        c.QueryParam("state"),
@@ -72,7 +78,7 @@ func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
 	}
 
 	authzCode := uuid.New().String()
-	if err := h.sessionManagerRepository.CacheAuthzCodeWithCtx(c, *q, authzCode, userID); err != nil {
+	if err := h.sessionManagerRepository.CacheAuthzCodeWithCtx(c, *q, userID, authzCode); err != nil {
 		return util.RedirectWithErrorForAuthz(c, *q, "server_error", "Failed to save authorization code")
 	}
 
