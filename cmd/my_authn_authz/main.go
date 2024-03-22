@@ -50,6 +50,9 @@ func main() {
 	e.GET(util.LOGIN_SCREEN_ENDPOINT, func(c echo.Context) error {
 		return c.File(util.LOGIN_SCREEN_FILEPATH)
 	})
+	e.GET(util.PASSKEY_SCREEN_ENDPOINT, func(c echo.Context) error {
+		return c.File(util.PASSKEY_SCREEN_FILEPATH)
+	})
 
 	e.GET(util.AUTHORAIZETION_ENDPOINT, authzHandler.AuthorizationHandle)
 	e.HEAD(util.HEALTH_ENDPOINT, healthHandler.CheckHealth)

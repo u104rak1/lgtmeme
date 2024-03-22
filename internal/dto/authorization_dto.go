@@ -7,6 +7,6 @@ type AuthorizationQuery struct {
 	ClientID     uuid.UUID `validate:"required"`
 	RedirectURI  string    `validate:"required,url"`
 	Scope        string    `validate:"omitempty"`
-	State        string    `validate:"omitempty"`
+	State        string    `validate:"required"`
 	Nonce        string    `validate:"omitempty"`
 }
