@@ -10,8 +10,8 @@ import (
 )
 
 type JwtService interface {
-	GenerateAccessToken(userID string, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error)
-	GenerateRefreshToken(userID string) (string, error)
+	GenerateAccessToken(userID uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error)
+	GenerateRefreshToken(userID uuid.UUID) (string, error)
 	GenerateIDToken(oauthClient *model.OauthClient, user *model.User, nonce string) (string, error)
 }
 
@@ -32,7 +32,7 @@ type CustomClaims struct {
 	Scope string `json:"scope,omitempty"`
 }
 
-func (s *jwtService) GenerateAccessToken(userID string, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error) {
+func (s *jwtService) GenerateAccessToken(userID uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error) {
 	scopes := []string{}
 	for _, scope := range oauthClient.Scopes {
 		scopes = append(scopes, scope.Code)
@@ -60,7 +60,7 @@ func (s *jwtService) GenerateAccessToken(userID string, oauthClient *model.Oauth
 	return tokenString, nil
 }
 
-func (s *jwtService) GenerateRefreshToken(userID string) (string, error) {
+func (s *jwtService) GenerateRefreshToken(userID uuid.UUID) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": userID,
 		"iss": s.issuerURL,
@@ -80,7 +80,7 @@ func (s *jwtService) GenerateRefreshToken(userID string) (string, error) {
 func (s *jwtService) GenerateIDToken(oauthClient *model.OauthClient, user *model.User, nonce string) (string, error) {
 	claims := jwt.MapClaims{
 		"aud":   oauthClient.ApplicationURL,
-		"sub":   user.ID.String(),
+		"sub":   user.ID,
 		"azp":   oauthClient.ClientID,
 		"iss":   s.issuerURL,
 		"exp":   time.Now().Add(ID_TOKEN_EXPIRES_IN).Unix(),
