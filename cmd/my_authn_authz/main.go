@@ -30,9 +30,7 @@ func main() {
 	userRepo := repository.NewUserRepository(config.DB)
 
 	// Init util
-	jwtKey := []byte(os.Getenv("JWT_SECRET_KEY"))
-	issuerURL := os.Getenv("BASE_URL")
-	jwtService := util.NewJwtService(jwtKey, issuerURL)
+	jwtService := util.NewJwtService()
 
 	// Init handler
 	authzHandler := handler.NewAuthorizationHandler(oauthClientRepo, userRepo, sessManagerRepo)

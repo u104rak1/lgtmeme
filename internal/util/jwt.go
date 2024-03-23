@@ -3,6 +3,7 @@ package util
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"os"
 	"strings"
 	"time"
 
@@ -17,16 +18,10 @@ type JwtService interface {
 	GenerateIDToken(oauthClient *model.OauthClient, user *model.User, nonce string) (string, error)
 }
 
-type jwtService struct {
-	jwtKey    []byte
-	issuerURL string
-}
+type jwtService struct{}
 
-func NewJwtService(jwtKey []byte, issuerURL string) JwtService {
-	return &jwtService{
-		jwtKey:    jwtKey,
-		issuerURL: issuerURL,
-	}
+func NewJwtService() JwtService {
+	return &jwtService{}
 }
 
 type CustomClaims struct {
@@ -45,7 +40,7 @@ func (s *jwtService) GenerateAccessToken(userID *uuid.UUID, oauthClient *model.O
 		"aud":   oauthClient.ApplicationURL,
 		"azp":   oauthClient.ClientID,
 		"scope": scopesStr,
-		"iss":   s.issuerURL,
+		"iss":   os.Getenv("BASE_URL"),
 		"exp":   time.Now().Add(expiresIn).Unix(),
 		"iat":   time.Now().Unix(),
 		"jti":   uuid.New().String(),
@@ -56,8 +51,8 @@ func (s *jwtService) GenerateAccessToken(userID *uuid.UUID, oauthClient *model.O
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, err := token.SignedString(s.jwtKey)
+	jwtKey := []byte(os.Getenv("JWT_SECRET_KEY"))
+	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		return "", err
 	}
@@ -78,7 +73,7 @@ func (s *jwtService) GenerateIDToken(oauthClient *model.OauthClient, user *model
 		"aud":   oauthClient.ApplicationURL,
 		"sub":   user.ID,
 		"azp":   oauthClient.ClientID,
-		"iss":   s.issuerURL,
+		"iss":   os.Getenv("BASE_URL"),
 		"exp":   time.Now().Add(ID_TOKEN_EXPIRES_IN).Unix(),
 		"iat":   time.Now().Unix(),
 		"nonce": nonce,
@@ -86,8 +81,8 @@ func (s *jwtService) GenerateIDToken(oauthClient *model.OauthClient, user *model
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, err := token.SignedString(s.jwtKey)
+	jwtKey := []byte(os.Getenv("JWT_SECRET_KEY"))
+	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		return "", err
 	}
