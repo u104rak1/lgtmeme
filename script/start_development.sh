@@ -8,6 +8,8 @@ make view_build
 
 make migrate_up
 
+make clear_data
+
 make insert_data
 
 docker exec -it my_authn_authz_redis redis-cli SET healthCheckKey redisValue

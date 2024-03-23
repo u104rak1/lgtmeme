@@ -38,7 +38,7 @@ rm -f $COOKIE_FILE
 echo "Obtain Access Token using authorization_code grant..."
 AUTH_CODE=$(echo "$AUTH_RESPONSE" | grep -oE 'code=[A-Za-z0-9\-]+' | cut -d'=' -f2 | cut -d'&' -f1)
 CLIENT_SECRET="owner_client_secret"
-TOKEN_RESPONSE=$(curl -X POST http://localhost:8080/api/connect/token \
+AUTHZ_RESPONSE=$(curl -X POST http://localhost:8080/api/connect/token \
  -H "Content-Type: application/x-www-form-urlencoded" \
  -d "grant_type=authorization_code" \
  -d "code=${AUTH_CODE}" \
@@ -46,31 +46,39 @@ TOKEN_RESPONSE=$(curl -X POST http://localhost:8080/api/connect/token \
  -d "client_id=${CLIENT_ID}" \
  -d "client_secret=${CLIENT_SECRET}")
 echo -e "\n"
-ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.accessToken')
-echo "Access Token obtained with authorization_code grant: $ACCESS_TOKEN"
+AUTHZ_ACCESS_TOKEN=$(echo "$AUTHZ_RESPONSE" | jq -r '.accessToken')
+AUTHZ_ID_TOKEN=$(echo "$AUTHZ_RESPONSE" | jq -r '.idToken')
+AUTHZ_REFRESH_TOKEN=$(echo "$AUTHZ_RESPONSE" | jq -r '.refreshToken')
+echo "Access Token obtained with authorization_code grant: $AUTHZ_ACCESS_TOKEN"
+echo -e "\n"
+echo "ID Token obtained with authorization_code grant: $AUTHZ_ID_TOKEN"
+echo -e "\n"
+echo "Refresh Token obtained with authorization_code grant: $AUTHZ_REFRESH_TOKEN"
 echo -e "\n"
 
 echo "Obtain Access Token using refresh_token grant..."
-REFRESH_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.refreshToken')
-REFLESH_TOKEN_RESPONSE=$(curl -X POST http://localhost:8080/api/connect/token \
+REF_RESPONSE=$(curl -X POST http://localhost:8080/api/connect/token \
  -H "Content-Type: application/x-www-form-urlencoded" \
  -d "grant_type=refresh_token" \
- -d "refresh_token=${REFRESH_TOKEN}" \
+ -d "refresh_token=${AUTHZ_REFRESH_TOKEN}" \
  -d "client_id=${CLIENT_ID}" \
  -d "client_secret=${CLIENT_SECRET}")
 echo -e "\n"
-ACCESS_TOKEN_REFLESH_TOKEN=$(echo "$REFLESH_TOKEN_RESPONSE" | jq -r '.accessToken')
-echo "Access Token obtained with reflesh_token grant: $ACCESS_TOKEN_REFLESH_TOKEN"
+REF_ACCESS_TOKEN=$(echo "$REF_RESPONSE" | jq -r '.accessToken')
+REF_REFRESH_TOKEN=$(echo "$REF_RESPONSE" | jq -r '.refreshToken')
+echo "Access Token obtained with reflesh_token grant: $REF_ACCESS_TOKEN"
+echo -e "\n"
+echo "Refresh Token obtained with reflesh_token grant: $REF_REFRESH_TOKEN"
 echo -e "\n"
 
 echo "Obtain Access Token using client_credentials grant..."
-CLIENT_ID_2="0411a9bb-b450-4951-8d95-dfbf19dd925b"
-CLIENT_SECRET_2="public_client_secret"
-CLIENT_CREDENTIALS_RESPONSE=$(curl -X POST http://localhost:8080/api/connect/token \
+CLI_CLIENT_ID="0411a9bb-b450-4951-8d95-dfbf19dd925b"
+CLI_CLIENT_SECRET="public_client_secret"
+CLI_RESPONSE=$(curl -X POST http://localhost:8080/api/connect/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=client_credentials" \
-  -d "client_id=${CLIENT_ID_2}" \
-  -d "client_secret=${CLIENT_SECRET_2}")
-ACCESS_TOKEN_CLIENT_CREDENTIALS=$(echo $CLIENT_CREDENTIALS_RESPONSE | jq -r '.accessToken')
-echo "Access Token obtained with client_credentials grant: $ACCESS_TOKEN_CLIENT_CREDENTIALS"
+  -d "client_id=${CLI_CLIENT_ID}" \
+  -d "client_secret=${CLI_CLIENT_SECRET}")
+CLI_ACCESS_TOKEN=$(echo $CLI_RESPONSE | jq -r '.accessToken')
+echo "Access Token obtained with client_credentials grant: $CLI_ACCESS_TOKEN"
 echo -e "\n"
