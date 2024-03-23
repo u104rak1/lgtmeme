@@ -1,2 +1,5 @@
 /cmd/my_authn_authz/__debug*
 .env.prod
+.env.local.private
+private_key.pem
+public_key.pem

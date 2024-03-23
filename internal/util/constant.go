@@ -6,6 +6,7 @@ import "time"
 const (
 	HEALTH_ENDPOINT         = "/api/health"
 	LOGIN_ENDPOINT          = "/api/login"
+	JWKS_ENDPOINT           = "/api/jwks"
 	AUTHORAIZETION_ENDPOINT = "/api/connect/authorize"
 	TOKEN_ENDPOINT          = "/api/connect/token"
 )
