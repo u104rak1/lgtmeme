@@ -35,6 +35,7 @@ func main() {
 	// Init handler
 	authzHandler := handler.NewAuthorizationHandler(oauthClientRepo, userRepo, sessManagerRepo)
 	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManagerRepo)
+	jwksHandler := handler.NewJwksHandler(jwtService)
 	loginHandler := handler.NewLoginHandler(userRepo, sessManagerRepo)
 	tokenHandler := handler.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, sessManagerRepo, jwtService)
 
@@ -54,6 +55,7 @@ func main() {
 
 	e.GET(util.AUTHORAIZETION_ENDPOINT, authzHandler.AuthorizationHandle)
 	e.HEAD(util.HEALTH_ENDPOINT, healthHandler.CheckHealth)
+	e.GET(util.JWKS_ENDPOINT, jwksHandler.GetJwks)
 	e.POST(util.LOGIN_ENDPOINT, loginHandler.Login)
 	e.POST(util.TOKEN_ENDPOINT, tokenHandler.GenerateToken)
 

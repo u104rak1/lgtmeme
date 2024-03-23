@@ -2,17 +2,22 @@ package util
 
 import (
 	"crypto/rand"
+	"crypto/rsa"
+	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/ucho456job/my_authn_authz/internal/model"
 )
 
 type JwtService interface {
+	GetPublicKeys() ([]byte, error)
 	GenerateAccessToken(userID *uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error)
 	GenerateRefreshToken() (string, error)
 	GenerateIDToken(oauthClient *model.OauthClient, user *model.User, nonce string) (string, error)
@@ -27,6 +32,56 @@ func NewJwtService() JwtService {
 type CustomClaims struct {
 	jwt.RegisteredClaims
 	Scope string `json:"scope,omitempty"`
+}
+
+func (s *jwtService) loadPrivateKey() (*rsa.PrivateKey, error) {
+	base64Key := os.Getenv("JWT_PRIVATE_KEY_BASE64")
+	keyBytes, err := base64.StdEncoding.DecodeString(base64Key)
+	if err != nil {
+		return nil, err
+	}
+	return jwt.ParseRSAPrivateKeyFromPEM(keyBytes)
+}
+
+func (s *jwtService) loadPublicKey() (*rsa.PublicKey, error) {
+	base64Key := os.Getenv("JWT_PUBLIC_KEY_BASE64")
+	keyBytes, err := base64.StdEncoding.DecodeString(base64Key)
+	if err != nil {
+		return nil, err
+	}
+	return jwt.ParseRSAPublicKeyFromPEM(keyBytes)
+}
+
+func (s *jwtService) GetPublicKeys() ([]byte, error) {
+	publicKey, err := s.loadPublicKey()
+	if err != nil {
+		return nil, err
+	}
+
+	keySet := jwk.NewSet()
+	key, err := jwk.New(publicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := key.Set(jwk.KeyIDKey, "1"); err != nil {
+		return nil, err
+	}
+	if err := key.Set(jwk.AlgorithmKey, "RS256"); err != nil {
+		return nil, err
+	}
+	if err := key.Set(jwk.KeyUsageKey, "sig"); err != nil {
+		return nil, err
+	}
+
+	keySet.Add(key)
+
+	jsonKeySet, err := json.MarshalIndent(keySet, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+
+	return jsonKeySet, nil
 }
 
 func (s *jwtService) GenerateAccessToken(userID *uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error) {
@@ -50,9 +105,14 @@ func (s *jwtService) GenerateAccessToken(userID *uuid.UUID, oauthClient *model.O
 		claims["sub"] = userID.String()
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	jwtKey := []byte(os.Getenv("JWT_SECRET_KEY"))
-	tokenString, err := token.SignedString(jwtKey)
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	privateKey, err := s.loadPrivateKey()
+	if err != nil {
+		return "", err
+	}
+
+	tokenString, err := token.SignedString(privateKey)
 	if err != nil {
 		return "", err
 	}
@@ -80,9 +140,14 @@ func (s *jwtService) GenerateIDToken(oauthClient *model.OauthClient, user *model
 		"name":  user.Name,
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	jwtKey := []byte(os.Getenv("JWT_SECRET_KEY"))
-	tokenString, err := token.SignedString(jwtKey)
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	privateKey, err := s.loadPrivateKey()
+	if err != nil {
+		return "", err
+	}
+
+	tokenString, err := token.SignedString(privateKey)
 	if err != nil {
 		return "", err
 	}
