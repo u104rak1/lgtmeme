@@ -19,6 +19,7 @@ type SessionManager interface {
 	LoadPreAuthnSession(c echo.Context) (query *dto.AuthorizationQuery, exists bool, err error)
 	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, authzCode string, userID uuid.UUID) error
 	LoadAuthzCodeWithCtx(c echo.Context, code string) (*AuthzCodeContext, error)
+	Logout(c echo.Context) error
 	CheckHealthForRedis(c echo.Context, key string) (string, error)
 }
 
@@ -174,7 +175,7 @@ func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.Authorizat
 	conn := sm.pool.Get()
 	defer conn.Close()
 
-	_, err = conn.Do("SET", authzCode, encodedData, "EX", 60)
+	_, err = conn.Do("SET", authzCode, encodedData, "EX", util.AUTHZ_CODE_EXPIRE_SEC)
 	if err != nil {
 		return err
 	}
@@ -197,6 +198,24 @@ func (sm *sessionManager) LoadAuthzCodeWithCtx(c echo.Context, code string) (*Au
 	}
 
 	return &ctx, nil
+}
+
+func (sm *sessionManager) Logout(c echo.Context) error {
+	if err := sm.clearSession(c, util.LOGIN_SESSION_NAME); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (sm *sessionManager) clearSession(c echo.Context, sessionName string) error {
+	sess, err := sm.store.Get(c.Request(), sessionName)
+	if err != nil {
+		return err
+	}
+
+	sess.Options.MaxAge = -1
+
+	return sess.Save(c.Request(), c.Response())
 }
 
 func (sm *sessionManager) CheckHealthForRedis(c echo.Context, key string) (value string, err error) {

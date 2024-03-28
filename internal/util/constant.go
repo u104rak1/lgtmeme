@@ -4,10 +4,11 @@ import "time"
 
 // api endpoint
 const (
-	HEALTH_ENDPOINT         = "/api/health"
-	LOGIN_ENDPOINT          = "/api/login"
-	JWKS_ENDPOINT           = "/api/jwks"
 	AUTHORAIZETION_ENDPOINT = "/api/connect/authorize"
+	HEALTH_ENDPOINT         = "/api/health"
+	JWKS_ENDPOINT           = "/api/jwks"
+	LOGIN_ENDPOINT          = "/api/login"
+	LOGOUT_ENDPOINT         = "/api/logout"
 	TOKEN_ENDPOINT          = "/api/connect/token"
 )
 
@@ -29,6 +30,8 @@ const (
 const (
 	ACCESS_TOKEN_EXPIRES_IN = time.Hour * 24
 	ID_TOKEN_EXPIRES_IN     = time.Minute * 10
+
+	AUTHZ_CODE_EXPIRE_SEC = 60
 )
 
 // number

@@ -37,6 +37,7 @@ func main() {
 	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManagerRepo)
 	jwksHandler := handler.NewJwksHandler(jwtService)
 	loginHandler := handler.NewLoginHandler(userRepo, sessManagerRepo)
+	logoutHandler := handler.NewLogoutHandler(sessManagerRepo)
 	tokenHandler := handler.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, sessManagerRepo, jwtService)
 
 	e := echo.New()
@@ -57,6 +58,7 @@ func main() {
 	e.HEAD(util.HEALTH_ENDPOINT, healthHandler.CheckHealth)
 	e.GET(util.JWKS_ENDPOINT, jwksHandler.GetJwks)
 	e.POST(util.LOGIN_ENDPOINT, loginHandler.Login)
+	e.GET(util.LOGOUT_ENDPOINT, logoutHandler.Logout)
 	e.POST(util.TOKEN_ENDPOINT, tokenHandler.GenerateToken)
 
 	// Graceful shutdown
