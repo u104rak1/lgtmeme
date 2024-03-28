@@ -1,4 +1,4 @@
-/cmd/my_authn_authz/__debug*
+/cmd/lgtmeme/__debug*
 .env.prod
 .env.local.private
 private_key.pem

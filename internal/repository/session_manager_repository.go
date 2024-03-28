@@ -6,8 +6,8 @@ import (
 	"github.com/boj/redistore"
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
-	"github.com/ucho456job/my_authn_authz/internal/dto"
-	"github.com/ucho456job/my_authn_authz/internal/util"
+	"github.com/ucho456job/lgtmeme/internal/dto"
+	"github.com/ucho456job/lgtmeme/internal/util"
 
 	"github.com/labstack/echo/v4"
 )

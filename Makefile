@@ -23,7 +23,7 @@ clear_data: ## Clear data from the database
 	@bash -c 'source .env.local && PGPASSWORD=$${POSTGRES_PASSWORD} psql -h $${POSTGRES_HOST} -U $${POSTGRES_USER} -d $${POSTGRES_DB} -f ./db/data/clear.sql'
 
 run: ## Run the application
-	@ECHO_MODE=local go run ./cmd/my_authn_authz/main.go
+	@ECHO_MODE=local go run ./cmd/lgtmeme/main.go
 
 view_build: ## Build the view files
 	@cd ./view && yarn install && yarn build

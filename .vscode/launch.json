@@ -6,7 +6,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "./cmd/my_authn_authz/main.go",
+      "program": "./cmd/lgtmeme/main.go",
       "showLog": true,
       "env": {
         "ECHO_MODE": "local"

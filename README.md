@@ -1,8 +1,8 @@
-# my_authn_authz
+# lgtmeme
 
 ## Redis
 ```
-docker exec -it my_authn_authz_redis redis-cli
+docker exec -it lgtmeme_redis redis-cli
 keys *
 get [key]
 ```

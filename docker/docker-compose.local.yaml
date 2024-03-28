@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    container_name: my_authn_authz_postgres
+    container_name: lgtmeme_postgres
     image: postgres:15.1
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -14,7 +14,7 @@ services:
     networks:
       - default
   redis:
-    container_name: my_authn_authz_redis
+    container_name: lgtmeme_redis
     image: redis:6.2
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
