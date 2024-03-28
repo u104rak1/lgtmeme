@@ -12,4 +12,4 @@ make clear_data
 
 make insert_data
 
-docker exec -it my_authn_authz_redis redis-cli SET healthCheckKey redisValue
+docker exec -it lgtmeme_redis redis-cli SET healthCheckKey redisValue

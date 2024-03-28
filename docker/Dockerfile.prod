@@ -10,12 +10,12 @@ WORKDIR /go/src/app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o my_authn_authz ./cmd/my_authn_authz
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o lgtmeme ./cmd/lgtmeme
 
 FROM alpine:latest AS runtime
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
-COPY --from=go-build /go/src/app/my_authn_authz .
+COPY --from=go-build /go/src/app/lgtmeme .
 COPY --from=nextjs-build /app/out ./view/out
 EXPOSE 8080
-CMD ["./my_authn_authz"]
+CMD ["./lgtmeme"]

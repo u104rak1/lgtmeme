@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/ucho456job/my_authn_authz/config"
-	"github.com/ucho456job/my_authn_authz/internal/repository"
-	"github.com/ucho456job/my_authn_authz/internal/util"
+	"github.com/ucho456job/lgtmeme/config"
+	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/internal/util"
 )
 
 type HealthHandler interface {

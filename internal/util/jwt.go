@@ -13,7 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/jwk"
-	"github.com/ucho456job/my_authn_authz/internal/model"
+	"github.com/ucho456job/lgtmeme/internal/model"
 )
 
 type JwtService interface {

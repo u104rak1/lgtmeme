@@ -6,9 +6,9 @@ import (
 	"net/url"
 
 	"github.com/labstack/echo/v4"
-	"github.com/ucho456job/my_authn_authz/internal/dto"
-	"github.com/ucho456job/my_authn_authz/internal/repository"
-	"github.com/ucho456job/my_authn_authz/internal/util"
+	"github.com/ucho456job/lgtmeme/internal/dto"
+	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/internal/util"
 	"golang.org/x/crypto/bcrypt"
 )
 

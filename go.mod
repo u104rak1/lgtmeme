@@ -1,4 +1,4 @@
-module github.com/ucho456job/my_authn_authz
+module github.com/ucho456job/lgtmeme
 
 go 1.21.4
 

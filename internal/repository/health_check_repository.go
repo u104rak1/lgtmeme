@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/ucho456job/my_authn_authz/internal/model"
+	"github.com/ucho456job/lgtmeme/internal/model"
 	"gorm.io/gorm"
 )
 
