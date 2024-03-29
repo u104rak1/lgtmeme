@@ -1,10 +1,11 @@
-package handler
+package auth_handler
 
 import (
 	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/dto"
 	"github.com/ucho456job/lgtmeme/internal/repository"
 	"github.com/ucho456job/lgtmeme/internal/util"
@@ -55,7 +56,7 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 		return util.BadRequestResponse(c, errors.New("invalid client_secret"))
 	}
 
-	expiresIn := util.ACCESS_TOKEN_EXPIRES_IN
+	expiresIn := config.ACCESS_TOKEN_EXPIRES_IN
 
 	switch form.GrantType {
 	case "authorization_code":

@@ -10,6 +10,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/handler"
+	authHandler "github.com/ucho456job/lgtmeme/internal/handler/auth"
+	viewHandler "github.com/ucho456job/lgtmeme/internal/handler/view"
 	"github.com/ucho456job/lgtmeme/internal/repository"
 	"github.com/ucho456job/lgtmeme/internal/util"
 )
@@ -32,34 +34,38 @@ func main() {
 	// Init util
 	jwtService := util.NewJwtService()
 
-	// Init handler
-	authzHandler := handler.NewAuthorizationHandler(oauthClientRepo, userRepo, sessManagerRepo)
-	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManagerRepo)
-	jwksHandler := handler.NewJwksHandler(jwtService)
-	loginHandler := handler.NewLoginHandler(userRepo, sessManagerRepo)
-	logoutHandler := handler.NewLogoutHandler(sessManagerRepo)
-	tokenHandler := handler.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, sessManagerRepo, jwtService)
-
+	// Init echo
 	e := echo.New()
-
 	e.Validator = validator
-
 	e.Use(config.SessionMiddleware(), config.LoggerMiddleware)
 
-	e.Static("/", "view/out")
-	e.GET(util.LOGIN_SCREEN_ENDPOINT, func(c echo.Context) error {
-		return c.File(util.LOGIN_SCREEN_FILEPATH)
-	})
-	e.GET(util.PASSKEY_SCREEN_ENDPOINT, func(c echo.Context) error {
-		return c.File(util.PASSKEY_SCREEN_FILEPATH)
-	})
+	// Init Health handler
+	healthHandler := handler.NewHealthHandler(healthCheckRepo, sessManagerRepo)
+	e.HEAD(config.HEALTH_ENDPOINT, healthHandler.CheckHealth)
 
-	e.GET(util.AUTHORAIZETION_ENDPOINT, authzHandler.AuthorizationHandle)
-	e.HEAD(util.HEALTH_ENDPOINT, healthHandler.CheckHealth)
-	e.GET(util.JWKS_ENDPOINT, jwksHandler.GetJwks)
-	e.POST(util.LOGIN_ENDPOINT, loginHandler.Login)
-	e.GET(util.LOGOUT_ENDPOINT, logoutHandler.Logout)
-	e.POST(util.TOKEN_ENDPOINT, tokenHandler.GenerateToken)
+	// Init Auth handler
+	authzHandler := authHandler.NewAuthorizationHandler(oauthClientRepo, userRepo, sessManagerRepo)
+	jwksHandler := authHandler.NewJwksHandler(jwtService)
+	loginHandler := authHandler.NewLoginHandler(userRepo, sessManagerRepo)
+	logoutHandler := authHandler.NewLogoutHandler(sessManagerRepo)
+	tokenHandler := authHandler.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, sessManagerRepo, jwtService)
+	e.GET(config.AUTHORAIZETION_ENDPOINT, authzHandler.AuthorizationHandle)
+	e.GET(config.JWKS_ENDPOINT, jwksHandler.GetJwks)
+	e.POST(config.LOGIN_ENDPOINT, loginHandler.Login)
+	e.GET(config.LOGOUT_ENDPOINT, logoutHandler.Logout)
+	e.POST(config.TOKEN_ENDPOINT, tokenHandler.GenerateToken)
+
+	// Init Resource handler
+
+	// Init View handler
+	loginViewHandler := viewHandler.NewLoginViewHandler()
+	e.GET(config.LOGIN_VIEW_ENDPOINT, loginViewHandler.GetLoginView)
+	e.GET(config.PASSKEY_VIEW_ENDPOINT, func(c echo.Context) error {
+		return c.File(config.PASSKEY_VIEW_FILEPATH)
+	})
+	e.Static(config.STATIC_ENDPOINT, config.STATIC_FILEPATH)
+
+	// Init API handler
 
 	// Graceful shutdown
 	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.

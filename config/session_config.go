@@ -45,15 +45,10 @@ func InitSessionStore() {
 		panic(err)
 	}
 
-	redisMaxAge, err := strconv.Atoi(os.Getenv("REDIS_STORE_MAX_AGE"))
-	if err != nil {
-		panic(err)
-	}
-
 	Store.Options = &sessions.Options{
 		Path:     "/",
 		HttpOnly: true,
-		MaxAge:   redisMaxAge,
+		MaxAge:   DEFAULT_SESSION_EXPIRE_SEC,
 		Secure:   secure,
 	}
 	if secure {
