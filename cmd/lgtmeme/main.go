@@ -47,19 +47,19 @@ func main() {
 	e.Use(config.SessionMiddleware(), config.LoggerMiddleware)
 
 	e.Static("/", "view/out")
-	e.GET(util.LOGIN_SCREEN_ENDPOINT, func(c echo.Context) error {
-		return c.File(util.LOGIN_SCREEN_FILEPATH)
+	e.GET(config.LOGIN_SCREEN_ENDPOINT, func(c echo.Context) error {
+		return c.File(config.LOGIN_SCREEN_FILEPATH)
 	})
-	e.GET(util.PASSKEY_SCREEN_ENDPOINT, func(c echo.Context) error {
-		return c.File(util.PASSKEY_SCREEN_FILEPATH)
+	e.GET(config.PASSKEY_SCREEN_ENDPOINT, func(c echo.Context) error {
+		return c.File(config.PASSKEY_SCREEN_FILEPATH)
 	})
 
-	e.GET(util.AUTHORAIZETION_ENDPOINT, authzHandler.AuthorizationHandle)
-	e.HEAD(util.HEALTH_ENDPOINT, healthHandler.CheckHealth)
-	e.GET(util.JWKS_ENDPOINT, jwksHandler.GetJwks)
-	e.POST(util.LOGIN_ENDPOINT, loginHandler.Login)
-	e.GET(util.LOGOUT_ENDPOINT, logoutHandler.Logout)
-	e.POST(util.TOKEN_ENDPOINT, tokenHandler.GenerateToken)
+	e.GET(config.AUTHORAIZETION_ENDPOINT, authzHandler.AuthorizationHandle)
+	e.HEAD(config.HEALTH_ENDPOINT, healthHandler.CheckHealth)
+	e.GET(config.JWKS_ENDPOINT, jwksHandler.GetJwks)
+	e.POST(config.LOGIN_ENDPOINT, loginHandler.Login)
+	e.GET(config.LOGOUT_ENDPOINT, logoutHandler.Logout)
+	e.POST(config.TOKEN_ENDPOINT, tokenHandler.GenerateToken)
 
 	// Graceful shutdown
 	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.

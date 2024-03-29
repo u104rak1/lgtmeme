@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/dto"
 	"github.com/ucho456job/lgtmeme/internal/repository"
 	"github.com/ucho456job/lgtmeme/internal/util"
@@ -68,7 +69,7 @@ func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
 		if err := h.sessionManagerRepository.CachePreAuthnSession(c, *q); err != nil {
 			return util.RedirectWithErrorForAuthz(c, *q, "server_error", "Failed to save pre authentication session")
 		}
-		return c.Redirect(http.StatusFound, util.LOGIN_SCREEN_ENDPOINT)
+		return c.Redirect(http.StatusFound, config.LOGIN_SCREEN_ENDPOINT)
 	}
 
 	exists, err = h.userRepository.ExistsByID(c, userID)

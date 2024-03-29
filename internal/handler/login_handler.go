@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/labstack/echo/v4"
+	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/dto"
 	"github.com/ucho456job/lgtmeme/internal/repository"
 	"github.com/ucho456job/lgtmeme/internal/util"
@@ -58,7 +59,7 @@ func (h *loginHandler) Login(c echo.Context) error {
 		return util.InternalServerErrorResponse(c, err)
 	}
 	if !exists {
-		return c.JSON(http.StatusOK, map[string]string{"redirectURL": util.PASSKEY_SCREEN_ENDPOINT})
+		return c.JSON(http.StatusOK, map[string]string{"redirectURL": config.PASSKEY_SCREEN_ENDPOINT})
 	}
 
 	queryParams := url.Values{}

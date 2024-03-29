@@ -6,8 +6,8 @@ import (
 	"github.com/boj/redistore"
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
+	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/dto"
-	"github.com/ucho456job/lgtmeme/internal/util"
 
 	"github.com/labstack/echo/v4"
 )
@@ -36,7 +36,7 @@ func NewSessionManager(store *redistore.RediStore, pool *redis.Pool) SessionMana
 }
 
 func (sm *sessionManager) CacheLoginSession(c echo.Context, userID uuid.UUID) error {
-	sess, err := sm.store.Get(c.Request(), util.LOGIN_SESSION_NAME)
+	sess, err := sm.store.Get(c.Request(), config.LOGIN_SESSION_NAME)
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (sm *sessionManager) CacheLoginSession(c echo.Context, userID uuid.UUID) er
 }
 
 func (sm *sessionManager) LoadLoginSession(c echo.Context) (userID uuid.UUID, isLogin bool, err error) {
-	sess, err := sm.store.Get(c.Request(), util.LOGIN_SESSION_NAME)
+	sess, err := sm.store.Get(c.Request(), config.LOGIN_SESSION_NAME)
 	if err != nil {
 		return uuid.Nil, false, err
 	}
@@ -82,7 +82,7 @@ func (sm *sessionManager) LoadLoginSession(c echo.Context) (userID uuid.UUID, is
 }
 
 func (sm *sessionManager) CachePreAuthnSession(c echo.Context, q dto.AuthorizationQuery) error {
-	sess, err := sm.store.Get(c.Request(), util.PRE_AUTHN_SESSION_NAME)
+	sess, err := sm.store.Get(c.Request(), config.PRE_AUTHN_SESSION_NAME)
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func (sm *sessionManager) CachePreAuthnSession(c echo.Context, q dto.Authorizati
 }
 
 func (sm *sessionManager) LoadPreAuthnSession(c echo.Context) (query *dto.AuthorizationQuery, exists bool, err error) {
-	sess, err := sm.store.Get(c.Request(), util.PRE_AUTHN_SESSION_NAME)
+	sess, err := sm.store.Get(c.Request(), config.PRE_AUTHN_SESSION_NAME)
 	if err != nil {
 		return nil, false, err
 	}
@@ -175,7 +175,7 @@ func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.Authorizat
 	conn := sm.pool.Get()
 	defer conn.Close()
 
-	_, err = conn.Do("SET", authzCode, encodedData, "EX", util.AUTHZ_CODE_EXPIRE_SEC)
+	_, err = conn.Do("SET", authzCode, encodedData, "EX", config.AUTHZ_CODE_EXPIRE_SEC)
 	if err != nil {
 		return err
 	}
@@ -201,7 +201,7 @@ func (sm *sessionManager) LoadAuthzCodeWithCtx(c echo.Context, code string) (*Au
 }
 
 func (sm *sessionManager) Logout(c echo.Context) error {
-	if err := sm.clearSession(c, util.LOGIN_SESSION_NAME); err != nil {
+	if err := sm.clearSession(c, config.LOGIN_SESSION_NAME); err != nil {
 		return err
 	}
 	return nil

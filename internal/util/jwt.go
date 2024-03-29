@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/model"
 )
 
@@ -121,7 +122,7 @@ func (s *jwtService) GenerateAccessToken(userID *uuid.UUID, oauthClient *model.O
 }
 
 func (s *jwtService) GenerateRefreshToken() (string, error) {
-	bytes := make([]byte, REFRESH_TOKEN_SIZE)
+	bytes := make([]byte, config.REFRESH_TOKEN_SIZE)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
@@ -134,7 +135,7 @@ func (s *jwtService) GenerateIDToken(oauthClient *model.OauthClient, user *model
 		"sub":   user.ID,
 		"azp":   oauthClient.ClientID,
 		"iss":   os.Getenv("BASE_URL"),
-		"exp":   time.Now().Add(ID_TOKEN_EXPIRES_IN).Unix(),
+		"exp":   time.Now().Add(config.ID_TOKEN_EXPIRES_IN).Unix(),
 		"iat":   time.Now().Unix(),
 		"nonce": nonce,
 		"name":  user.Name,
