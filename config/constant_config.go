@@ -2,26 +2,27 @@ package config
 
 import "time"
 
-// api endpoint
+// auth api endpoint and filepath
 const (
 	AUTHORAIZETION_ENDPOINT = "/api/connect/authorize"
 	HEALTH_ENDPOINT         = "/api/health"
 	JWKS_ENDPOINT           = "/api/jwks"
 	LOGIN_ENDPOINT          = "/api/login"
+	LOGIN_VIEW_ENDPOINT     = "/login"
+	LOGIN_VIEW_FILEPATH     = "view/out/login.html"
 	LOGOUT_ENDPOINT         = "/api/logout"
 	TOKEN_ENDPOINT          = "/api/connect/token"
 )
 
-// view endpoint & file path
+// client endpoint and filepath
 const (
 	STATIC_ENDPOINT       = "/"
 	STATIC_FILEPATH       = "view/out"
+	CLIENT_AUTH_ENDPOINT  = "/client-api/auth"
 	ERROR_VIEW_ENDPOINT   = "/error"
 	ERROR_VIEW_FILEPATH   = "view/out/error.html"
 	HOME_VIEW_ENDPOINT    = "/"
 	HOME_VIEW_FILEPATH    = "view/out/index.html"
-	LOGIN_VIEW_ENDPOINT   = "/login"
-	LOGIN_VIEW_FILEPATH   = "view/out/login.html"
 	PASSKEY_VIEW_ENDPOINT = "/passkey"
 	PASSKEY_VIEW_FILEPATH = "view/out/passkey.html"
 )

@@ -25,10 +25,10 @@ func NewClientCredentialsService() ClientCredentialsService {
 }
 
 func (s *clientCredentialsService) GetAccessToken(c echo.Context) (accessToken string, status int, err error) {
-	clientID := os.Getenv("CLIENT_ID")
-	clientSecret := os.Getenv("CLIENT_SECRET")
-	reqData := fmt.Sprintf("grant_type=client_credentials&client_id=%s&client_secret=%s", clientID, clientSecret)
 	baseURL := os.Getenv("BASE_URL")
+	clientID := os.Getenv("GENERAL_CLIENT_ID")
+	clientSecret := os.Getenv("GENERAL_CLIENT_SECRET")
+	reqData := fmt.Sprintf("grant_type=client_credentials&client_id=%s&client_secret=%s", clientID, clientSecret)
 
 	req, err := http.NewRequest("POST", baseURL+config.TOKEN_ENDPOINT, bytes.NewBufferString(reqData))
 	if err != nil {

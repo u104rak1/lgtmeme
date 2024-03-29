@@ -45,6 +45,7 @@ func main() {
 	e := echo.New()
 	e.Validator = validator
 	e.Use(config.SessionMiddleware(), config.LoggerMiddleware)
+	e.Static(config.STATIC_ENDPOINT, config.STATIC_FILEPATH)
 
 	// Init Auth Handler
 	authzHandler := authHander.NewAuthorizationHandler(oauthClientRepository, userRepository, authSessionManagerRepository)
@@ -64,8 +65,10 @@ func main() {
 	// Init Resource Handler
 
 	// Init Client Handler
+	clientAuthHandler := clientHandler.NewAuthorizationHandler()
 	errorViewHandler := clientHandler.NewErrorViewHandler()
 	homeViewHandler := clientHandler.NewHomeViewHandler(clientSessionManagerRepository, clientCredentialsService)
+	e.GET(config.CLIENT_AUTH_ENDPOINT, clientAuthHandler.RedirectAuthz)
 	e.GET(config.ERROR_VIEW_ENDPOINT, errorViewHandler.GetErrorView)
 	e.GET(config.HOME_VIEW_ENDPOINT, homeViewHandler.GetHomeView)
 
