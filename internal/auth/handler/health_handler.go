@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/internal/auth/repository"
 	"github.com/ucho456job/lgtmeme/internal/util"
 )
 

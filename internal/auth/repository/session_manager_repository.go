@@ -7,7 +7,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/dto"
+	"github.com/ucho456job/lgtmeme/internal/auth/dto"
 
 	"github.com/labstack/echo/v4"
 )

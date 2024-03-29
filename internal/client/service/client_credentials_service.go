@@ -11,7 +11,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/dto"
+	authDto "github.com/ucho456job/lgtmeme/internal/auth/dto"
 )
 
 type ClientCredentialsService interface {
@@ -53,7 +53,7 @@ func (s *clientCredentialsService) GetAccessToken(c echo.Context) (accessToken s
 		return "", http.StatusInternalServerError, err
 	}
 
-	respBody := dto.ClientCredentialsResponse{}
+	respBody := authDto.ClientCredentialsResponse{}
 	if err := json.Unmarshal(body, &respBody); err != nil {
 		return "", http.StatusInternalServerError, err
 	}

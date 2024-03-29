@@ -1,4 +1,4 @@
-package util
+package service
 
 import (
 	"crypto/rand"
@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/model"
+	"github.com/ucho456job/lgtmeme/internal/auth/model"
 )
 
 type JwtService interface {

@@ -1,10 +1,10 @@
-package auth_handler
+package handler
 
 import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/ucho456job/lgtmeme/internal/util"
+	"github.com/ucho456job/lgtmeme/internal/auth/service"
 )
 
 type JwksHandler interface {
@@ -12,10 +12,10 @@ type JwksHandler interface {
 }
 
 type jwksHandler struct {
-	jwtService util.JwtService
+	jwtService service.JwtService
 }
 
-func NewJwksHandler(jwtService util.JwtService) JwksHandler {
+func NewJwksHandler(jwtService service.JwtService) JwksHandler {
 	return &jwksHandler{
 		jwtService: jwtService,
 	}

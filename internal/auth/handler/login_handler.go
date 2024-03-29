@@ -1,4 +1,4 @@
-package auth_handler
+package handler
 
 import (
 	"fmt"
@@ -7,14 +7,15 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/dto"
-	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/internal/auth/dto"
+	"github.com/ucho456job/lgtmeme/internal/auth/repository"
 	"github.com/ucho456job/lgtmeme/internal/util"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginHandler interface {
-	Login(c echo.Context)
+	Login(c echo.Context) error
+	GetLoginView(c echo.Context) error
 }
 
 type loginHandler struct {
@@ -78,4 +79,8 @@ func (h *loginHandler) Login(c echo.Context) error {
 	authorizationURL := fmt.Sprintf("%s?%s", "/api/connect/authorize", queryParams.Encode())
 
 	return c.JSON(http.StatusOK, map[string]string{"redirectURL": authorizationURL})
+}
+
+func (h *loginHandler) GetLoginView(c echo.Context) error {
+	return c.File(config.LOGIN_VIEW_FILEPATH)
 }
