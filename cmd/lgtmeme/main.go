@@ -13,6 +13,7 @@ import (
 	authHandler "github.com/ucho456job/lgtmeme/internal/handler/auth"
 	viewHandler "github.com/ucho456job/lgtmeme/internal/handler/view"
 	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/internal/service"
 	"github.com/ucho456job/lgtmeme/internal/util"
 )
 
@@ -30,6 +31,9 @@ func main() {
 	refreshTokenRepo := repository.NewRefreshTokenRepository(config.DB)
 	sessManagerRepo := repository.NewSessionManager(config.Store, config.Pool)
 	userRepo := repository.NewUserRepository(config.DB)
+
+	// Init service
+	cliCreService := service.NewClientCredentialsService()
 
 	// Init util
 	jwtService := util.NewJwtService()
@@ -58,7 +62,11 @@ func main() {
 	// Init Resource handler
 
 	// Init View handler
+	errorViewHandler := viewHandler.NewErrorViewHandler()
+	homeViewHandler := viewHandler.NewHomeViewHandler(sessManagerRepo, cliCreService)
 	loginViewHandler := viewHandler.NewLoginViewHandler()
+	e.GET(config.ERROR_VIEW_ENDPOINT, errorViewHandler.GetErrorView)
+	e.GET(config.HOME_VIEW_ENDPOINT, homeViewHandler.GetHomeView)
 	e.GET(config.LOGIN_VIEW_ENDPOINT, loginViewHandler.GetLoginView)
 	e.GET(config.PASSKEY_VIEW_ENDPOINT, func(c echo.Context) error {
 		return c.File(config.PASSKEY_VIEW_FILEPATH)

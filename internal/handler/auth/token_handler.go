@@ -139,10 +139,10 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 			return util.InternalServerErrorResponse(c, err)
 		}
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"accessToken": accessToken,
-			"tokenType":   "Bearer",
-			"expiresIn":   expiresIn.Seconds(),
+		return c.JSON(http.StatusOK, dto.ClientCredentialsResponse{
+			AccessToken: accessToken,
+			TokenType:   "Bearer",
+			ExpiresIn:   int(expiresIn.Seconds()),
 		})
 	default:
 		return util.BadRequestResponse(c, errors.New("unsupported grant_type"))

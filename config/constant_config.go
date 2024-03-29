@@ -16,6 +16,10 @@ const (
 const (
 	STATIC_ENDPOINT       = "/"
 	STATIC_FILEPATH       = "view/out"
+	ERROR_VIEW_ENDPOINT   = "/error"
+	ERROR_VIEW_FILEPATH   = "view/out/error.html"
+	HOME_VIEW_ENDPOINT    = "/"
+	HOME_VIEW_FILEPATH    = "view/out/index.html"
 	LOGIN_VIEW_ENDPOINT   = "/login"
 	LOGIN_VIEW_FILEPATH   = "view/out/login.html"
 	PASSKEY_VIEW_ENDPOINT = "/passkey"
@@ -24,8 +28,9 @@ const (
 
 // session name
 const (
-	LOGIN_SESSION_NAME     = "login_session"
-	PRE_AUTHN_SESSION_NAME = "pre_authn_session"
+	LOGIN_SESSION_NAME                           = "login_session"
+	PRE_AUTHN_SESSION_NAME                       = "pre_authn_session"
+	CLIENT_CREDENTIALS_ACCESS_TOKEN_SESSION_NAME = "client_credentials_access_token"
 )
 
 // session expire

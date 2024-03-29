@@ -10,3 +10,9 @@ type TokenForm struct {
 	ClientSecret string    `form:"client_secret" validate:"required"`
 	RefreshToken string    `form:"refresh_token" validate:"required_with=GrantType=refresh_token"`
 }
+
+type ClientCredentialsResponse struct {
+	AccessToken string `json:"accessToken"`
+	TokenType   string `json:"tokenType"`
+	ExpiresIn   int    `json:"expiresIn"`
+}
