@@ -6,11 +6,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/dto"
+	authDto "github.com/ucho456job/lgtmeme/internal/auth/dto"
 )
 
 // 302 Found with error
-func RedirectWithErrorForAuthz(c echo.Context, q dto.AuthorizationQuery, errCode, errDescription string) error {
+func RedirectWithErrorForAuthz(c echo.Context, q authDto.AuthorizationQuery, errCode, errDescription string) error {
 	redirectURL, err := url.Parse(q.RedirectURI)
 	if err != nil {
 		return InternalServerErrorResponse(c, err)

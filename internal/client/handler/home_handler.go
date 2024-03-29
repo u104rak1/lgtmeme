@@ -1,4 +1,4 @@
-package view_handler
+package handler
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/repository"
-	"github.com/ucho456job/lgtmeme/internal/service"
+	"github.com/ucho456job/lgtmeme/internal/client/repository"
+	"github.com/ucho456job/lgtmeme/internal/client/service"
 )
 
 type HomeViewHandler interface {

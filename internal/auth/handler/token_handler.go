@@ -1,4 +1,4 @@
-package auth_handler
+package handler
 
 import (
 	"errors"
@@ -6,8 +6,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/dto"
-	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/internal/auth/dto"
+	"github.com/ucho456job/lgtmeme/internal/auth/repository"
+	"github.com/ucho456job/lgtmeme/internal/auth/service"
 	"github.com/ucho456job/lgtmeme/internal/util"
 )
 
@@ -20,7 +21,7 @@ type tokenHandler struct {
 	refreshTokenRepository   repository.RefreshTokenRepository
 	userRepository           repository.UserRepository
 	sessionManagerRepository repository.SessionManager
-	jwtService               util.JwtService
+	jwtService               service.JwtService
 }
 
 func NewTokenHandler(
@@ -28,7 +29,7 @@ func NewTokenHandler(
 	refreshTokenRepository repository.RefreshTokenRepository,
 	userRepository repository.UserRepository,
 	sessionManagerRepository repository.SessionManager,
-	jwtService util.JwtService,
+	jwtService service.JwtService,
 ) *tokenHandler {
 	return &tokenHandler{
 		oauthClientRepository:    oauthClientRepository,
