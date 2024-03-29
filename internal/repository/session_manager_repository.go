@@ -20,6 +20,8 @@ type SessionManager interface {
 	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, authzCode string, userID uuid.UUID) error
 	LoadAuthzCodeWithCtx(c echo.Context, code string) (*AuthzCodeContext, error)
 	Logout(c echo.Context) error
+	CacheClientCredentialsAccessToken(c echo.Context, token string) error
+	LoadClientCredentialsAccessToken(c echo.Context) (string, error)
 	CheckHealthForRedis(c echo.Context, key string) (string, error)
 }
 
@@ -216,6 +218,31 @@ func (sm *sessionManager) clearSession(c echo.Context, sessionName string) error
 	sess.Options.MaxAge = -1
 
 	return sess.Save(c.Request(), c.Response())
+}
+
+func (sm *sessionManager) CacheClientCredentialsAccessToken(c echo.Context, token string) error {
+	sess, err := sm.store.Get(c.Request(), config.CLIENT_CREDENTIALS_ACCESS_TOKEN_SESSION_NAME)
+	if err != nil {
+		return err
+	}
+
+	sess.Values["accessToken"] = token
+
+	return sess.Save(c.Request(), c.Response())
+}
+
+func (sm *sessionManager) LoadClientCredentialsAccessToken(c echo.Context) (string, error) {
+	sess, err := sm.store.Get(c.Request(), config.CLIENT_CREDENTIALS_ACCESS_TOKEN_SESSION_NAME)
+	if err != nil {
+		return "", err
+	}
+
+	token, ok := sess.Values["accessToken"].(string)
+	if !ok {
+		return "", nil
+	}
+
+	return token, nil
 }
 
 func (sm *sessionManager) CheckHealthForRedis(c echo.Context, key string) (value string, err error) {
