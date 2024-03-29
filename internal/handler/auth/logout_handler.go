@@ -1,4 +1,4 @@
-package handler
+package auth_handler
 
 import (
 	"net/http"
@@ -9,7 +9,7 @@ import (
 )
 
 type LogoutHandler interface {
-	Logout(c *echo.Context) error
+	Logout(c echo.Context) error
 }
 
 type logoutHandler struct {

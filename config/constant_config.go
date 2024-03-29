@@ -12,12 +12,14 @@ const (
 	TOKEN_ENDPOINT          = "/api/connect/token"
 )
 
-// screen endpoint & file path
+// view endpoint & file path
 const (
-	LOGIN_SCREEN_ENDPOINT   = "/login"
-	LOGIN_SCREEN_FILEPATH   = "view/out/login.html"
-	PASSKEY_SCREEN_ENDPOINT = "/passkey"
-	PASSKEY_SCREEN_FILEPATH = "view/out/passkey.html"
+	STATIC_ENDPOINT       = "/"
+	STATIC_FILEPATH       = "view/out"
+	LOGIN_VIEW_ENDPOINT   = "/login"
+	LOGIN_VIEW_FILEPATH   = "view/out/login.html"
+	PASSKEY_VIEW_ENDPOINT = "/passkey"
+	PASSKEY_VIEW_FILEPATH = "view/out/passkey.html"
 )
 
 // session name

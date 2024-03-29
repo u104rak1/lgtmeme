@@ -1,4 +1,4 @@
-package handler
+package auth_handler
 
 import (
 	"fmt"
@@ -59,7 +59,7 @@ func (h *loginHandler) Login(c echo.Context) error {
 		return util.InternalServerErrorResponse(c, err)
 	}
 	if !exists {
-		return c.JSON(http.StatusOK, map[string]string{"redirectURL": config.PASSKEY_SCREEN_ENDPOINT})
+		return c.JSON(http.StatusOK, map[string]string{"redirectURL": config.PASSKEY_VIEW_ENDPOINT})
 	}
 
 	queryParams := url.Values{}

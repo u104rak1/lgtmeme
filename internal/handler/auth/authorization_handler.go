@@ -1,4 +1,4 @@
-package handler
+package auth_handler
 
 import (
 	"net/http"
@@ -69,7 +69,7 @@ func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
 		if err := h.sessionManagerRepository.CachePreAuthnSession(c, *q); err != nil {
 			return util.RedirectWithErrorForAuthz(c, *q, "server_error", "Failed to save pre authentication session")
 		}
-		return c.Redirect(http.StatusFound, config.LOGIN_SCREEN_ENDPOINT)
+		return c.Redirect(http.StatusFound, config.LOGIN_VIEW_ENDPOINT)
 	}
 
 	exists, err = h.userRepository.ExistsByID(c, userID)
