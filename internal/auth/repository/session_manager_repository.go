@@ -15,14 +15,12 @@ import (
 type SessionManager interface {
 	CacheLoginSession(c echo.Context, userID uuid.UUID) error
 	LoadLoginSession(c echo.Context) (userID uuid.UUID, isLogin bool, err error)
-	CachePreAuthnSession(c echo.Context, q dto.AuthorizationQuery) error
-	LoadPreAuthnSession(c echo.Context) (query *dto.AuthorizationQuery, exists bool, err error)
-	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, authzCode string, userID uuid.UUID) error
+	CachePreAuthnSession(c echo.Context, q dto.AuthzQuery) error
+	LoadPreAuthnSession(c echo.Context) (query *dto.AuthzQuery, exists bool, err error)
+	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthzQuery, authzCode string, userID uuid.UUID) error
 	LoadAuthzCodeWithCtx(c echo.Context, code string) (*AuthzCodeContext, error)
 	Logout(c echo.Context) error
-	CacheClientCredentialsAccessToken(c echo.Context, token string) error
-	LoadClientCredentialsAccessToken(c echo.Context) (string, error)
-	CheckHealthForRedis(c echo.Context, key string) (string, error)
+	CheckRedis(c echo.Context, key string) (string, error)
 }
 
 type sessionManager struct {
@@ -83,7 +81,7 @@ func (sm *sessionManager) LoadLoginSession(c echo.Context) (userID uuid.UUID, is
 	return userID, isLogin, nil
 }
 
-func (sm *sessionManager) CachePreAuthnSession(c echo.Context, q dto.AuthorizationQuery) error {
+func (sm *sessionManager) CachePreAuthnSession(c echo.Context, q dto.AuthzQuery) error {
 	sess, err := sm.store.Get(c.Request(), config.PRE_AUTHN_SESSION_NAME)
 	if err != nil {
 		return err
@@ -99,7 +97,7 @@ func (sm *sessionManager) CachePreAuthnSession(c echo.Context, q dto.Authorizati
 	return sess.Save(c.Request(), c.Response())
 }
 
-func (sm *sessionManager) LoadPreAuthnSession(c echo.Context) (query *dto.AuthorizationQuery, exists bool, err error) {
+func (sm *sessionManager) LoadPreAuthnSession(c echo.Context) (query *dto.AuthzQuery, exists bool, err error) {
 	sess, err := sm.store.Get(c.Request(), config.PRE_AUTHN_SESSION_NAME)
 	if err != nil {
 		return nil, false, err
@@ -140,7 +138,7 @@ func (sm *sessionManager) LoadPreAuthnSession(c echo.Context) (query *dto.Author
 		nonce = ""
 	}
 
-	query = &dto.AuthorizationQuery{
+	query = &dto.AuthzQuery{
 		ResponseType: responseType,
 		ClientID:     clientID,
 		RedirectURI:  redirectURI,
@@ -160,7 +158,7 @@ type AuthzCodeContext struct {
 	Nonce       string    `json:"nonce"`
 }
 
-func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthorizationQuery, authzCode string, userID uuid.UUID) error {
+func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthzQuery, authzCode string, userID uuid.UUID) error {
 	saveData := AuthzCodeContext{
 		UserID:      userID,
 		ClientID:    q.ClientID,
@@ -220,32 +218,7 @@ func (sm *sessionManager) clearSession(c echo.Context, sessionName string) error
 	return sess.Save(c.Request(), c.Response())
 }
 
-func (sm *sessionManager) CacheClientCredentialsAccessToken(c echo.Context, token string) error {
-	sess, err := sm.store.Get(c.Request(), config.CLIENT_CREDENTIALS_ACCESS_TOKEN_SESSION_NAME)
-	if err != nil {
-		return err
-	}
-
-	sess.Values["accessToken"] = token
-
-	return sess.Save(c.Request(), c.Response())
-}
-
-func (sm *sessionManager) LoadClientCredentialsAccessToken(c echo.Context) (string, error) {
-	sess, err := sm.store.Get(c.Request(), config.CLIENT_CREDENTIALS_ACCESS_TOKEN_SESSION_NAME)
-	if err != nil {
-		return "", err
-	}
-
-	token, ok := sess.Values["accessToken"].(string)
-	if !ok {
-		return "", nil
-	}
-
-	return token, nil
-}
-
-func (sm *sessionManager) CheckHealthForRedis(c echo.Context, key string) (value string, err error) {
+func (sm *sessionManager) CheckRedis(c echo.Context, key string) (value string, err error) {
 	conn := sm.pool.Get()
 	defer conn.Close()
 

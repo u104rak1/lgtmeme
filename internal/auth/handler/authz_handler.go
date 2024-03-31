@@ -12,35 +12,35 @@ import (
 	"github.com/ucho456job/lgtmeme/internal/util"
 )
 
-type AuthorizationHandler interface {
-	AuthorizationHandle(c echo.Context) error
+type AuthzHandler interface {
+	Authorize(c echo.Context) error
 }
 
-type authorizationHandler struct {
+type authzHandler struct {
 	oauthClientRepository    repository.OauthClientRepository
 	userRepository           repository.UserRepository
 	sessionManagerRepository repository.SessionManager
 }
 
-func NewAuthorizationHandler(
+func NewAuthzHandler(
 	oauthClientRepository repository.OauthClientRepository,
 	userRepository repository.UserRepository,
 	sessionManagerRepository repository.SessionManager,
-) *authorizationHandler {
-	return &authorizationHandler{
+) *authzHandler {
+	return &authzHandler{
 		oauthClientRepository:    oauthClientRepository,
 		userRepository:           userRepository,
 		sessionManagerRepository: sessionManagerRepository,
 	}
 }
 
-func (h *authorizationHandler) AuthorizationHandle(c echo.Context) error {
+func (h *authzHandler) Authorize(c echo.Context) error {
 	clientID, err := uuid.Parse(c.QueryParam("client_id"))
 	if err != nil {
 		return util.BadRequestResponse(c, err)
 	}
 
-	q := &dto.AuthorizationQuery{
+	q := &dto.AuthzQuery{
 		ResponseType: c.QueryParam("response_type"),
 		ClientID:     clientID,
 		RedirectURI:  c.QueryParam("redirect_uri"),

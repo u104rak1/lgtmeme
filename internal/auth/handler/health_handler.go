@@ -10,33 +10,33 @@ import (
 )
 
 type HealthHandler interface {
-	CheckHealth(c echo.Context) error
+	Check(c echo.Context) error
 }
 
 type healthHandler struct {
-	healthCheckRepository repository.HealthCheckRepository
-	sessionManager        repository.SessionManager
+	healthRepository repository.HealthRepository
+	sessionManager   repository.SessionManager
 }
 
 func NewHealthHandler(
-	healthCheckRepository repository.HealthCheckRepository,
+	healthRepository repository.HealthRepository,
 	sessionManager repository.SessionManager,
 ) *healthHandler {
 	return &healthHandler{
-		healthCheckRepository: healthCheckRepository,
-		sessionManager:        sessionManager,
+		healthRepository: healthRepository,
+		sessionManager:   sessionManager,
 	}
 }
 
-func (h *healthHandler) CheckHealth(c echo.Context) error {
+func (h *healthHandler) Check(c echo.Context) error {
 	key := "healthCheckKey"
 
-	postgresValue, err := h.healthCheckRepository.CheckHealthForPostgres(c, key)
+	postgresValue, err := h.healthRepository.CheckPostgres(c, key)
 	if err != nil {
 		return util.InternalServerErrorResponse(c, err)
 	}
 
-	redisValue, err := h.sessionManager.CheckHealthForRedis(c, key)
+	redisValue, err := h.sessionManager.CheckRedis(c, key)
 	if err != nil {
 		return util.InternalServerErrorResponse(c, err)
 	}

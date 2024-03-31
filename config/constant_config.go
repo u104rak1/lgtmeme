@@ -2,36 +2,54 @@ package config
 
 import "time"
 
-// auth api endpoint and filepath
+// auth server
 const (
-	AUTHORAIZETION_ENDPOINT = "/api/connect/authorize"
-	HEALTH_ENDPOINT         = "/api/health"
-	JWKS_ENDPOINT           = "/api/jwks"
-	LOGIN_ENDPOINT          = "/api/login"
-	LOGIN_VIEW_ENDPOINT     = "/login"
-	LOGIN_VIEW_FILEPATH     = "view/out/login.html"
-	LOGOUT_ENDPOINT         = "/api/logout"
-	TOKEN_ENDPOINT          = "/api/connect/token"
+	// api endpoint
+	AUTHZ_ENDPOINT  = "/auth-api/authorize"
+	HEALTH_ENDPOINT = "/auth-api/health"
+	JWKS_ENDPOINT   = "/auth-api/jwks"
+	LOGIN_ENDPOINT  = "/auth-api/login"
+	LOGOUT_ENDPOINT = "/auth-api/logout"
+	TOKEN_ENDPOINT  = "/auth-api/token"
+
+	// view endpoint
+	LOGIN_VIEW_ENDPOINT = "/login"
+
+	// file path
+	LOGIN_VIEW_FILEPATH = "view/out/login.html"
 )
 
-// client endpoint and filepath
+// client server
 const (
+	// api endpoint
+	CLIENT_AUTH_ENDPOINT          = "/client-api/auth"
+	CLIENT_AUTH_CALLBACK_ENDPOINT = "/client-api/auth/callback"
+
+	// view endpoint
 	STATIC_ENDPOINT       = "/"
-	STATIC_FILEPATH       = "view/out"
-	CLIENT_AUTH_ENDPOINT  = "/client-api/auth"
 	ERROR_VIEW_ENDPOINT   = "/error"
-	ERROR_VIEW_FILEPATH   = "view/out/error.html"
 	HOME_VIEW_ENDPOINT    = "/"
-	HOME_VIEW_FILEPATH    = "view/out/index.html"
 	PASSKEY_VIEW_ENDPOINT = "/passkey"
+
+	// file path
+	STATIC_FILEPATH       = "view/out"
+	ERROR_VIEW_FILEPATH   = "view/out/error.html"
+	HOME_VIEW_FILEPATH    = "view/out/index.html"
 	PASSKEY_VIEW_FILEPATH = "view/out/passkey.html"
+)
+
+// resoruce server
+const (
+	// api endpoint
+	IMAGES_ENDPOINT = "/resource-api/images"
 )
 
 // session name
 const (
-	LOGIN_SESSION_NAME                           = "login_session"
-	PRE_AUTHN_SESSION_NAME                       = "pre_authn_session"
-	CLIENT_CREDENTIALS_ACCESS_TOKEN_SESSION_NAME = "client_credentials_access_token"
+	LOGIN_SESSION_NAME                = "login_session"
+	PRE_AUTHN_SESSION_NAME            = "pre_authn_session"
+	GENERAL_ACCESS_TOKEN_SESSION_NAME = "general_access_token"
+	OWNER_ACCESS_TOKEN_SESSION_NAME   = "owner_access_token"
 )
 
 // session expire

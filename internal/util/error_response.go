@@ -10,7 +10,7 @@ import (
 )
 
 // 302 Found with error
-func RedirectWithErrorForAuthz(c echo.Context, q authDto.AuthorizationQuery, errCode, errDescription string) error {
+func RedirectWithErrorForAuthz(c echo.Context, q authDto.AuthzQuery, errCode, errDescription string) error {
 	redirectURL, err := url.Parse(q.RedirectURI)
 	if err != nil {
 		return InternalServerErrorResponse(c, err)

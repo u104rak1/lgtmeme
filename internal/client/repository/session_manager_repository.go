@@ -9,8 +9,8 @@ import (
 )
 
 type SessionManager interface {
-	CacheClientCredentialsAccessToken(c echo.Context, token string) error
-	LoadClientCredentialsAccessToken(c echo.Context) (string, error)
+	CacheGeneralAccessToken(c echo.Context, token string) error
+	LoadGeneralAccessToken(c echo.Context) (string, error)
 }
 
 type sessionManager struct {
@@ -25,8 +25,8 @@ func NewSessionManager(store *redistore.RediStore, pool *redis.Pool) SessionMana
 	}
 }
 
-func (sm *sessionManager) CacheClientCredentialsAccessToken(c echo.Context, token string) error {
-	sess, err := sm.store.Get(c.Request(), config.CLIENT_CREDENTIALS_ACCESS_TOKEN_SESSION_NAME)
+func (sm *sessionManager) CacheGeneralAccessToken(c echo.Context, token string) error {
+	sess, err := sm.store.Get(c.Request(), config.GENERAL_ACCESS_TOKEN_SESSION_NAME)
 	if err != nil {
 		return err
 	}
@@ -36,8 +36,8 @@ func (sm *sessionManager) CacheClientCredentialsAccessToken(c echo.Context, toke
 	return sess.Save(c.Request(), c.Response())
 }
 
-func (sm *sessionManager) LoadClientCredentialsAccessToken(c echo.Context) (string, error) {
-	sess, err := sm.store.Get(c.Request(), config.CLIENT_CREDENTIALS_ACCESS_TOKEN_SESSION_NAME)
+func (sm *sessionManager) LoadGeneralAccessToken(c echo.Context) (string, error) {
+	sess, err := sm.store.Get(c.Request(), config.GENERAL_ACCESS_TOKEN_SESSION_NAME)
 	if err != nil {
 		return "", err
 	}

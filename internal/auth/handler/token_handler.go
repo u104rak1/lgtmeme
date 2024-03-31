@@ -13,7 +13,7 @@ import (
 )
 
 type TokenHandler interface {
-	GenerateToken(c echo.Context) error
+	Generate(c echo.Context) error
 }
 
 type tokenHandler struct {
@@ -40,7 +40,7 @@ func NewTokenHandler(
 	}
 }
 
-func (h *tokenHandler) GenerateToken(c echo.Context) error {
+func (h *tokenHandler) Generate(c echo.Context) error {
 	var form dto.TokenForm
 	if err := c.Bind(&form); err != nil {
 		return util.InternalServerErrorResponse(c, err)
@@ -93,13 +93,14 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 			return util.InternalServerErrorResponse(c, err)
 		}
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"accessToken":  accessToken,
-			"tokenType":    "Bearer",
-			"expiresIn":    expiresIn.Seconds(),
-			"refreshToken": refreshToken,
-			"idToken":      idToken,
+		return c.JSON(http.StatusOK, dto.AuthzCodeResp{
+			AccessToken:  accessToken,
+			TokenType:    "Bearer",
+			ExpiresIn:    int(expiresIn.Seconds()),
+			RefreshToken: refreshToken,
+			IDToken:      idToken,
 		})
+
 	case "refresh_token":
 		refreshTokenData, err := h.refreshTokenRepository.FindByToken(c, form.RefreshToken)
 		if err != nil {
@@ -128,12 +129,13 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 			return util.InternalServerErrorResponse(c, err)
 		}
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"accessToken":  accessToken,
-			"tokenType":    "Bearer",
-			"expiresIn":    expiresIn.Seconds(),
-			"refreshToken": newRefreshToken,
+		return c.JSON(http.StatusOK, dto.RefreshTokenResp{
+			AccessToken:  accessToken,
+			TokenType:    "Bearer",
+			ExpiresIn:    int(expiresIn.Seconds()),
+			RefreshToken: newRefreshToken,
 		})
+
 	case "client_credentials":
 		accessToken, err := h.jwtService.GenerateAccessToken(nil, oauthClient, expiresIn)
 		if err != nil {
@@ -145,6 +147,7 @@ func (h *tokenHandler) GenerateToken(c echo.Context) error {
 			TokenType:   "Bearer",
 			ExpiresIn:   int(expiresIn.Seconds()),
 		})
+
 	default:
 		return util.BadRequestResponse(c, errors.New("unsupported grant_type"))
 	}
