@@ -10,7 +10,7 @@ import (
 
 var Logger *slog.Logger
 
-func InitLogger() {
+func NewLogger() {
 	logLevel := os.Getenv("LOG_LEVEL")
 	var handler slog.Handler
 

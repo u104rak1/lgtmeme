@@ -6,7 +6,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func InitEnv() {
+func NewEnv() {
 	if os.Getenv("ECHO_MODE") == "local" {
 		if err := godotenv.Load(".env.local"); err != nil {
 			panic(err)

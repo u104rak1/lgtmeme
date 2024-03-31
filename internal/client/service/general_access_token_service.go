@@ -14,17 +14,17 @@ import (
 	authDto "github.com/ucho456job/lgtmeme/internal/auth/dto"
 )
 
-type ClientCredentialsService interface {
-	GetAccessToken(c echo.Context) (accessToken string, statusCode int, err error)
+type GeneralAccessTokenService interface {
+	CallToken(c echo.Context) (respBody *authDto.ClientCredentialsResponse, status int, err error)
 }
 
-type clientCredentialsService struct{}
+type generalAccessTokenService struct{}
 
-func NewClientCredentialsService() ClientCredentialsService {
-	return &clientCredentialsService{}
+func NewGeneralAccessTokenService() GeneralAccessTokenService {
+	return &generalAccessTokenService{}
 }
 
-func (s *clientCredentialsService) GetAccessToken(c echo.Context) (accessToken string, status int, err error) {
+func (s *generalAccessTokenService) CallToken(c echo.Context) (respBody *authDto.ClientCredentialsResponse, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 	clientID := os.Getenv("GENERAL_CLIENT_ID")
 	clientSecret := os.Getenv("GENERAL_CLIENT_SECRET")
@@ -32,7 +32,7 @@ func (s *clientCredentialsService) GetAccessToken(c echo.Context) (accessToken s
 
 	req, err := http.NewRequest("POST", baseURL+config.TOKEN_ENDPOINT, bytes.NewBufferString(reqData))
 	if err != nil {
-		return "", http.StatusInternalServerError, err
+		return nil, http.StatusInternalServerError, err
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -40,23 +40,22 @@ func (s *clientCredentialsService) GetAccessToken(c echo.Context) (accessToken s
 	httpClient := &http.Client{}
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return "", http.StatusServiceUnavailable, err
+		return nil, http.StatusServiceUnavailable, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", resp.StatusCode, errors.New("failed to get access token")
+		return nil, resp.StatusCode, errors.New("failed to get access token")
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", http.StatusInternalServerError, err
+		return nil, http.StatusInternalServerError, err
 	}
 
-	respBody := authDto.ClientCredentialsResponse{}
 	if err := json.Unmarshal(body, &respBody); err != nil {
-		return "", http.StatusInternalServerError, err
+		return nil, http.StatusInternalServerError, err
 	}
 
-	return respBody.AccessToken, resp.StatusCode, nil
+	return respBody, resp.StatusCode, nil
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/ucho456job/lgtmeme/internal/auth/dto"
 	"github.com/ucho456job/lgtmeme/internal/auth/repository"
 	"github.com/ucho456job/lgtmeme/internal/util"
 )
@@ -26,5 +27,5 @@ func (h *logoutHandler) Logout(c echo.Context) error {
 	if err := h.sessionManager.Logout(c); err != nil {
 		return util.InternalServerErrorResponse(c, err)
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{"message": "logout success"})
+	return c.JSON(http.StatusOK, dto.LogoutResp{OK: true})
 }

@@ -15,7 +15,7 @@ import (
 
 type LoginHandler interface {
 	Login(c echo.Context) error
-	GetLoginView(c echo.Context) error
+	GetView(c echo.Context) error
 }
 
 type loginHandler struct {
@@ -60,7 +60,8 @@ func (h *loginHandler) Login(c echo.Context) error {
 		return util.InternalServerErrorResponse(c, err)
 	}
 	if !exists {
-		return c.JSON(http.StatusOK, map[string]string{"redirectURL": config.PASSKEY_VIEW_ENDPOINT})
+		// TODO: Think about redirect destinations
+		return c.JSON(http.StatusOK, dto.LoginResp{RedirectURL: config.PASSKEY_VIEW_ENDPOINT})
 	}
 
 	queryParams := url.Values{}
@@ -76,11 +77,11 @@ func (h *loginHandler) Login(c echo.Context) error {
 	if query.Nonce != "" {
 		queryParams.Set("nonce", query.Nonce)
 	}
-	authorizationURL := fmt.Sprintf("%s?%s", "/api/connect/authorize", queryParams.Encode())
+	authorizationURL := fmt.Sprintf("%s?%s", config.AUTHZ_ENDPOINT, queryParams.Encode())
 
-	return c.JSON(http.StatusOK, map[string]string{"redirectURL": authorizationURL})
+	return c.JSON(http.StatusOK, dto.LoginResp{RedirectURL: authorizationURL})
 }
 
-func (h *loginHandler) GetLoginView(c echo.Context) error {
+func (h *loginHandler) GetView(c echo.Context) error {
 	return c.File(config.LOGIN_VIEW_FILEPATH)
 }

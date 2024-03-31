@@ -11,6 +11,21 @@ type TokenForm struct {
 	RefreshToken string    `form:"refresh_token" validate:"required_with=GrantType=refresh_token"`
 }
 
+type AuthzCodeResp struct {
+	AccessToken  string `json:"accessToken"`
+	TokenType    string `json:"tokenType"`
+	ExpiresIn    int    `json:"expiresIn"`
+	RefreshToken string `json:"refreshToken"`
+	IDToken      string `json:"idToken"`
+}
+
+type RefreshTokenResp struct {
+	AccessToken  string `json:"accessToken"`
+	TokenType    string `json:"tokenType"`
+	ExpiresIn    int    `json:"expiresIn"`
+	RefreshToken string `json:"refreshToken"`
+}
+
 type ClientCredentialsResponse struct {
 	AccessToken string `json:"accessToken"`
 	TokenType   string `json:"tokenType"`

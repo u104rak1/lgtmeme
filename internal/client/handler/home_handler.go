@@ -10,39 +10,39 @@ import (
 	"github.com/ucho456job/lgtmeme/internal/client/service"
 )
 
-type HomeViewHandler interface {
-	GetHomeView(c echo.Context) error
+type HomeHandler interface {
+	GetView(c echo.Context) error
 }
 
-type homeViewHandler struct {
-	sessionManagerRepository repository.SessionManager
-	clientCredentialsService service.ClientCredentialsService
+type homeHandler struct {
+	sessionManagerRepository  repository.SessionManager
+	generalAccessTokenService service.GeneralAccessTokenService
 }
 
-func NewHomeViewHandler(
+func NewHomeHandler(
 	sessionManagerRepository repository.SessionManager,
-	clientCredentialsService service.ClientCredentialsService,
-) *homeViewHandler {
-	return &homeViewHandler{
-		sessionManagerRepository: sessionManagerRepository,
-		clientCredentialsService: clientCredentialsService,
+	generalAccessTokenService service.GeneralAccessTokenService,
+) *homeHandler {
+	return &homeHandler{
+		sessionManagerRepository:  sessionManagerRepository,
+		generalAccessTokenService: generalAccessTokenService,
 	}
 }
 
-func (h *homeViewHandler) GetHomeView(c echo.Context) error {
-	accessToken, err := h.sessionManagerRepository.LoadClientCredentialsAccessToken(c)
+func (h *homeHandler) GetView(c echo.Context) error {
+	accessToken, err := h.sessionManagerRepository.LoadGeneralAccessToken(c)
 	if err != nil {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 
 	if accessToken == "" {
-		accessToken, statusCode, err := h.clientCredentialsService.GetAccessToken(c)
-		if err != nil && statusCode != http.StatusOK {
-			errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, statusCode)
+		respBody, status, err := h.generalAccessTokenService.CallToken(c)
+		if err != nil && status != http.StatusOK {
+			errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
 			return c.Redirect(http.StatusFound, errURL)
 		}
 
-		if err := h.sessionManagerRepository.CacheClientCredentialsAccessToken(c, accessToken); err != nil {
+		if err := h.sessionManagerRepository.CacheGeneralAccessToken(c, respBody.AccessToken); err != nil {
 			return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 		}
 	}

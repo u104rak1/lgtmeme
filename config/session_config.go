@@ -16,7 +16,7 @@ import (
 var Store *redistore.RediStore
 var Pool *redis.Pool
 
-func InitSessionStore() {
+func NewSessionStore() {
 	var err error
 	secretKey := os.Getenv("SESSION_SECRET_KEY")
 

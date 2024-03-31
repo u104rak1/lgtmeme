@@ -18,59 +18,21 @@ import (
 )
 
 func main() {
-	// Init Config
-	config.InitEnv()
-	config.InitDB()
-	config.InitSessionStore()
-	config.InitLogger()
-	validator := config.InitValidator()
+	// Init config
+	config.NewEnv()
+	config.NewDB()
+	config.NewSessionStore()
+	config.NewLogger()
+	validator := config.NewValidator()
 
-	// Init Auth Repository
-	healthCheckRepository := authRepository.NewHealthCheckRepository(config.DB)
-	oauthClientRepository := authRepository.NewOauthClientRepository(config.DB)
-	refreshTokenRepository := authRepository.NewRefreshTokenRepository(config.DB)
-	authSessionManagerRepository := authRepository.NewSessionManager(config.Store, config.Pool)
-	userRepository := authRepository.NewUserRepository(config.DB)
-
-	// Init Client Repository
-	clientSessionManagerRepository := clientRepository.NewSessionManager(config.Store, config.Pool)
-
-	// Init Client Service
-	clientCredentialsService := clientService.NewClientCredentialsService()
-
-	// Init Auth Service
-	jwtService := authService.NewJwtService()
-
-	// Init Echo
+	// Init echo
 	e := echo.New()
 	e.Validator = validator
 	e.Use(config.SessionMiddleware(), config.LoggerMiddleware)
 	e.Static(config.STATIC_ENDPOINT, config.STATIC_FILEPATH)
 
-	// Init Auth Handler
-	authzHandler := authHander.NewAuthorizationHandler(oauthClientRepository, userRepository, authSessionManagerRepository)
-	healthHandler := authHander.NewHealthHandler(healthCheckRepository, authSessionManagerRepository)
-	jwksHandler := authHander.NewJwksHandler(jwtService)
-	loginHandler := authHander.NewLoginHandler(userRepository, authSessionManagerRepository)
-	logoutHandler := authHander.NewLogoutHandler(authSessionManagerRepository)
-	tokenHandler := authHander.NewTokenHandler(oauthClientRepository, refreshTokenRepository, userRepository, authSessionManagerRepository, jwtService)
-	e.GET(config.AUTHORAIZETION_ENDPOINT, authzHandler.AuthorizationHandle)
-	e.HEAD(config.HEALTH_ENDPOINT, healthHandler.CheckHealth)
-	e.GET(config.JWKS_ENDPOINT, jwksHandler.GetJwks)
-	e.POST(config.LOGIN_ENDPOINT, loginHandler.Login)
-	e.GET(config.LOGIN_VIEW_ENDPOINT, loginHandler.GetLoginView)
-	e.GET(config.LOGOUT_ENDPOINT, logoutHandler.Logout)
-	e.POST(config.TOKEN_ENDPOINT, tokenHandler.GenerateToken)
-
-	// Init Resource Handler
-
-	// Init Client Handler
-	clientAuthHandler := clientHandler.NewAuthorizationHandler()
-	errorViewHandler := clientHandler.NewErrorViewHandler()
-	homeViewHandler := clientHandler.NewHomeViewHandler(clientSessionManagerRepository, clientCredentialsService)
-	e.GET(config.CLIENT_AUTH_ENDPOINT, clientAuthHandler.RedirectAuthz)
-	e.GET(config.ERROR_VIEW_ENDPOINT, errorViewHandler.GetErrorView)
-	e.GET(config.HOME_VIEW_ENDPOINT, homeViewHandler.GetHomeView)
+	newAuthServer(e)
+	newClientServer(e)
 
 	// Graceful shutdown
 	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
@@ -89,4 +51,48 @@ func main() {
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
 	}
+}
+
+func newAuthServer(e *echo.Echo) {
+	// Init repository
+	healthRepo := authRepository.NewHealthRepository(config.DB)
+	oauthClientRepo := authRepository.NewOauthClientRepository(config.DB)
+	refreshTokenRepo := authRepository.NewRefreshTokenRepository(config.DB)
+	authSessManaRepo := authRepository.NewSessionManager(config.Store, config.Pool)
+	userRepo := authRepository.NewUserRepository(config.DB)
+
+	// Init service
+	jwtServ := authService.NewJwtService()
+
+	// Init handler
+	authzHandler := authHander.NewAuthzHandler(oauthClientRepo, userRepo, authSessManaRepo)
+	healthHandler := authHander.NewHealthHandler(healthRepo, authSessManaRepo)
+	jwksHandler := authHander.NewJwksHandler(jwtServ)
+	loginHandler := authHander.NewLoginHandler(userRepo, authSessManaRepo)
+	logoutHandler := authHander.NewLogoutHandler(authSessManaRepo)
+	tokenHandler := authHander.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, authSessManaRepo, jwtServ)
+	e.GET(config.AUTHZ_ENDPOINT, authzHandler.Authorize)
+	e.HEAD(config.HEALTH_ENDPOINT, healthHandler.Check)
+	e.GET(config.JWKS_ENDPOINT, jwksHandler.Get)
+	e.POST(config.LOGIN_ENDPOINT, loginHandler.Login)
+	e.GET(config.LOGIN_VIEW_ENDPOINT, loginHandler.GetView)
+	e.GET(config.LOGOUT_ENDPOINT, logoutHandler.Logout)
+	e.POST(config.TOKEN_ENDPOINT, tokenHandler.Generate)
+}
+
+func newClientServer(e *echo.Echo) {
+	// Init repository
+	clientSessManaRepo := clientRepository.NewSessionManager(config.Store, config.Pool)
+
+	// Init service
+	generalAccessTokenServ := clientService.NewGeneralAccessTokenService()
+	ownerAccessTokenServ := clientService.NewOwnerAccessTokenService()
+
+	// Init Handler
+	clientAuthHandler := clientHandler.NewAuthzHandler(ownerAccessTokenServ)
+	errHandler := clientHandler.NewErrHandler()
+	homeHandler := clientHandler.NewHomeHandler(clientSessManaRepo, generalAccessTokenServ)
+	e.GET(config.CLIENT_AUTH_ENDPOINT, clientAuthHandler.RedirectAuthz)
+	e.GET(config.ERROR_VIEW_ENDPOINT, errHandler.GetView)
+	e.GET(config.HOME_VIEW_ENDPOINT, homeHandler.GetView)
 }

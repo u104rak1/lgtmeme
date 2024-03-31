@@ -13,7 +13,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.validator.Struct(i)
 }
 
-func InitValidator() echo.Validator {
+func NewValidator() echo.Validator {
 	v := validator.New()
 	v.RegisterValidation("grantType", isGrantTypeValid)
 	return &CustomValidator{validator: v}

@@ -5,7 +5,6 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"os"
 	"strings"
 	"time"
@@ -18,7 +17,7 @@ import (
 )
 
 type JwtService interface {
-	GetPublicKeys() ([]byte, error)
+	GetPublicKeys() (*jwk.Set, error)
 	GenerateAccessToken(userID *uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error)
 	GenerateRefreshToken() (string, error)
 	GenerateIDToken(oauthClient *model.OauthClient, user *model.User, nonce string) (string, error)
@@ -53,7 +52,7 @@ func (s *jwtService) loadPublicKey() (*rsa.PublicKey, error) {
 	return jwt.ParseRSAPublicKeyFromPEM(keyBytes)
 }
 
-func (s *jwtService) GetPublicKeys() ([]byte, error) {
+func (s *jwtService) GetPublicKeys() (*jwk.Set, error) {
 	publicKey, err := s.loadPublicKey()
 	if err != nil {
 		return nil, err
@@ -77,12 +76,7 @@ func (s *jwtService) GetPublicKeys() ([]byte, error) {
 
 	keySet.Add(key)
 
-	jsonKeySet, err := json.MarshalIndent(keySet, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonKeySet, nil
+	return &keySet, nil
 }
 
 func (s *jwtService) GenerateAccessToken(userID *uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error) {

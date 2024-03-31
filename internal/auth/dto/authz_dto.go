@@ -2,7 +2,7 @@ package dto
 
 import "github.com/google/uuid"
 
-type AuthorizationQuery struct {
+type AuthzQuery struct {
 	ResponseType string    `validate:"required"`
 	ClientID     uuid.UUID `validate:"required"`
 	RedirectURI  string    `validate:"required,url"`

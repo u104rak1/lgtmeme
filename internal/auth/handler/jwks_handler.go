@@ -8,7 +8,7 @@ import (
 )
 
 type JwksHandler interface {
-	GetJwks(c echo.Context) error
+	Get(c echo.Context) error
 }
 
 type jwksHandler struct {
@@ -21,7 +21,7 @@ func NewJwksHandler(jwtService service.JwtService) JwksHandler {
 	}
 }
 
-func (h *jwksHandler) GetJwks(c echo.Context) error {
+func (h *jwksHandler) Get(c echo.Context) error {
 	jwks, err := h.jwtService.GetPublicKeys()
 	if err != nil {
 		return err

@@ -12,7 +12,7 @@ import (
 )
 
 type OauthClientRepository interface {
-	ExistsForAuthz(c echo.Context, q dto.AuthorizationQuery) (bool, error)
+	ExistsForAuthz(c echo.Context, q dto.AuthzQuery) (bool, error)
 	FindByClientID(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error)
 }
 
@@ -24,7 +24,7 @@ func NewOauthClientRepository(db *gorm.DB) OauthClientRepository {
 	return &oauthClientRepository{DB: db}
 }
 
-func (r *oauthClientRepository) ExistsForAuthz(c echo.Context, q dto.AuthorizationQuery) (bool, error) {
+func (r *oauthClientRepository) ExistsForAuthz(c echo.Context, q dto.AuthzQuery) (bool, error) {
 	var oauthClient model.OauthClient
 	if err := r.DB.Model(&model.OauthClient{}).Preload("Scopes").Where("client_id = ? AND redirect_uri = ?", q.ClientID, q.RedirectURI).First(&oauthClient).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
