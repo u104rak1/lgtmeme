@@ -10,12 +10,14 @@ import (
 	"os"
 
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/ucho456job/lgtmeme/config"
 	authDto "github.com/ucho456job/lgtmeme/internal/auth/dto"
 )
 
 type OwnerAccessTokenService interface {
 	CallToken(c echo.Context) (respBody *authDto.AuthzCodeResp, status int, err error)
+	CallJWKS(c echo.Context) (keySet jwk.Set, status int, err error)
 }
 
 type ownerAccessTokenService struct{}
@@ -65,13 +67,13 @@ func (s *ownerAccessTokenService) CallToken(c echo.Context) (respBody *authDto.A
 	return respBody, resp.StatusCode, nil
 }
 
-func (s *ownerAccessTokenService) CallJWKS(c echo.Context) (respBody authDto.AuthzCodeResp, status int, err error) {
+func (s *ownerAccessTokenService) CallJWKS(c echo.Context) (keySet jwk.Set, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.JWKS_ENDPOINT
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return respBody, http.StatusInternalServerError, err
+		return nil, http.StatusInternalServerError, err
 	}
 
 	req.Header.Set("Content-Type", "application/jwk-set+json")
@@ -79,22 +81,23 @@ func (s *ownerAccessTokenService) CallJWKS(c echo.Context) (respBody authDto.Aut
 	httpClient := &http.Client{}
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return respBody, http.StatusServiceUnavailable, err
+		return nil, http.StatusServiceUnavailable, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return respBody, resp.StatusCode, errors.New("failed to get access token")
+		return nil, resp.StatusCode, errors.New("failed to get access token")
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return respBody, http.StatusInternalServerError, err
+		return nil, http.StatusInternalServerError, err
 	}
 
-	if err := json.Unmarshal(body, &respBody); err != nil {
-		return respBody, http.StatusInternalServerError, err
+	keySet, err = jwk.Parse(body)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
 	}
 
-	return respBody, resp.StatusCode, nil
+	return keySet, resp.StatusCode, nil
 }

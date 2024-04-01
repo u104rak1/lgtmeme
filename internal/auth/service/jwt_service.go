@@ -16,7 +16,7 @@ import (
 	"github.com/ucho456job/lgtmeme/internal/auth/model"
 )
 
-type JwtService interface {
+type JWTService interface {
 	GetPublicKeys() (*jwk.Set, error)
 	GenerateAccessToken(userID *uuid.UUID, oauthClient *model.OauthClient, expiresIn time.Duration) (string, error)
 	GenerateRefreshToken() (string, error)
@@ -25,7 +25,7 @@ type JwtService interface {
 
 type jwtService struct{}
 
-func NewJwtService() JwtService {
+func NewJWTService() JWTService {
 	return &jwtService{}
 }
 
@@ -64,7 +64,7 @@ func (s *jwtService) GetPublicKeys() (*jwk.Set, error) {
 		return nil, err
 	}
 
-	if err := key.Set(jwk.KeyIDKey, "1"); err != nil {
+	if err := key.Set(jwk.KeyIDKey, os.Getenv("KEY_ID")); err != nil {
 		return nil, err
 	}
 	if err := key.Set(jwk.AlgorithmKey, "RS256"); err != nil {
@@ -107,6 +107,8 @@ func (s *jwtService) GenerateAccessToken(userID *uuid.UUID, oauthClient *model.O
 		return "", err
 	}
 
+	token.Header[jwk.KeyIDKey] = os.Getenv("KEY_ID")
+
 	tokenString, err := token.SignedString(privateKey)
 	if err != nil {
 		return "", err
@@ -141,6 +143,8 @@ func (s *jwtService) GenerateIDToken(oauthClient *model.OauthClient, user *model
 	if err != nil {
 		return "", err
 	}
+
+	token.Header[jwk.KeyIDKey] = os.Getenv("KEY_ID")
 
 	tokenString, err := token.SignedString(privateKey)
 	if err != nil {

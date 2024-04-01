@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTH_ENDPOINTS } from "@/utils/constants";
 import { useState } from "react";
 
 type ResBody = {
@@ -19,7 +20,7 @@ const LoginPage = () => {
     formData.append("password", password);
 
     try {
-      const res = await fetch("/api/login", {
+      const res = await fetch(AUTH_ENDPOINTS.login, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
