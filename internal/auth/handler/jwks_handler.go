@@ -12,10 +12,10 @@ type JwksHandler interface {
 }
 
 type jwksHandler struct {
-	jwtService service.JwtService
+	jwtService service.JWTService
 }
 
-func NewJwksHandler(jwtService service.JwtService) JwksHandler {
+func NewJwksHandler(jwtService service.JWTService) JwksHandler {
 	return &jwksHandler{
 		jwtService: jwtService,
 	}

@@ -30,12 +30,14 @@ const (
 	ERROR_VIEW_ENDPOINT   = "/error"
 	HOME_VIEW_ENDPOINT    = "/"
 	PASSKEY_VIEW_ENDPOINT = "/passkey"
+	AUTH_VIEW_ENDPOINT    = "/auth"
 
 	// file path
 	STATIC_FILEPATH       = "view/out"
 	ERROR_VIEW_FILEPATH   = "view/out/error.html"
 	HOME_VIEW_FILEPATH    = "view/out/index.html"
 	PASSKEY_VIEW_FILEPATH = "view/out/passkey.html"
+	AUTH_VIEW_FILEPATH    = "view/out/auth.html"
 )
 
 // resoruce server
@@ -50,12 +52,15 @@ const (
 	PRE_AUTHN_SESSION_NAME            = "pre_authn_session"
 	GENERAL_ACCESS_TOKEN_SESSION_NAME = "general_access_token"
 	OWNER_ACCESS_TOKEN_SESSION_NAME   = "owner_access_token"
+	STATE_AND_NONCE_SESSION_NAME      = "state_and_nonce"
+	REFRESH_TOKEN_SESSION_NAME        = "refresh_token"
 )
 
 // session expire
 const (
-	DEFAULT_SESSION_EXPIRE_SEC = 60 * 60 * 23
-	AUTHZ_CODE_EXPIRE_SEC      = 60
+	DEFAULT_SESSION_EXPIRE_SEC       = 60 * 60 * 23
+	AUTHZ_CODE_EXPIRE_SEC            = 60
+	REFRESH_TOKEN_SESSION_EXPIRE_SEC = 60 * 60 * 24 * 30
 )
 
 // token expire

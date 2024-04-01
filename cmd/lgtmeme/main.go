@@ -18,14 +18,12 @@ import (
 )
 
 func main() {
-	// Init config
 	config.NewEnv()
 	config.NewDB()
 	config.NewSessionStore()
 	config.NewLogger()
 	validator := config.NewValidator()
 
-	// Init echo
 	e := echo.New()
 	e.Validator = validator
 	e.Use(config.SessionMiddleware(), config.LoggerMiddleware)
@@ -54,23 +52,21 @@ func main() {
 }
 
 func newAuthServer(e *echo.Echo) {
-	// Init repository
 	healthRepo := authRepository.NewHealthRepository(config.DB)
 	oauthClientRepo := authRepository.NewOauthClientRepository(config.DB)
 	refreshTokenRepo := authRepository.NewRefreshTokenRepository(config.DB)
 	authSessManaRepo := authRepository.NewSessionManager(config.Store, config.Pool)
 	userRepo := authRepository.NewUserRepository(config.DB)
 
-	// Init service
-	jwtServ := authService.NewJwtService()
+	jwtServ := authService.NewJWTService()
 
-	// Init handler
 	authzHandler := authHander.NewAuthzHandler(oauthClientRepo, userRepo, authSessManaRepo)
 	healthHandler := authHander.NewHealthHandler(healthRepo, authSessManaRepo)
 	jwksHandler := authHander.NewJwksHandler(jwtServ)
 	loginHandler := authHander.NewLoginHandler(userRepo, authSessManaRepo)
 	logoutHandler := authHander.NewLogoutHandler(authSessManaRepo)
 	tokenHandler := authHander.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, authSessManaRepo, jwtServ)
+
 	e.GET(config.AUTHZ_ENDPOINT, authzHandler.Authorize)
 	e.HEAD(config.HEALTH_ENDPOINT, healthHandler.Check)
 	e.GET(config.JWKS_ENDPOINT, jwksHandler.Get)
@@ -81,18 +77,18 @@ func newAuthServer(e *echo.Echo) {
 }
 
 func newClientServer(e *echo.Echo) {
-	// Init repository
-	clientSessManaRepo := clientRepository.NewSessionManager(config.Store, config.Pool)
+	sessManaRepo := clientRepository.NewSessionManager(config.Store, config.Pool)
 
-	// Init service
 	generalAccessTokenServ := clientService.NewGeneralAccessTokenService()
 	ownerAccessTokenServ := clientService.NewOwnerAccessTokenService()
 
-	// Init Handler
-	clientAuthHandler := clientHandler.NewAuthzHandler(ownerAccessTokenServ)
+	authHandler := clientHandler.NewAuthzHandler(sessManaRepo, ownerAccessTokenServ)
 	errHandler := clientHandler.NewErrHandler()
-	homeHandler := clientHandler.NewHomeHandler(clientSessManaRepo, generalAccessTokenServ)
-	e.GET(config.CLIENT_AUTH_ENDPOINT, clientAuthHandler.RedirectAuthz)
+	homeHandler := clientHandler.NewHomeHandler(sessManaRepo, generalAccessTokenServ)
+
+	e.GET(config.AUTH_VIEW_ENDPOINT, authHandler.GetView)
+	e.GET(config.CLIENT_AUTH_ENDPOINT, authHandler.RedirectAuthz)
+	e.GET(config.CLIENT_AUTH_CALLBACK_ENDPOINT, authHandler.Callback)
 	e.GET(config.ERROR_VIEW_ENDPOINT, errHandler.GetView)
 	e.GET(config.HOME_VIEW_ENDPOINT, homeHandler.GetView)
 }
