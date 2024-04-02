@@ -25,6 +25,9 @@ clear_data: ## Clear data from the database
 run: ## Run the application
 	@ECHO_MODE=local go run ./cmd/lgtmeme/main.go
 
+clean: ## Clean the binary
+	go clean -cache -modcache
+
 view_build: ## Build the view files
 	@cd ./view && yarn install && yarn build
 

@@ -17,8 +17,8 @@ type SessionManager interface {
 	LoadLoginSession(c echo.Context) (userID uuid.UUID, isLogin bool, err error)
 	CachePreAuthnSession(c echo.Context, q dto.AuthzQuery) error
 	LoadPreAuthnSession(c echo.Context) (query *dto.AuthzQuery, exists bool, err error)
-	CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthzQuery, authzCode string, userID uuid.UUID) error
-	LoadAuthzCodeWithCtx(c echo.Context, code string) (*AuthzCodeContext, error)
+	CacheAuthzCodeCtx(c echo.Context, q dto.AuthzQuery, authzCode string, userID uuid.UUID) error
+	LoadAuthzCodeCtx(c echo.Context, code string) (*AuthzCodeCtx, error)
 	Logout(c echo.Context) error
 	CheckRedis(c echo.Context, key string) (string, error)
 }
@@ -147,10 +147,14 @@ func (sm *sessionManager) LoadPreAuthnSession(c echo.Context) (query *dto.AuthzQ
 		Nonce:        nonce,
 	}
 
+	if err := sm.clearSession(c, config.PRE_AUTHN_SESSION_NAME); err != nil {
+		return nil, false, err
+	}
+
 	return query, true, nil
 }
 
-type AuthzCodeContext struct {
+type AuthzCodeCtx struct {
 	UserID      uuid.UUID `json:"userId"`
 	ClientID    uuid.UUID `json:"clientId"`
 	Scope       string    `json:"scope"`
@@ -158,8 +162,8 @@ type AuthzCodeContext struct {
 	Nonce       string    `json:"nonce"`
 }
 
-func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthzQuery, authzCode string, userID uuid.UUID) error {
-	saveData := AuthzCodeContext{
+func (sm *sessionManager) CacheAuthzCodeCtx(c echo.Context, q dto.AuthzQuery, authzCode string, userID uuid.UUID) error {
+	saveData := AuthzCodeCtx{
 		UserID:      userID,
 		ClientID:    q.ClientID,
 		Scope:       q.Scope,
@@ -183,7 +187,7 @@ func (sm *sessionManager) CacheAuthzCodeWithCtx(c echo.Context, q dto.AuthzQuery
 	return nil
 }
 
-func (sm *sessionManager) LoadAuthzCodeWithCtx(c echo.Context, code string) (*AuthzCodeContext, error) {
+func (sm *sessionManager) LoadAuthzCodeCtx(c echo.Context, code string) (*AuthzCodeCtx, error) {
 	conn := sm.pool.Get()
 	defer conn.Close()
 
@@ -192,8 +196,12 @@ func (sm *sessionManager) LoadAuthzCodeWithCtx(c echo.Context, code string) (*Au
 		return nil, err
 	}
 
-	var ctx AuthzCodeContext
+	var ctx AuthzCodeCtx
 	if err := json.Unmarshal([]byte(value), &ctx); err != nil {
+		return nil, err
+	}
+
+	if err := sm.clearSession(c, code); err != nil {
 		return nil, err
 	}
 
@@ -202,6 +210,9 @@ func (sm *sessionManager) LoadAuthzCodeWithCtx(c echo.Context, code string) (*Au
 
 func (sm *sessionManager) Logout(c echo.Context) error {
 	if err := sm.clearSession(c, config.LOGIN_SESSION_NAME); err != nil {
+		return err
+	}
+	if err := sm.clearSession(c, config.OWNER_ACCESS_TOKEN_SESSION_NAME); err != nil {
 		return err
 	}
 	return nil

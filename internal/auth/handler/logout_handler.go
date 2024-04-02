@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/internal/auth/dto"
 	"github.com/ucho456job/lgtmeme/internal/auth/repository"
-	"github.com/ucho456job/lgtmeme/internal/util"
+	"github.com/ucho456job/lgtmeme/internal/util/response"
 )
 
 type LogoutHandler interface {
@@ -25,7 +25,7 @@ func NewLogoutHandler(sessionManager repository.SessionManager) *logoutHandler {
 
 func (h *logoutHandler) Logout(c echo.Context) error {
 	if err := h.sessionManager.Logout(c); err != nil {
-		return util.InternalServerErrorResponse(c, err)
+		return response.InternalServerError(c, err)
 	}
 	return c.JSON(http.StatusOK, dto.LogoutResp{OK: true})
 }

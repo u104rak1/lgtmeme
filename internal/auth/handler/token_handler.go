@@ -9,7 +9,7 @@ import (
 	"github.com/ucho456job/lgtmeme/internal/auth/dto"
 	"github.com/ucho456job/lgtmeme/internal/auth/repository"
 	"github.com/ucho456job/lgtmeme/internal/auth/service"
-	"github.com/ucho456job/lgtmeme/internal/util"
+	"github.com/ucho456job/lgtmeme/internal/util/response"
 )
 
 type TokenHandler interface {
@@ -43,54 +43,60 @@ func NewTokenHandler(
 func (h *tokenHandler) Generate(c echo.Context) error {
 	var form dto.TokenForm
 	if err := c.Bind(&form); err != nil {
-		return util.InternalServerErrorResponse(c, err)
+		return response.InternalServerError(c, err)
 	}
 	if err := c.Validate(&form); err != nil {
-		return util.BadRequestResponse(c, err)
+		return response.BadRequest(c, err)
 	}
 
 	oauthClient, err := h.oauthClientRepository.FindByClientID(c, form.ClientID)
 	if err != nil {
-		return util.NotFoundErrorResponse(c, err)
+		return response.NotFound(c, err)
 	}
 	if oauthClient.ClientSecret != form.ClientSecret {
-		return util.BadRequestResponse(c, errors.New("invalid client_secret"))
+		err = errors.New("invalid client_secret")
+		return response.BadRequest(c, err)
 	}
 
 	expiresIn := config.ACCESS_TOKEN_EXPIRES_IN
 
 	switch form.GrantType {
 	case "authorization_code":
-		authzCodeCtx, err := h.sessionManagerRepository.LoadAuthzCodeWithCtx(c, form.Code)
+		authzCodeCtx, err := h.sessionManagerRepository.LoadAuthzCodeCtx(c, form.Code)
 		if err != nil {
-			return util.InternalServerErrorResponse(c, err)
+			return response.InternalServerError(c, err)
 		}
 		if authzCodeCtx.RedirectURI != form.RedirectURI || authzCodeCtx.ClientID != form.ClientID {
-			return util.BadRequestResponse(c, errors.New("invalid redirect_uri or client_id"))
+			err = errors.New("invalid redirect_uri or client_id")
+			return response.BadRequest(c, err)
 		}
 
 		user, err := h.userRepository.FindByID(c, authzCodeCtx.UserID)
 		if err != nil {
-			return util.NotFoundErrorResponse(c, err)
+			return response.InternalServerError(c, err)
+		}
+		if user == nil {
+			err = errors.New("user not found")
+			return response.NotFound(c, err)
 		}
 
 		accessToken, err := h.jwtService.GenerateAccessToken(&user.ID, oauthClient, expiresIn)
 		if err != nil {
-			return util.InternalServerErrorResponse(c, err)
+			return response.InternalServerError(c, err)
 		}
 
 		idToken, err := h.jwtService.GenerateIDToken(oauthClient, user, authzCodeCtx.Nonce)
 		if err != nil {
-			return util.InternalServerErrorResponse(c, err)
+			return response.InternalServerError(c, err)
 		}
 
 		refreshToken, err := h.jwtService.GenerateRefreshToken()
 		if err != nil {
-			return util.InternalServerErrorResponse(c, err)
+			return response.InternalServerError(c, err)
 		}
 
-		if err := h.refreshTokenRepository.CreateRefreshToken(c, user.ID, form.ClientID, refreshToken, authzCodeCtx.Scope); err != nil {
-			return util.InternalServerErrorResponse(c, err)
+		if err := h.refreshTokenRepository.Create(c, user.ID, form.ClientID, refreshToken, authzCodeCtx.Scope); err != nil {
+			return response.InternalServerError(c, err)
 		}
 
 		return c.JSON(http.StatusOK, dto.AuthzCodeResp{
@@ -104,29 +110,30 @@ func (h *tokenHandler) Generate(c echo.Context) error {
 	case "refresh_token":
 		refreshTokenData, err := h.refreshTokenRepository.FindByToken(c, form.RefreshToken)
 		if err != nil {
-			return util.NotFoundErrorResponse(c, err)
+			return response.NotFound(c, err)
 		}
 
 		exists, err := h.userRepository.ExistsByID(c, refreshTokenData.UserID)
 		if err != nil {
-			return util.InternalServerErrorResponse(c, err)
+			return response.InternalServerError(c, err)
 		}
 		if !exists {
-			return util.NotFoundErrorResponse(c, errors.New("user not found"))
+			err = errors.New("user not found")
+			return response.NotFound(c, err)
 		}
 
 		accessToken, err := h.jwtService.GenerateAccessToken(&refreshTokenData.UserID, oauthClient, expiresIn)
 		if err != nil {
-			return util.InternalServerErrorResponse(c, err)
+			return response.InternalServerError(c, err)
 		}
 
 		newRefreshToken, err := h.jwtService.GenerateRefreshToken()
 		if err != nil {
-			return util.InternalServerErrorResponse(c, err)
+			return response.InternalServerError(c, err)
 		}
 
-		if err := h.refreshTokenRepository.UpdateRefreshToken(c, refreshTokenData.UserID, form.ClientID, newRefreshToken, refreshTokenData.Scopes); err != nil {
-			return util.InternalServerErrorResponse(c, err)
+		if err := h.refreshTokenRepository.Update(c, refreshTokenData.UserID, form.ClientID, newRefreshToken, refreshTokenData.Scopes); err != nil {
+			return response.InternalServerError(c, err)
 		}
 
 		return c.JSON(http.StatusOK, dto.RefreshTokenResp{
@@ -139,7 +146,7 @@ func (h *tokenHandler) Generate(c echo.Context) error {
 	case "client_credentials":
 		accessToken, err := h.jwtService.GenerateAccessToken(nil, oauthClient, expiresIn)
 		if err != nil {
-			return util.InternalServerErrorResponse(c, err)
+			return response.InternalServerError(c, err)
 		}
 
 		return c.JSON(http.StatusOK, dto.ClientCredentialsResponse{
@@ -149,6 +156,7 @@ func (h *tokenHandler) Generate(c echo.Context) error {
 		})
 
 	default:
-		return util.BadRequestResponse(c, errors.New("unsupported grant_type"))
+		err = errors.New("unsupported grant_type")
+		return response.BadRequest(c, err)
 	}
 }

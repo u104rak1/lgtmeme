@@ -40,6 +40,8 @@ func (h *authzHandler) GetView(c echo.Context) error {
 }
 
 func (h *authzHandler) RedirectAuthz(c echo.Context) error {
+	// TODO: valid refresh token and get new access token
+
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.AUTHZ_ENDPOINT
 	clientID := os.Getenv("OWNER_CLIENT_ID")
