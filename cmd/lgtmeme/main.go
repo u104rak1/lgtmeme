@@ -15,6 +15,8 @@ import (
 	clientHandler "github.com/ucho456job/lgtmeme/internal/client/handler"
 	clientRepository "github.com/ucho456job/lgtmeme/internal/client/repository"
 	clientService "github.com/ucho456job/lgtmeme/internal/client/service"
+	resourceHandler "github.com/ucho456job/lgtmeme/internal/resource/handler"
+	resourceRepository "github.com/ucho456job/lgtmeme/internal/resource/repository"
 )
 
 func main() {
@@ -31,6 +33,7 @@ func main() {
 
 	newAuthServer(e)
 	newClientServer(e)
+	newResourceServer(e)
 
 	// Graceful shutdown
 	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
@@ -91,4 +94,12 @@ func newClientServer(e *echo.Echo) {
 	e.GET(config.CLIENT_AUTH_CALLBACK_ENDPOINT, authHandler.Callback)
 	e.GET(config.ERROR_VIEW_ENDPOINT, errHandler.GetView)
 	e.GET(config.HOME_VIEW_ENDPOINT, homeHandler.GetView)
+}
+
+func newResourceServer(e *echo.Echo) {
+	imgRepo := resourceRepository.NewImageRepository(config.DB)
+
+	imgHandler := resourceHandler.NewImageHandler(imgRepo)
+
+	e.GET(config.IMAGES_ENDPOINT, imgHandler.GetImages)
 }
