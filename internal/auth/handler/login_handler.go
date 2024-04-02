@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -9,7 +10,7 @@ import (
 	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/auth/dto"
 	"github.com/ucho456job/lgtmeme/internal/auth/repository"
-	"github.com/ucho456job/lgtmeme/internal/util"
+	"github.com/ucho456job/lgtmeme/internal/util/response"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -36,32 +37,32 @@ func NewLoginHandler(
 func (h *loginHandler) Login(c echo.Context) error {
 	var form dto.LoginForm
 	if err := c.Bind(&form); err != nil {
-		return util.InternalServerErrorResponse(c, err)
+		return response.InternalServerError(c, err)
 	}
 	if err := c.Validate(&form); err != nil {
-		return util.BadRequestResponse(c, err)
+		return response.BadRequest(c, err)
 	}
 
 	user, err := h.userRepository.FindByName(c, form.Username)
 	if err != nil {
-		return util.UnauthorizedErrorResponse(c, err)
+		return response.Unauthorized(c, err)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(form.Password)); err != nil {
-		return util.UnauthorizedErrorResponse(c, err)
+		return response.Unauthorized(c, err)
 	}
 
 	if err := h.sessionManager.CacheLoginSession(c, user.ID); err != nil {
-		return util.InternalServerErrorResponse(c, err)
+		return response.InternalServerError(c, err)
 	}
 
 	query, exists, err := h.sessionManager.LoadPreAuthnSession(c)
 	if err != nil {
-		return util.InternalServerErrorResponse(c, err)
+		return response.InternalServerError(c, err)
 	}
 	if !exists {
-		// TODO: Think about redirect destinations
-		return c.JSON(http.StatusOK, dto.LoginResp{RedirectURL: config.PASSKEY_VIEW_ENDPOINT})
+		err = errors.New("no pre-authentication session found")
+		return response.BadRequest(c, err)
 	}
 
 	queryParams := url.Values{}

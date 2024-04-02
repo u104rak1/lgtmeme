@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/auth/repository"
-	"github.com/ucho456job/lgtmeme/internal/util"
+	"github.com/ucho456job/lgtmeme/internal/util/response"
 )
 
 type HealthHandler interface {
@@ -33,12 +33,12 @@ func (h *healthHandler) Check(c echo.Context) error {
 
 	postgresValue, err := h.healthRepository.CheckPostgres(c, key)
 	if err != nil {
-		return util.InternalServerErrorResponse(c, err)
+		return response.InternalServerError(c, err)
 	}
 
 	redisValue, err := h.sessionManager.CheckRedis(c, key)
 	if err != nil {
-		return util.InternalServerErrorResponse(c, err)
+		return response.InternalServerError(c, err)
 	}
 
 	config.Logger.Info("Server, Postgres and Redis are healthy", "postgresValue", postgresValue, "redisValue", redisValue)

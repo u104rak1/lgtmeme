@@ -8,9 +8,9 @@ import (
 )
 
 type RefreshTokenRepository interface {
-	CreateRefreshToken(c echo.Context, userID uuid.UUID, clientID uuid.UUID, token, scope string) error
+	Create(c echo.Context, userID uuid.UUID, clientID uuid.UUID, token, scope string) error
 	FindByToken(c echo.Context, token string) (model.RefreshToken, error)
-	UpdateRefreshToken(c echo.Context, userID uuid.UUID, clientID uuid.UUID, newToken, scope string) error
+	Update(c echo.Context, userID uuid.UUID, clientID uuid.UUID, newToken, scope string) error
 }
 
 type refreshTokenRepository struct {
@@ -21,7 +21,7 @@ func NewRefreshTokenRepository(db *gorm.DB) RefreshTokenRepository {
 	return &refreshTokenRepository{DB: db}
 }
 
-func (r *refreshTokenRepository) CreateRefreshToken(c echo.Context, userID uuid.UUID, clientID uuid.UUID, token, scope string) error {
+func (r *refreshTokenRepository) Create(c echo.Context, userID uuid.UUID, clientID uuid.UUID, token, scope string) error {
 	refreshToken := model.RefreshToken{
 		Token:    token,
 		UserID:   userID,
@@ -45,7 +45,7 @@ func (r *refreshTokenRepository) FindByToken(c echo.Context, token string) (mode
 	return refreshToken, nil
 }
 
-func (r *refreshTokenRepository) UpdateRefreshToken(c echo.Context, userID uuid.UUID, clientID uuid.UUID, newToken, scope string) error {
+func (r *refreshTokenRepository) Update(c echo.Context, userID uuid.UUID, clientID uuid.UUID, newToken, scope string) error {
 	return r.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Where("user_id = ? AND client_id = ?", userID, clientID).Delete(&model.RefreshToken{}).Error; err != nil {
 			return err

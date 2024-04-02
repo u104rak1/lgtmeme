@@ -84,5 +84,20 @@ func (sm *sessionManager) LoadStateAndNonce(c echo.Context) (state string, nonce
 		return "", "", nil
 	}
 
+	if err := sm.clearSession(c, config.STATE_AND_NONCE_SESSION_NAME); err != nil {
+		return "", "", err
+	}
+
 	return state, nonce, nil
+}
+
+func (sm *sessionManager) clearSession(c echo.Context, sessionName string) error {
+	sess, err := sm.store.Get(c.Request(), sessionName)
+	if err != nil {
+		return err
+	}
+
+	sess.Options.MaxAge = -1
+
+	return sess.Save(c.Request(), c.Response())
 }
