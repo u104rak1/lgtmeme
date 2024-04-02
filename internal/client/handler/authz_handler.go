@@ -40,7 +40,27 @@ func (h *authzHandler) GetView(c echo.Context) error {
 }
 
 func (h *authzHandler) RedirectAuthz(c echo.Context) error {
-	// TODO: valid refresh token and get new access token
+	accessToken, err := h.sessionManagerRepository.LoadToken(c, config.OWNER_ACCESS_TOKEN_SESSION_NAME)
+	if err != nil {
+		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+	}
+	if accessToken != "" {
+		return c.Redirect(http.StatusFound, config.AUTH_VIEW_ENDPOINT)
+	}
+
+	refreshToken, err := h.sessionManagerRepository.LoadToken(c, config.REFRESH_TOKEN_SESSION_NAME)
+	if err != nil {
+		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+	}
+	if refreshToken != "" {
+		respBody, status, err := h.ownerAccessTokenService.CallTokenWithRefreshToken(c, &refreshToken)
+		if err != nil {
+			errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
+			return c.Redirect(http.StatusFound, errURL)
+		}
+
+		return h.commonSuccessProcess(c, respBody.AccessToken, respBody.RefreshToken)
+	}
 
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.AUTHZ_ENDPOINT
@@ -106,6 +126,18 @@ func (h *authzHandler) Callback(c echo.Context) error {
 	}
 
 	if err := h.sessionManagerRepository.CacheToken(c, tokenRespBody.RefreshToken, config.REFRESH_TOKEN_SESSION_NAME); err != nil {
+		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+	}
+
+	return h.commonSuccessProcess(c, tokenRespBody.AccessToken, tokenRespBody.RefreshToken)
+}
+
+func (h *authzHandler) commonSuccessProcess(c echo.Context, accessToken, refreshToken string) error {
+	if err := h.sessionManagerRepository.CacheToken(c, accessToken, config.OWNER_ACCESS_TOKEN_SESSION_NAME); err != nil {
+		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+	}
+
+	if err := h.sessionManagerRepository.CacheToken(c, refreshToken, config.REFRESH_TOKEN_SESSION_NAME); err != nil {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 
