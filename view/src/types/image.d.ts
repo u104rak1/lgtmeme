@@ -8,7 +8,7 @@ type GetImagesQuery = {
   page: number;
   keyword: string;
   sort: "popular" | "latest";
-  favaoriteImageIds: string[];
+  favoriteImageIds: string[];
   authCheck: boolean;
 };
 type GetImagesRespBody = {
@@ -50,7 +50,8 @@ type DeleteImageSuccessResult = {
 };
 type DeleteImageResult = DeleteImageSuccessResult | ErrResult;
 
-/** Image editor */
+/** Other image related types */
+type ActiveTabId = "latest" | "popular" | "favorite";
 type TextStyle = {
   left: number;
   top: number;

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"strings"
+
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/internal/resource/dto"
 	"github.com/ucho456job/lgtmeme/internal/resource/model"
@@ -24,8 +26,9 @@ func NewImageRepository(db *gorm.DB) ImageRepository {
 func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {
 	sqlQ := r.DB.Model(&model.Image{}).Select("id", "url")
 
-	if len(q.FavoriteImageIDs) > 0 {
-		sqlQ = sqlQ.Where("id IN ?", q.FavoriteImageIDs)
+	if q.FavoriteImageIDs != "" {
+		favoriteImageIDs := strings.Split(q.FavoriteImageIDs, ",")
+		sqlQ = sqlQ.Where("id IN ?", favoriteImageIDs)
 	}
 
 	if q.Keyword != "" {

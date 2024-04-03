@@ -29,9 +29,7 @@ func (s *imageService) GetImages(c echo.Context, q resourceDto.GetImagesQuery, t
 	reqDataParts = append(reqDataParts, fmt.Sprintf("page=%d", q.Page))
 	reqDataParts = append(reqDataParts, fmt.Sprintf("keyword=%s", q.Keyword))
 	reqDataParts = append(reqDataParts, fmt.Sprintf("sort=%s", q.Sort))
-	if len(q.FavoriteImageIDs) > 0 {
-		reqDataParts = append(reqDataParts, fmt.Sprintf("favorite_image_ids=%s", strings.Join(q.FavoriteImageIDs, ",")))
-	}
+	reqDataParts = append(reqDataParts, fmt.Sprintf("favorite_image_ids=%s", q.FavoriteImageIDs))
 	reqDataParts = append(reqDataParts, fmt.Sprintf("auth_check=%t", q.AuthCheck))
 	reqData := strings.Join(reqDataParts, "&")
 
