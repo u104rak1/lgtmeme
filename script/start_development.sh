@@ -2,6 +2,8 @@
 
 source .env.local
 
+rm -rf ./docker/volumes/storage/stub
+
 make dependencies_start
 
 make view_build

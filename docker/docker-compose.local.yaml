@@ -1,22 +1,86 @@
 version: '3.8'
 
 services:
-  postgres:
+  db:
     container_name: lgtmeme_postgres
-    image: postgres:15.1
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      TZ: ${TZ}
+    image: supabase/postgres:15.1.0.147
+    healthcheck:
+      test: pg_isready -U postgres -h localhost
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - log_min_messages=fatal
+    restart: unless-stopped
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: ${POSTGRES_PORT}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${SUPABASE_JWT_SECRET}
+      JWT_EXP: ${SUPABASE_JWT_EXPIRY}
+      TZ: ${TZ}
     networks:
       - default
+    volumes:
+      - ./volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+      - ./volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      - ./volumes/db/data:/var/lib/postgresql/data:Z
+
+  storage:
+    container_name: lgtmeme_storage
+    image: supabase/storage-api:v0.46.4
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${SUPABASE_STORAGE_PORT}/status"
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    restart: unless-stopped
+    ports:
+      - "${SUPABASE_STORAGE_PORT}:${SUPABASE_STORAGE_PORT}"
+    environment:
+      ANON_KEY: ${SUPABASE_ANON_KEY}
+      SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      PGRST_JWT_SECRET: ${SUPABASE_JWT_SECRET}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: stub
+      GLOBAL_S3_BUCKET: stub
+      ENABLE_IMAGE_TRANSFORMATION: "true"
+    networks:
+      - default
+    volumes:
+      - ./volumes/storage:/var/lib/storage:z
+
   redis:
     container_name: lgtmeme_redis
     image: redis:6.2
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     networks:
       - default
