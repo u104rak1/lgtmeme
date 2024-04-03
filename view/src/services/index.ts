@@ -5,7 +5,7 @@ export class CommonService {
     const queryParams: string[] = [];
     Object.entries(query).forEach(([key, value]) => {
       const snakeKey = toSnakeCase(key);
-      if (Array.isArray(value)) {
+      if (Array.isArray(value) && value.length > 0) {
         queryParams.push(`${snakeKey}=${value.join(",")}`);
       } else {
         queryParams.push(`${snakeKey}=${value}`);

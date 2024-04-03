@@ -1,6 +1,8 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -18,7 +20,7 @@ func NewValidator() echo.Validator {
 	v := validator.New()
 	v.RegisterValidation("grantType", isGrantTypeValid)
 	v.RegisterValidation("sort", isSortValid)
-	v.RegisterValidation("uuidSlice", isUUIDSliceValid)
+	v.RegisterValidation("uuidStrings", isUUIDStringsValid)
 	return &CustomValidator{validator: v}
 }
 
@@ -44,10 +46,18 @@ func isSortValid(fl validator.FieldLevel) bool {
 	return false
 }
 
-func isUUIDSliceValid(fl validator.FieldLevel) bool {
-	UUIDs := fl.Field().Interface().([]string)
+func isUUIDStringsValid(fl validator.FieldLevel) bool {
+	field := fl.Field().String()
+	if field == "" {
+		return true
+	}
+
+	UUIDs := strings.Split(field, ",")
 	for _, ID := range UUIDs {
-		if _, err := uuid.Parse(ID); err != nil {
+		if strings.TrimSpace(ID) == "" {
+			continue
+		}
+		if _, err := uuid.Parse(strings.TrimSpace(ID)); err != nil {
 			return false
 		}
 	}

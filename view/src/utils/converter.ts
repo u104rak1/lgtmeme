@@ -1,6 +1,3 @@
 export const toSnakeCase = (str: string): string => {
-  return str.replace(
-    /([A-Z])/g,
-    (char, index) => `${index > 0 ? "_" : ""}${char.toLowerCase()}`
-  );
+  return str.replace(/([A-Z])/g, (_match, char) => `_${char.toLowerCase()}`);
 };

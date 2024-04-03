@@ -1,6 +1,3 @@
-"use client";
-
-import Image from "next/image";
 import Button from "@/components/atoms/Button/Button";
 import Svg from "@/components/atoms/Svg/Svg";
 import { IMAGE_SIZE } from "@/utils/constants";
@@ -31,13 +28,12 @@ const ImageCard = ({
     <div className={css}>
       <div className={cardCss}>
         <div className={imageContainerCss}>
-          <Image
+          <img
             className={imageCss}
             src={image.url}
             height={IMAGE_SIZE}
             width={IMAGE_SIZE}
             alt="LGTM"
-            priority
           />
         </div>
         <div className={buttonsCss}>

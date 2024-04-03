@@ -3,11 +3,11 @@ package dto
 import "github.com/google/uuid"
 
 type GetImagesQuery struct {
-	Page             int      `query:"page" validate:"min=0"  default:"0"`
-	Keyword          string   `query:"keyword" validate:"max=50"  default:""`
-	Sort             string   `query:"sort" validate:"sort" default:"latest"`
-	FavoriteImageIDs []string `query:"favorite_image_ids" validate:"uuidSlice"`
-	AuthCheck        bool     `query:"auth_check"`
+	Page             int    `query:"page" validate:"min=0"  default:"0"`
+	Keyword          string `query:"keyword" validate:"max=50"  default:""`
+	Sort             string `query:"sort" validate:"sort" default:"latest"`
+	FavoriteImageIDs string `query:"favorite_image_ids" validate:"uuidStrings"`
+	AuthCheck        bool   `query:"auth_check"`
 }
 
 type GetImagesImages struct {
