@@ -34,7 +34,7 @@ func NewSessionStore() {
 		port := os.Getenv("REDIS_PORT")
 		address := fmt.Sprintf("%s:%s", host, port)
 
-		Store, err = redistore.NewRediStore(10, "tcp", address, password, []byte(secretKey))
+		Store, err = redistore.NewRediStore(10, "tcp", address, "", []byte(secretKey))
 	}
 
 	if err != nil {

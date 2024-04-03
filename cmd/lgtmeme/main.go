@@ -84,17 +84,20 @@ func newClientServer(e *echo.Echo) {
 	sessManaRepo := clientRepository.NewSessionManager(config.Store, config.Pool)
 
 	generalAccessTokenServ := clientService.NewGeneralAccessTokenService()
+	imgServ := clientService.NewImageService()
 	ownerAccessTokenServ := clientService.NewOwnerAccessTokenService()
 
 	authHandler := clientHandler.NewAuthzHandler(sessManaRepo, ownerAccessTokenServ)
 	errHandler := clientHandler.NewErrHandler()
 	homeHandler := clientHandler.NewHomeHandler(sessManaRepo, generalAccessTokenServ)
+	imgHandler := clientHandler.NewImageHandler(sessManaRepo, imgServ)
 
 	e.GET(config.AUTH_VIEW_ENDPOINT, authHandler.GetView)
 	e.GET(config.CLIENT_AUTH_ENDPOINT, authHandler.RedirectAuthz)
 	e.GET(config.CLIENT_AUTH_CALLBACK_ENDPOINT, authHandler.Callback)
 	e.GET(config.ERROR_VIEW_ENDPOINT, errHandler.GetView)
 	e.GET(config.HOME_VIEW_ENDPOINT, homeHandler.GetView)
+	e.GET(config.CLIENT_IMAGES_ENDPOINT, imgHandler.Get)
 }
 
 func newResourceServer(e *echo.Echo) {
@@ -102,5 +105,5 @@ func newResourceServer(e *echo.Echo) {
 
 	imgHandler := resourceHandler.NewImageHandler(imgRepo)
 
-	e.GET(config.IMAGES_ENDPOINT, imgHandler.GetImages, middleware.VerifyAccessToken(config.IMAGES_READ_SCOPE))
+	e.GET(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.GetImages, middleware.VerifyAccessToken(config.IMAGES_READ_SCOPE))
 }

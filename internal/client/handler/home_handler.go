@@ -30,9 +30,9 @@ func NewHomeHandler(
 }
 
 func (h *homeHandler) GetView(c echo.Context) error {
-	sessionName := config.GENERAL_ACCESS_TOKEN_SESSION_NAME
+	sessName := config.GENERAL_ACCESS_TOKEN_SESSION_NAME
 
-	accessToken, err := h.sessionManagerRepository.LoadToken(c, sessionName)
+	accessToken, err := h.sessionManagerRepository.LoadToken(c, sessName)
 	if err != nil {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
@@ -44,7 +44,7 @@ func (h *homeHandler) GetView(c echo.Context) error {
 			return c.Redirect(http.StatusFound, errURL)
 		}
 
-		if err := h.sessionManagerRepository.CacheToken(c, respBody.AccessToken, sessionName); err != nil {
+		if err := h.sessionManagerRepository.CacheToken(c, respBody.AccessToken, sessName); err != nil {
 			return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 		}
 	}
