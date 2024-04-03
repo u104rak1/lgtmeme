@@ -13,3 +13,6 @@ export const PAGE_ENDPOINTS = {
   privacyPolicy: "/privacy-policy",
   termsOfService: "/terms-of-service",
 } as const;
+
+export const IMAGE_SIZE = 300;
+export const MAX_KEYWORD_LENGTH = 50;
