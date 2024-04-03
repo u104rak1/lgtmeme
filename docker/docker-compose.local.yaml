@@ -80,7 +80,5 @@ services:
     image: redis:6.2
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
     networks:
       - default

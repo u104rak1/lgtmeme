@@ -12,6 +12,19 @@ type ErrResp struct {
 	ErrMsg  string `json:"errorMessage"`
 }
 
+func HandleErrResp(c echo.Context, status int, err error) error {
+	switch status {
+	case http.StatusBadRequest:
+		return BadRequest(c, err)
+	case http.StatusUnauthorized:
+		return Unauthorized(c, err)
+	case http.StatusNotFound:
+		return NotFound(c, err)
+	default:
+		return InternalServerError(c, err)
+	}
+}
+
 func BadRequest(c echo.Context, err error) error {
 	config.Logger.Warn("Bad request", "error", err.Error())
 	return c.JSON(http.StatusBadRequest, ErrResp{

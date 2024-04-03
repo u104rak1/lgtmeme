@@ -24,6 +24,7 @@ const (
 	// api endpoint
 	CLIENT_AUTH_ENDPOINT          = "/client-api/auth"
 	CLIENT_AUTH_CALLBACK_ENDPOINT = "/client-api/auth/callback"
+	CLIENT_IMAGES_ENDPOINT        = "/client-api/images"
 
 	// view endpoint
 	STATIC_ENDPOINT       = "/"
@@ -43,7 +44,7 @@ const (
 // resoruce server
 const (
 	// api endpoint
-	IMAGES_ENDPOINT = "/resource-api/images"
+	RESOURCE_IMAGES_ENDPOINT = "/resource-api/images"
 )
 
 // session name
