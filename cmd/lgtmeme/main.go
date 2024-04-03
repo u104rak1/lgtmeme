@@ -16,6 +16,7 @@ import (
 	clientRepository "github.com/ucho456job/lgtmeme/internal/client/repository"
 	clientService "github.com/ucho456job/lgtmeme/internal/client/service"
 	resourceHandler "github.com/ucho456job/lgtmeme/internal/resource/handler"
+	"github.com/ucho456job/lgtmeme/internal/resource/middleware"
 	resourceRepository "github.com/ucho456job/lgtmeme/internal/resource/repository"
 )
 
@@ -101,5 +102,5 @@ func newResourceServer(e *echo.Echo) {
 
 	imgHandler := resourceHandler.NewImageHandler(imgRepo)
 
-	e.GET(config.IMAGES_ENDPOINT, imgHandler.GetImages)
+	e.GET(config.IMAGES_ENDPOINT, imgHandler.GetImages, middleware.VerifyAccessToken(config.IMAGES_READ_SCOPE))
 }
