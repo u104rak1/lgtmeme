@@ -73,3 +73,11 @@ const (
 const (
 	REFRESH_TOKEN_SIZE = 64
 )
+
+// scope
+const (
+	IMAGES_READ_SCOPE   = "images.read"
+	IMAGES_CREATE_SCOPE = "images.create"
+	IMAGES_UPDATE_SCOPE = "images.update"
+	IMAGES_DELETE_SCOPE = "images.delete"
+)

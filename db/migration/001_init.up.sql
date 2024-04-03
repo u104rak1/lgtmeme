@@ -56,3 +56,13 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (client_id) REFERENCES oauth_clients(client_id)
 );
+
+CREATE TABLE IF NOT EXISTS images (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    url TEXT NOT NULL,
+    keyword VARCHAR(50) NOT NULL DEFAULT '',
+    used_count INTEGER NOT NULL DEFAULT 0,
+    reported BOOLEAN NOT NULL DEFAULT false,
+    confirmed BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
