@@ -19,13 +19,14 @@ var Pool *redis.Pool
 func NewSessionStore() {
 	var err error
 	secretKey := os.Getenv("SESSION_SECRET_KEY")
+	password := os.Getenv("REDIS_PASSWORD")
 
 	if os.Getenv("ECHO_MODE") == "production" {
 		redisURL := os.Getenv("REDIS_URL")
 
 		Store, err = redistore.NewRediStoreWithPool(&redis.Pool{
 			Dial: func() (redis.Conn, error) {
-				return redis.DialURL(redisURL)
+				return redis.DialURL(redisURL, redis.DialPassword(password))
 			},
 		}, []byte(secretKey))
 	} else {
@@ -33,7 +34,7 @@ func NewSessionStore() {
 		port := os.Getenv("REDIS_PORT")
 		address := fmt.Sprintf("%s:%s", host, port)
 
-		Store, err = redistore.NewRediStore(10, "tcp", address, "", []byte(secretKey))
+		Store, err = redistore.NewRediStore(10, "tcp", address, password, []byte(secretKey))
 	}
 
 	if err != nil {

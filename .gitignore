@@ -1,4 +1,6 @@
 /cmd/lgtmeme/__debug*
+/docker/volumes/db/data
+/docker/volumes/storage/stub
 .env.prod
 .env.local.private
 private_key.pem
