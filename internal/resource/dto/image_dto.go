@@ -3,7 +3,7 @@ package dto
 import "github.com/google/uuid"
 
 type PostImageReqBody struct {
-	Base64image string `json:"base64image" validate:"required"`
+	Base64image string `json:"base64image" validate:"required,imageSize,base64image"`
 	Keyword     string `json:"keyword" validate:"max=50"`
 }
 
