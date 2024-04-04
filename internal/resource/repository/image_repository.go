@@ -3,24 +3,44 @@ package repository
 import (
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/internal/resource/dto"
 	"github.com/ucho456job/lgtmeme/internal/resource/model"
+	"github.com/ucho456job/lgtmeme/internal/util/clock"
 	"gorm.io/gorm"
 )
 
 type ImageRepository interface {
+	Create(c echo.Context, id uuid.UUID, url, keyword string) error
 	FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error)
 }
 
 type imageRepository struct {
-	DB *gorm.DB
+	DB      *gorm.DB
+	Clocker clock.Clocker
 }
 
-func NewImageRepository(db *gorm.DB) ImageRepository {
+func NewImageRepository(db *gorm.DB, clocker clock.Clocker) ImageRepository {
 	return &imageRepository{
-		DB: db,
+		DB:      db,
+		Clocker: clocker,
 	}
+}
+
+func (r *imageRepository) Create(c echo.Context, id uuid.UUID, url, keyword string) error {
+	newImage := &model.Image{
+		ID:        id,
+		URL:       url,
+		Keyword:   keyword,
+		CreatedAt: r.Clocker.Now(),
+	}
+
+	if err := r.DB.Create(newImage).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {

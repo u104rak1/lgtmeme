@@ -22,7 +22,7 @@ type GetImagesResult = GetImagesSuccessResult | ErrResult;
 
 /** POST */
 type PostImageReqBody = {
-  image: string;
+  base64image: string;
   keyword: string;
 };
 type PostImageRespBody = {

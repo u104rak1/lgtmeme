@@ -11,7 +11,11 @@ import (
 	"github.com/ucho456job/lgtmeme/internal/util/response"
 )
 
-type ImageHandler interface{}
+type ImageHandler interface {
+	GetCreateImageView(c echo.Context) error
+	Post(c echo.Context) error
+	BulkGet(c echo.Context) error
+}
 
 type imageHandler struct {
 	sessionManagerRepository repository.SessionManager
@@ -28,7 +32,34 @@ func NewImageHandler(
 	}
 }
 
-func (h *imageHandler) Get(c echo.Context) error {
+func (h *imageHandler) GetCreateImageView(c echo.Context) error {
+	return c.File(config.CREATE_IMAGE_VIEW_FILEPATH)
+}
+
+func (h *imageHandler) Post(c echo.Context) error {
+	var body resourceDto.PostImageReqBody
+	if err := c.Bind(&body); err != nil {
+		return response.BadRequest(c, err)
+	}
+
+	if err := c.Validate(body); err != nil {
+		return response.BadRequest(c, err)
+	}
+
+	accessToken, err := h.sessionManagerRepository.LoadToken(c, config.GENERAL_ACCESS_TOKEN_SESSION_NAME)
+	if err != nil {
+		return response.InternalServerError(c, err)
+	}
+
+	respBody, status, err := h.imageService.Post(c, body, accessToken)
+	if err != nil {
+		return response.HandleErrResp(c, status, err)
+	}
+
+	return c.JSON(http.StatusCreated, respBody)
+}
+
+func (h *imageHandler) BulkGet(c echo.Context) error {
 	q := new(resourceDto.GetImagesQuery)
 	if err := c.Bind(q); err != nil {
 		return response.BadRequest(c, err)
@@ -43,7 +74,7 @@ func (h *imageHandler) Get(c echo.Context) error {
 		return response.InternalServerError(c, err)
 	}
 
-	respBody, status, err := h.imageService.GetImages(c, *q, accessToken)
+	respBody, status, err := h.imageService.BulkGet(c, *q, accessToken)
 	if err != nil {
 		return response.HandleErrResp(c, status, err)
 	}

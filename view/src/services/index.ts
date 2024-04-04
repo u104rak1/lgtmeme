@@ -18,6 +18,9 @@ export class CommonService {
   createConfig(method: RequestMethod, body?: RequestBody): RequestInit {
     return {
       method,
+      headers: {
+        "Content-Type": "application/json",
+      },
       cache: "no-store",
       body: body ? JSON.stringify(body) : undefined,
     };
