@@ -14,7 +14,7 @@ type PostImageResp struct {
 type GetImagesQuery struct {
 	Page             int    `query:"page" validate:"min=0"  default:"0"`
 	Keyword          string `query:"keyword" validate:"max=50" default:""`
-	Sort             string `query:"sort" validate:"sort" default:"latest"`
+	Sort             string `query:"sort" validate:"oneof=latest popular" default:"latest"`
 	FavoriteImageIDs string `query:"favorite_image_ids" validate:"uuidStrings"`
 	AuthCheck        bool   `query:"auth_check"`
 }
@@ -27,4 +27,16 @@ type GetImagesImages struct {
 type GetImagesResp struct {
 	Total  int               `json:"total"`
 	Images []GetImagesImages `json:"images"`
+}
+
+type PatchImageReqType string
+
+const (
+	PatchImageReqTypeUsed    PatchImageReqType = "used"
+	PatchImageReqTypeReport  PatchImageReqType = "report"
+	PatchImageReqTypeConfirm PatchImageReqType = "confirm"
+)
+
+type PatchImageReqBody struct {
+	Type PatchImageReqType `json:"type" validate:"required,oneof=used report confirm"`
 }

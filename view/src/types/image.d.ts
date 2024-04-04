@@ -35,7 +35,7 @@ type PostImageSuccessResult = {
 type PostImageResult = PostImageSuccessResult | ErrResult;
 
 /** PATCH */
-type PatchRequestType = "used" | "report" | "confirmed";
+type PatchRequestType = "used" | "report" | "confirm";
 type PatchImageReqBody = {
   type: PatchRequestType;
 };

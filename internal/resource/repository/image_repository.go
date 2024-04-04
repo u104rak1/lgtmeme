@@ -14,6 +14,8 @@ import (
 type ImageRepository interface {
 	Create(c echo.Context, id uuid.UUID, url, keyword string) error
 	FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error)
+	ExistsByID(c echo.Context, id uuid.UUID) (bool, error)
+	Update(c echo.Context, id uuid.UUID, reqType dto.PatchImageReqType) error
 }
 
 type imageRepository struct {
@@ -72,4 +74,30 @@ func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]m
 	}
 
 	return &images, nil
+}
+
+func (r *imageRepository) ExistsByID(c echo.Context, id uuid.UUID) (bool, error) {
+	var count int64
+	if err := r.DB.Model(&model.Image{}).Where("id = ?", id).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (r *imageRepository) Update(c echo.Context, id uuid.UUID, reqType dto.PatchImageReqType) error {
+	var updateData map[string]interface{}
+	switch reqType {
+	case dto.PatchImageReqTypeUsed:
+		updateData = map[string]interface{}{"used_count": gorm.Expr("used_count + ?", 1)}
+	case dto.PatchImageReqTypeReport:
+		updateData = map[string]interface{}{"reported": true}
+	case dto.PatchImageReqTypeConfirm:
+		updateData = map[string]interface{}{"confirmed": true}
+	}
+
+	if err := r.DB.Model(&model.Image{}).Where("id = ?", id).Updates(updateData).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
