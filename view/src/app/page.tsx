@@ -1,9 +1,13 @@
 "use client";
 
+import Link from "next/link";
+import Button from "@/components/atoms/Button/Button";
+import Svg from "@/components/atoms/Svg/Svg";
 import ImageGallery from "@/components/organisms/ImageGallery/ImageGallery";
 import { ImageService } from "@/services/image.service";
 import { css } from "@@/styled-system/css";
 import { useEffect, useState } from "react";
+import { PAGE_ENDPOINTS } from "@/utils/constants";
 
 const HomePage = () => {
   const [images, setImages] = useState<Image[]>([]);
@@ -29,6 +33,11 @@ const HomePage = () => {
   return (
     <div>
       <ImageGallery css={imageGalleryCss} initImages={images} />
+      <Link href={PAGE_ENDPOINTS.createImage}>
+        <Button css={buttonCss} icon={<Svg icon="plus" color="white" />}>
+          Create image
+        </Button>
+      </Link>
     </div>
   );
 };

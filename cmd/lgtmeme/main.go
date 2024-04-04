@@ -18,6 +18,9 @@ import (
 	resourceHandler "github.com/ucho456job/lgtmeme/internal/resource/handler"
 	"github.com/ucho456job/lgtmeme/internal/resource/middleware"
 	resourceRepository "github.com/ucho456job/lgtmeme/internal/resource/repository"
+	resourceService "github.com/ucho456job/lgtmeme/internal/resource/service"
+	"github.com/ucho456job/lgtmeme/internal/util/clock"
+	"github.com/ucho456job/lgtmeme/internal/util/uuidgen"
 )
 
 func main() {
@@ -95,15 +98,23 @@ func newClientServer(e *echo.Echo) {
 	e.GET(config.AUTH_VIEW_ENDPOINT, authHandler.GetView)
 	e.GET(config.CLIENT_AUTH_ENDPOINT, authHandler.RedirectAuthz)
 	e.GET(config.CLIENT_AUTH_CALLBACK_ENDPOINT, authHandler.Callback)
+
 	e.GET(config.ERROR_VIEW_ENDPOINT, errHandler.GetView)
+
 	e.GET(config.HOME_VIEW_ENDPOINT, homeHandler.GetView)
-	e.GET(config.CLIENT_IMAGES_ENDPOINT, imgHandler.Get)
+
+	e.GET(config.CREATE_IMAGE_VIEW_ENDPOINT, imgHandler.GetCreateImageView)
+	e.POST(config.CLIENT_IMAGES_ENDPOINT, imgHandler.Post)
+	e.GET(config.CLIENT_IMAGES_ENDPOINT, imgHandler.BulkGet)
 }
 
 func newResourceServer(e *echo.Echo) {
-	imgRepo := resourceRepository.NewImageRepository(config.DB)
+	imgRepo := resourceRepository.NewImageRepository(config.DB, &clock.RealClocker{})
 
-	imgHandler := resourceHandler.NewImageHandler(imgRepo)
+	storageServ := resourceService.NewStorageService()
 
-	e.GET(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.GetImages, middleware.VerifyAccessToken(config.IMAGES_READ_SCOPE))
+	imgHandler := resourceHandler.NewImageHandler(imgRepo, storageServ, &uuidgen.RealUUIDGenerator{})
+
+	e.POST(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.Post, middleware.VerifyAccessToken(config.IMAGES_CREATE_SCOPE))
+	e.GET(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.BulkGet, middleware.VerifyAccessToken(config.IMAGES_READ_SCOPE))
 }

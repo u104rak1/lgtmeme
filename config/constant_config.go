@@ -27,18 +27,20 @@ const (
 	CLIENT_IMAGES_ENDPOINT        = "/client-api/images"
 
 	// view endpoint
-	STATIC_ENDPOINT       = "/"
-	ERROR_VIEW_ENDPOINT   = "/error"
-	HOME_VIEW_ENDPOINT    = "/"
-	PASSKEY_VIEW_ENDPOINT = "/passkey"
-	AUTH_VIEW_ENDPOINT    = "/auth"
+	STATIC_ENDPOINT            = "/"
+	ERROR_VIEW_ENDPOINT        = "/error"
+	HOME_VIEW_ENDPOINT         = "/"
+	CREATE_IMAGE_VIEW_ENDPOINT = "/create-image"
+	PASSKEY_VIEW_ENDPOINT      = "/passkey"
+	AUTH_VIEW_ENDPOINT         = "/auth"
 
 	// file path
-	STATIC_FILEPATH       = "view/out"
-	ERROR_VIEW_FILEPATH   = "view/out/error.html"
-	HOME_VIEW_FILEPATH    = "view/out/index.html"
-	PASSKEY_VIEW_FILEPATH = "view/out/passkey.html"
-	AUTH_VIEW_FILEPATH    = "view/out/auth.html"
+	STATIC_FILEPATH            = "view/out"
+	ERROR_VIEW_FILEPATH        = "view/out/error.html"
+	HOME_VIEW_FILEPATH         = "view/out/index.html"
+	CREATE_IMAGE_VIEW_FILEPATH = "view/out/create-image.html"
+	PASSKEY_VIEW_FILEPATH      = "view/out/passkey.html"
+	AUTH_VIEW_FILEPATH         = "view/out/auth.html"
 )
 
 // resoruce server

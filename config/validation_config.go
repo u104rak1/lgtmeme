@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -21,6 +22,8 @@ func NewValidator() echo.Validator {
 	v.RegisterValidation("grantType", isGrantTypeValid)
 	v.RegisterValidation("sort", isSortValid)
 	v.RegisterValidation("uuidStrings", isUUIDStringsValid)
+	v.RegisterValidation("imageSize", isImageSizeValid)
+	v.RegisterValidation("base64image", isBase64imageValid)
 	return &CustomValidator{validator: v}
 }
 
@@ -62,4 +65,27 @@ func isUUIDStringsValid(fl validator.FieldLevel) bool {
 		}
 	}
 	return true
+}
+
+func isImageSizeValid(fl validator.FieldLevel) bool {
+	image := fl.Field().String()
+	return len(image) < 1048576*4/3
+}
+
+func isBase64imageValid(fl validator.FieldLevel) bool {
+	image := fl.Field().String()
+	var imagePrefixes = map[string]string{
+		"jpeg": "data:image/jpeg;base64,",
+		"png":  "data:image/png;base64,",
+		"webp": "data:image/webp;base64,",
+	}
+	for _, prefix := range imagePrefixes {
+		if strings.HasPrefix(image, prefix) {
+			base64Data := strings.TrimPrefix(image, prefix)
+			if _, err := base64.StdEncoding.DecodeString(base64Data); err == nil {
+				return true
+			}
+		}
+	}
+	return false
 }
