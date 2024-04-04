@@ -27,5 +27,5 @@ export const ACTIVE_TAB_ID = {
 export const PATCH_IMAGE_REQUEST_TYPE = {
   used: "used",
   report: "report",
-  confirmed: "confirmed",
+  confirm: "confirm",
 } as const;

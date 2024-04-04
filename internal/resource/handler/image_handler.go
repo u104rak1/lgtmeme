@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/internal/resource/dto"
 	"github.com/ucho456job/lgtmeme/internal/resource/repository"
@@ -14,6 +15,7 @@ import (
 type ImageHandler interface {
 	Post(c echo.Context) error
 	BulkGet(c echo.Context) error
+	Patch(c echo.Context) error
 }
 
 type imageHandler struct {
@@ -91,4 +93,35 @@ func (h *imageHandler) BulkGet(c echo.Context) error {
 		Total:  total,
 		Images: respImgs,
 	})
+}
+
+func (h *imageHandler) Patch(c echo.Context) error {
+	var body dto.PatchImageReqBody
+	if err := c.Bind(&body); err != nil {
+		return response.BadRequest(c, err)
+	}
+
+	if err := c.Validate(body); err != nil {
+		return response.BadRequest(c, err)
+	}
+
+	imageIDStr := c.Param("image_id")
+	imageID, err := uuid.Parse(imageIDStr)
+	if err != nil {
+		return response.BadRequest(c, err)
+	}
+
+	exists, err := h.imageRepository.ExistsByID(c, imageID)
+	if err != nil {
+		return response.InternalServerError(c, err)
+	}
+	if !exists {
+		return response.NotFound(c, nil)
+	}
+
+	if err := h.imageRepository.Update(c, imageID, body.Type); err != nil {
+		return response.InternalServerError(c, err)
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
 }

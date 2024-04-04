@@ -17,6 +17,7 @@ import (
 type ImageService interface {
 	Post(c echo.Context, b resourceDto.PostImageReqBody, token string) (respBody *resourceDto.PostImageResp, status int, err error)
 	BulkGet(c echo.Context, q resourceDto.GetImagesQuery, token string) (respBody *resourceDto.GetImagesResp, status int, err error)
+	Patch(c echo.Context, b resourceDto.PatchImageReqBody, imageID, token string) (status int, err error)
 }
 
 type imageService struct{}
@@ -104,4 +105,36 @@ func (s *imageService) BulkGet(c echo.Context, q resourceDto.GetImagesQuery, tok
 	}
 
 	return respBody, resp.StatusCode, nil
+}
+
+func (s *imageService) Patch(c echo.Context, b resourceDto.PatchImageReqBody, imageID, token string) (status int, err error) {
+	baseURL := os.Getenv("BASE_URL")
+
+	url := fmt.Sprintf("%s%s/%s", baseURL, config.RESOURCE_IMAGES_ENDPOINT, imageID)
+
+	body, err := json.Marshal(b)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	req, err := http.NewRequest("PATCH", url, strings.NewReader(string(body)))
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return http.StatusServiceUnavailable, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		return resp.StatusCode, errors.New("failed to update image")
+	}
+
+	return resp.StatusCode, nil
 }
