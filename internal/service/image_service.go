@@ -11,13 +11,13 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	resourceDto "github.com/ucho456job/lgtmeme/internal/resource/dto"
+	"github.com/ucho456job/lgtmeme/internal/dto"
 )
 
 type ImageService interface {
-	Post(c echo.Context, b resourceDto.PostImageReqBody, token string) (respBody *resourceDto.PostImageResp, status int, err error)
-	BulkGet(c echo.Context, q resourceDto.GetImagesQuery, token string) (respBody *resourceDto.GetImagesResp, status int, err error)
-	Patch(c echo.Context, b resourceDto.PatchImageReqBody, imageID, token string) (status int, err error)
+	Post(c echo.Context, b dto.PostImageReqBody, token string) (respBody *dto.PostImageResp, status int, err error)
+	BulkGet(c echo.Context, q dto.GetImagesQuery, token string) (respBody *dto.GetImagesResp, status int, err error)
+	Patch(c echo.Context, b dto.PatchImageReqBody, imageID, token string) (status int, err error)
 }
 
 type imageService struct{}
@@ -26,7 +26,7 @@ func NewImageService() ImageService {
 	return &imageService{}
 }
 
-func (s *imageService) Post(c echo.Context, b resourceDto.PostImageReqBody, token string) (respBody *resourceDto.PostImageResp, status int, err error) {
+func (s *imageService) Post(c echo.Context, b dto.PostImageReqBody, token string) (respBody *dto.PostImageResp, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 
 	url := fmt.Sprintf("%s%s", baseURL, config.RESOURCE_IMAGES_ENDPOINT)
@@ -55,7 +55,7 @@ func (s *imageService) Post(c echo.Context, b resourceDto.PostImageReqBody, toke
 		return nil, resp.StatusCode, errors.New("failed to create image")
 	}
 
-	respBody = new(resourceDto.PostImageResp)
+	respBody = new(dto.PostImageResp)
 	if err := json.NewDecoder(resp.Body).Decode(respBody); err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
@@ -63,7 +63,7 @@ func (s *imageService) Post(c echo.Context, b resourceDto.PostImageReqBody, toke
 	return respBody, resp.StatusCode, nil
 }
 
-func (s *imageService) BulkGet(c echo.Context, q resourceDto.GetImagesQuery, token string) (respBody *resourceDto.GetImagesResp, status int, err error) {
+func (s *imageService) BulkGet(c echo.Context, q dto.GetImagesQuery, token string) (respBody *dto.GetImagesResp, status int, err error) {
 	var reqDataParts []string
 	reqDataParts = append(reqDataParts, fmt.Sprintf("page=%d", q.Page))
 	reqDataParts = append(reqDataParts, fmt.Sprintf("keyword=%s", q.Keyword))
@@ -107,7 +107,7 @@ func (s *imageService) BulkGet(c echo.Context, q resourceDto.GetImagesQuery, tok
 	return respBody, resp.StatusCode, nil
 }
 
-func (s *imageService) Patch(c echo.Context, b resourceDto.PatchImageReqBody, imageID, token string) (status int, err error) {
+func (s *imageService) Patch(c echo.Context, b dto.PatchImageReqBody, imageID, token string) (status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 
 	url := fmt.Sprintf("%s%s/%s", baseURL, config.RESOURCE_IMAGES_ENDPOINT, imageID)

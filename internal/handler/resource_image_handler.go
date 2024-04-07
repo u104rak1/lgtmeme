@@ -5,38 +5,38 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/ucho456job/lgtmeme/internal/resource/dto"
-	"github.com/ucho456job/lgtmeme/internal/resource/repository"
-	"github.com/ucho456job/lgtmeme/internal/resource/service"
+	"github.com/ucho456job/lgtmeme/internal/dto"
+	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/internal/service"
 	"github.com/ucho456job/lgtmeme/internal/util/response"
 	"github.com/ucho456job/lgtmeme/internal/util/uuidgen"
 )
 
-type ImageHandler interface {
+type ResourceImageHandler interface {
 	Post(c echo.Context) error
 	BulkGet(c echo.Context) error
 	Patch(c echo.Context) error
 }
 
-type imageHandler struct {
+type resourceImageHandler struct {
 	imageRepository repository.ImageRepository
 	storageService  service.StorageService
 	uuidGenerator   uuidgen.UUIDGenerator
 }
 
-func NewImageHandler(
+func NewResourceImageHandler(
 	imageRepository repository.ImageRepository,
 	storageService service.StorageService,
 	uuidGenerator uuidgen.UUIDGenerator,
-) ImageHandler {
-	return &imageHandler{
+) ResourceImageHandler {
+	return &resourceImageHandler{
 		imageRepository: imageRepository,
 		storageService:  storageService,
 		uuidGenerator:   uuidGenerator,
 	}
 }
 
-func (h *imageHandler) Post(c echo.Context) error {
+func (h *resourceImageHandler) Post(c echo.Context) error {
 	var body dto.PostImageReqBody
 	if err := c.Bind(&body); err != nil {
 		return response.BadRequest(c, err)
@@ -65,7 +65,7 @@ func (h *imageHandler) Post(c echo.Context) error {
 	})
 }
 
-func (h *imageHandler) BulkGet(c echo.Context) error {
+func (h *resourceImageHandler) BulkGet(c echo.Context) error {
 	q := new(dto.GetImagesQuery)
 	if err := c.Bind(q); err != nil {
 		return response.BadRequest(c, err)
@@ -95,7 +95,7 @@ func (h *imageHandler) BulkGet(c echo.Context) error {
 	})
 }
 
-func (h *imageHandler) Patch(c echo.Context) error {
+func (h *resourceImageHandler) Patch(c echo.Context) error {
 	var body dto.PatchImageReqBody
 	if err := c.Bind(&body); err != nil {
 		return response.BadRequest(c, err)

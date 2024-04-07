@@ -5,40 +5,40 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
+	"github.com/ucho456job/lgtmeme/internal/dto"
 	"github.com/ucho456job/lgtmeme/internal/repository"
-	resourceDto "github.com/ucho456job/lgtmeme/internal/resource/dto"
 	"github.com/ucho456job/lgtmeme/internal/service"
 	"github.com/ucho456job/lgtmeme/internal/util/response"
 )
 
-type ImageHandler interface {
+type ClientImageHandler interface {
 	GetCreateImageView(c echo.Context) error
 	Post(c echo.Context) error
 	BulkGet(c echo.Context) error
 	Patch(c echo.Context) error
 }
 
-type imageHandler struct {
+type clientImageHandler struct {
 	sessionManagerRepository repository.SessionManager
 	imageService             service.ImageService
 }
 
-func NewImageHandler(
+func NewClientImageHandler(
 	sessionManagerRepository repository.SessionManager,
 	imageService service.ImageService,
-) *imageHandler {
-	return &imageHandler{
+) *clientImageHandler {
+	return &clientImageHandler{
 		sessionManagerRepository: sessionManagerRepository,
 		imageService:             imageService,
 	}
 }
 
-func (h *imageHandler) GetCreateImageView(c echo.Context) error {
+func (h *clientImageHandler) GetCreateImageView(c echo.Context) error {
 	return c.File(config.CREATE_IMAGE_VIEW_FILEPATH)
 }
 
-func (h *imageHandler) Post(c echo.Context) error {
-	var body resourceDto.PostImageReqBody
+func (h *clientImageHandler) Post(c echo.Context) error {
+	var body dto.PostImageReqBody
 	if err := c.Bind(&body); err != nil {
 		return response.BadRequest(c, err)
 	}
@@ -60,8 +60,8 @@ func (h *imageHandler) Post(c echo.Context) error {
 	return c.JSON(http.StatusCreated, respBody)
 }
 
-func (h *imageHandler) BulkGet(c echo.Context) error {
-	q := new(resourceDto.GetImagesQuery)
+func (h *clientImageHandler) BulkGet(c echo.Context) error {
+	q := new(dto.GetImagesQuery)
 	if err := c.Bind(q); err != nil {
 		return response.BadRequest(c, err)
 	}
@@ -83,8 +83,8 @@ func (h *imageHandler) BulkGet(c echo.Context) error {
 	return c.JSON(http.StatusOK, respBody)
 }
 
-func (h *imageHandler) Patch(c echo.Context) error {
-	var body resourceDto.PatchImageReqBody
+func (h *clientImageHandler) Patch(c echo.Context) error {
+	var body dto.PatchImageReqBody
 	if err := c.Bind(&body); err != nil {
 		return response.BadRequest(c, err)
 	}

@@ -13,11 +13,8 @@ import (
 	authRepository "github.com/ucho456job/lgtmeme/internal/auth/repository"
 	authService "github.com/ucho456job/lgtmeme/internal/auth/service"
 	"github.com/ucho456job/lgtmeme/internal/handler"
+	"github.com/ucho456job/lgtmeme/internal/middleware"
 	"github.com/ucho456job/lgtmeme/internal/repository"
-	resourceHandler "github.com/ucho456job/lgtmeme/internal/resource/handler"
-	"github.com/ucho456job/lgtmeme/internal/resource/middleware"
-	resourceRepository "github.com/ucho456job/lgtmeme/internal/resource/repository"
-	resourceService "github.com/ucho456job/lgtmeme/internal/resource/service"
 	"github.com/ucho456job/lgtmeme/internal/service"
 	"github.com/ucho456job/lgtmeme/internal/util/clock"
 	"github.com/ucho456job/lgtmeme/internal/util/uuidgen"
@@ -93,7 +90,7 @@ func newClientServer(e *echo.Echo) {
 	authHandler := handler.NewAuthzHandler(sessManaRepo, adminAccessTokenServ)
 	viewHandler := handler.NewViewHandler()
 	homeHandler := handler.NewHomeHandler(sessManaRepo, generalAccessTokenServ)
-	imgHandler := handler.NewImageHandler(sessManaRepo, imgServ)
+	imgHandler := handler.NewClientImageHandler(sessManaRepo, imgServ)
 
 	e.GET(config.AUTH_VIEW_ENDPOINT, authHandler.GetView)
 	e.GET(config.CLIENT_AUTH_ENDPOINT, authHandler.RedirectAuthz)
@@ -110,11 +107,11 @@ func newClientServer(e *echo.Echo) {
 }
 
 func newResourceServer(e *echo.Echo) {
-	imgRepo := resourceRepository.NewImageRepository(config.DB, &clock.RealClocker{})
+	imgRepo := repository.NewImageRepository(config.DB, &clock.RealClocker{})
 
-	storageServ := resourceService.NewStorageService()
+	storageServ := service.NewStorageService()
 
-	imgHandler := resourceHandler.NewImageHandler(imgRepo, storageServ, &uuidgen.RealUUIDGenerator{})
+	imgHandler := handler.NewResourceImageHandler(imgRepo, storageServ, &uuidgen.RealUUIDGenerator{})
 
 	e.POST(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.Post, middleware.VerifyAccessToken(config.IMAGES_CREATE_SCOPE))
 	e.GET(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.BulkGet, middleware.VerifyAccessToken(config.IMAGES_READ_SCOPE))
