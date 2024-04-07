@@ -10,8 +10,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/client/repository"
-	"github.com/ucho456job/lgtmeme/internal/client/service"
+	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/internal/service"
 )
 
 type AuthzHandler interface {
@@ -22,16 +22,16 @@ type AuthzHandler interface {
 
 type authzHandler struct {
 	sessionManagerRepository repository.SessionManager
-	ownerAccessTokenService  service.OwnerAccessTokenService
+	adminAccessTokenService  service.AdminAccessTokenService
 }
 
 func NewAuthzHandler(
 	sessionManagerRepository repository.SessionManager,
-	ownerAccessTokenService service.OwnerAccessTokenService,
+	adminAccessTokenService service.AdminAccessTokenService,
 ) *authzHandler {
 	return &authzHandler{
 		sessionManagerRepository: sessionManagerRepository,
-		ownerAccessTokenService:  ownerAccessTokenService,
+		adminAccessTokenService:  adminAccessTokenService,
 	}
 }
 
@@ -53,7 +53,7 @@ func (h *authzHandler) RedirectAuthz(c echo.Context) error {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 	if refreshToken != "" {
-		respBody, status, err := h.ownerAccessTokenService.CallTokenWithRefreshToken(c, &refreshToken)
+		respBody, status, err := h.adminAccessTokenService.CallTokenWithRefreshToken(c, &refreshToken)
 		if err != nil {
 			errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
 			return c.Redirect(http.StatusFound, errURL)
@@ -81,13 +81,13 @@ func (h *authzHandler) RedirectAuthz(c echo.Context) error {
 }
 
 func (h *authzHandler) Callback(c echo.Context) error {
-	tokenRespBody, status, err := h.ownerAccessTokenService.CallToken(c)
+	tokenRespBody, status, err := h.adminAccessTokenService.CallToken(c)
 	if err != nil {
 		errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
 		return c.Redirect(http.StatusFound, errURL)
 	}
 
-	keySet, status, err := h.ownerAccessTokenService.CallJWKS(c)
+	keySet, status, err := h.adminAccessTokenService.CallJWKS(c)
 	if err != nil {
 		errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
 		return c.Redirect(http.StatusFound, errURL)

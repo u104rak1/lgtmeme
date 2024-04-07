@@ -15,19 +15,19 @@ import (
 	authDto "github.com/ucho456job/lgtmeme/internal/auth/dto"
 )
 
-type OwnerAccessTokenService interface {
+type AdminAccessTokenService interface {
 	CallToken(c echo.Context) (respBody *authDto.AuthzCodeResp, status int, err error)
 	CallJWKS(c echo.Context) (keySet jwk.Set, status int, err error)
 	CallTokenWithRefreshToken(c echo.Context, refreshToken *string) (respBody *authDto.RefreshTokenResp, status int, err error)
 }
 
-type ownerAccessTokenService struct{}
+type adminAccessTokenService struct{}
 
-func NewOwnerAccessTokenService() OwnerAccessTokenService {
-	return &ownerAccessTokenService{}
+func NewAdminAccessTokenService() AdminAccessTokenService {
+	return &adminAccessTokenService{}
 }
 
-func (s *ownerAccessTokenService) CallToken(c echo.Context) (respBody *authDto.AuthzCodeResp, status int, err error) {
+func (s *adminAccessTokenService) CallToken(c echo.Context) (respBody *authDto.AuthzCodeResp, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.TOKEN_ENDPOINT
 	clientID := os.Getenv("OWNER_CLIENT_ID")
@@ -68,7 +68,7 @@ func (s *ownerAccessTokenService) CallToken(c echo.Context) (respBody *authDto.A
 	return respBody, resp.StatusCode, nil
 }
 
-func (s *ownerAccessTokenService) CallJWKS(c echo.Context) (keySet jwk.Set, status int, err error) {
+func (s *adminAccessTokenService) CallJWKS(c echo.Context) (keySet jwk.Set, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.JWKS_ENDPOINT
 
@@ -103,7 +103,7 @@ func (s *ownerAccessTokenService) CallJWKS(c echo.Context) (keySet jwk.Set, stat
 	return keySet, resp.StatusCode, nil
 }
 
-func (s *ownerAccessTokenService) CallTokenWithRefreshToken(c echo.Context, refreshToken *string) (respBody *authDto.RefreshTokenResp, status int, err error) {
+func (s *adminAccessTokenService) CallTokenWithRefreshToken(c echo.Context, refreshToken *string) (respBody *authDto.RefreshTokenResp, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.TOKEN_ENDPOINT
 	clientID := os.Getenv("OWNER_CLIENT_ID")

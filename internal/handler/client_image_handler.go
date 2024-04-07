@@ -5,9 +5,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/client/repository"
-	"github.com/ucho456job/lgtmeme/internal/client/service"
+	"github.com/ucho456job/lgtmeme/internal/repository"
 	resourceDto "github.com/ucho456job/lgtmeme/internal/resource/dto"
+	"github.com/ucho456job/lgtmeme/internal/service"
 	"github.com/ucho456job/lgtmeme/internal/util/response"
 )
 

@@ -12,13 +12,13 @@ import (
 	authHander "github.com/ucho456job/lgtmeme/internal/auth/handler"
 	authRepository "github.com/ucho456job/lgtmeme/internal/auth/repository"
 	authService "github.com/ucho456job/lgtmeme/internal/auth/service"
-	clientHandler "github.com/ucho456job/lgtmeme/internal/client/handler"
-	clientRepository "github.com/ucho456job/lgtmeme/internal/client/repository"
-	clientService "github.com/ucho456job/lgtmeme/internal/client/service"
+	"github.com/ucho456job/lgtmeme/internal/handler"
+	"github.com/ucho456job/lgtmeme/internal/repository"
 	resourceHandler "github.com/ucho456job/lgtmeme/internal/resource/handler"
 	"github.com/ucho456job/lgtmeme/internal/resource/middleware"
 	resourceRepository "github.com/ucho456job/lgtmeme/internal/resource/repository"
 	resourceService "github.com/ucho456job/lgtmeme/internal/resource/service"
+	"github.com/ucho456job/lgtmeme/internal/service"
 	"github.com/ucho456job/lgtmeme/internal/util/clock"
 	"github.com/ucho456job/lgtmeme/internal/util/uuidgen"
 )
@@ -84,22 +84,22 @@ func newAuthServer(e *echo.Echo) {
 }
 
 func newClientServer(e *echo.Echo) {
-	sessManaRepo := clientRepository.NewSessionManager(config.Store, config.Pool)
+	sessManaRepo := repository.NewSessionManager(config.Store, config.Pool)
 
-	generalAccessTokenServ := clientService.NewGeneralAccessTokenService()
-	imgServ := clientService.NewImageService()
-	ownerAccessTokenServ := clientService.NewOwnerAccessTokenService()
+	generalAccessTokenServ := service.NewGeneralAccessTokenService()
+	imgServ := service.NewImageService()
+	adminAccessTokenServ := service.NewAdminAccessTokenService()
 
-	authHandler := clientHandler.NewAuthzHandler(sessManaRepo, ownerAccessTokenServ)
-	errHandler := clientHandler.NewErrHandler()
-	homeHandler := clientHandler.NewHomeHandler(sessManaRepo, generalAccessTokenServ)
-	imgHandler := clientHandler.NewImageHandler(sessManaRepo, imgServ)
+	authHandler := handler.NewAuthzHandler(sessManaRepo, adminAccessTokenServ)
+	viewHandler := handler.NewViewHandler()
+	homeHandler := handler.NewHomeHandler(sessManaRepo, generalAccessTokenServ)
+	imgHandler := handler.NewImageHandler(sessManaRepo, imgServ)
 
 	e.GET(config.AUTH_VIEW_ENDPOINT, authHandler.GetView)
 	e.GET(config.CLIENT_AUTH_ENDPOINT, authHandler.RedirectAuthz)
 	e.GET(config.CLIENT_AUTH_CALLBACK_ENDPOINT, authHandler.Callback)
 
-	e.GET(config.ERROR_VIEW_ENDPOINT, errHandler.GetView)
+	e.GET(config.ERROR_VIEW_ENDPOINT, viewHandler.GetErrView)
 
 	e.GET(config.HOME_VIEW_ENDPOINT, homeHandler.GetView)
 
