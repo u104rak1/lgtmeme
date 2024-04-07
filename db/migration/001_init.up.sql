@@ -8,24 +8,24 @@ CREATE TABLE IF NOT EXISTS health_checks (
 
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(20) UNIQUE,
+    name VARCHAR(20) UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role VARCHAR(20)
+    role VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS oauth_clients (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(30) NOT NULL,
-    client_id UUID UNIQUE,
-    client_secret VARCHAR(255) UNIQUE,
-    redirect_uri TEXT,
+    client_id UUID UNIQUE NOT NULL,
+    client_secret VARCHAR(255) UNIQUE NOT NULL,
+    redirect_uri TEXT NOT NULL,
     application_url TEXT NOT NULL,
     client_type VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS master_scopes (
     code VARCHAR(20) PRIMARY KEY,
-    description TEXT
+    description TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS oauth_clients_scopes (
