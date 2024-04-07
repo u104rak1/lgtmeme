@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/ucho456job/lgtmeme/internal/auth/dto"
-	"github.com/ucho456job/lgtmeme/internal/auth/model"
+	"github.com/ucho456job/lgtmeme/internal/dto"
+	"github.com/ucho456job/lgtmeme/internal/model"
 	"gorm.io/gorm"
 )
 

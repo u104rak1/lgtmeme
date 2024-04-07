@@ -14,32 +14,32 @@ import (
 	"github.com/ucho456job/lgtmeme/internal/service"
 )
 
-type AuthzHandler interface {
+type AdminHandler interface {
 	GetView(c echo.Context) error
 	RedirectAuthz(c echo.Context) error
 	Callback(c echo.Context) error
 }
 
-type authzHandler struct {
+type adminHandler struct {
 	sessionManagerRepository repository.SessionManager
 	adminAccessTokenService  service.AdminAccessTokenService
 }
 
-func NewAuthzHandler(
+func NewAdminHandler(
 	sessionManagerRepository repository.SessionManager,
 	adminAccessTokenService service.AdminAccessTokenService,
-) *authzHandler {
-	return &authzHandler{
+) *adminHandler {
+	return &adminHandler{
 		sessionManagerRepository: sessionManagerRepository,
 		adminAccessTokenService:  adminAccessTokenService,
 	}
 }
 
-func (h *authzHandler) GetView(c echo.Context) error {
+func (h *adminHandler) GetView(c echo.Context) error {
 	return c.File(config.AUTH_VIEW_FILEPATH)
 }
 
-func (h *authzHandler) RedirectAuthz(c echo.Context) error {
+func (h *adminHandler) RedirectAuthz(c echo.Context) error {
 	accessToken, err := h.sessionManagerRepository.LoadToken(c, config.OWNER_ACCESS_TOKEN_SESSION_NAME)
 	if err != nil {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
@@ -80,7 +80,7 @@ func (h *authzHandler) RedirectAuthz(c echo.Context) error {
 	return c.Redirect(http.StatusFound, q)
 }
 
-func (h *authzHandler) Callback(c echo.Context) error {
+func (h *adminHandler) Callback(c echo.Context) error {
 	tokenRespBody, status, err := h.adminAccessTokenService.CallToken(c)
 	if err != nil {
 		errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
@@ -124,7 +124,7 @@ func (h *authzHandler) Callback(c echo.Context) error {
 	return h.commonSuccessProcess(c, tokenRespBody.AccessToken, tokenRespBody.RefreshToken)
 }
 
-func (h *authzHandler) commonSuccessProcess(c echo.Context, accessToken, refreshToken string) error {
+func (h *adminHandler) commonSuccessProcess(c echo.Context, accessToken, refreshToken string) error {
 	if err := h.sessionManagerRepository.CacheToken(c, accessToken, config.OWNER_ACCESS_TOKEN_SESSION_NAME); err != nil {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}

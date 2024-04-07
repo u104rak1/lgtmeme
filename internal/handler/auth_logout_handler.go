@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/ucho456job/lgtmeme/internal/auth/dto"
-	"github.com/ucho456job/lgtmeme/internal/auth/repository"
+	"github.com/ucho456job/lgtmeme/internal/dto"
+	"github.com/ucho456job/lgtmeme/internal/repository"
 	"github.com/ucho456job/lgtmeme/internal/util/response"
 )
 

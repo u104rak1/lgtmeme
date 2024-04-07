@@ -9,9 +9,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	authHander "github.com/ucho456job/lgtmeme/internal/auth/handler"
-	authRepository "github.com/ucho456job/lgtmeme/internal/auth/repository"
-	authService "github.com/ucho456job/lgtmeme/internal/auth/service"
 	"github.com/ucho456job/lgtmeme/internal/handler"
 	"github.com/ucho456job/lgtmeme/internal/middleware"
 	"github.com/ucho456job/lgtmeme/internal/repository"
@@ -56,20 +53,20 @@ func main() {
 }
 
 func newAuthServer(e *echo.Echo) {
-	healthRepo := authRepository.NewHealthRepository(config.DB)
-	oauthClientRepo := authRepository.NewOauthClientRepository(config.DB)
-	refreshTokenRepo := authRepository.NewRefreshTokenRepository(config.DB)
-	authSessManaRepo := authRepository.NewSessionManager(config.Store, config.Pool)
-	userRepo := authRepository.NewUserRepository(config.DB)
+	healthRepo := repository.NewHealthRepository(config.DB)
+	oauthClientRepo := repository.NewOauthClientRepository(config.DB)
+	refreshTokenRepo := repository.NewRefreshTokenRepository(config.DB)
+	authSessManaRepo := repository.NewSessionManager(config.Store, config.Pool)
+	userRepo := repository.NewUserRepository(config.DB)
 
-	jwtServ := authService.NewJWTService()
+	jwtServ := service.NewJWTService()
 
-	authzHandler := authHander.NewAuthzHandler(oauthClientRepo, userRepo, authSessManaRepo)
-	healthHandler := authHander.NewHealthHandler(healthRepo, authSessManaRepo)
-	jwksHandler := authHander.NewJwksHandler(jwtServ)
-	loginHandler := authHander.NewLoginHandler(userRepo, authSessManaRepo)
-	logoutHandler := authHander.NewLogoutHandler(authSessManaRepo)
-	tokenHandler := authHander.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, authSessManaRepo, jwtServ)
+	authzHandler := handler.NewAuthzHandler(oauthClientRepo, userRepo, authSessManaRepo)
+	healthHandler := handler.NewHealthHandler(healthRepo, authSessManaRepo)
+	jwksHandler := handler.NewJwksHandler(jwtServ)
+	loginHandler := handler.NewLoginHandler(userRepo, authSessManaRepo)
+	logoutHandler := handler.NewLogoutHandler(authSessManaRepo)
+	tokenHandler := handler.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, authSessManaRepo, jwtServ)
 
 	e.GET(config.AUTHZ_ENDPOINT, authzHandler.Authorize)
 	e.HEAD(config.HEALTH_ENDPOINT, healthHandler.Check)
@@ -87,14 +84,14 @@ func newClientServer(e *echo.Echo) {
 	imgServ := service.NewImageService()
 	adminAccessTokenServ := service.NewAdminAccessTokenService()
 
-	authHandler := handler.NewAuthzHandler(sessManaRepo, adminAccessTokenServ)
+	adminHandler := handler.NewAdminHandler(sessManaRepo, adminAccessTokenServ)
 	viewHandler := handler.NewViewHandler()
 	homeHandler := handler.NewHomeHandler(sessManaRepo, generalAccessTokenServ)
 	imgHandler := handler.NewClientImageHandler(sessManaRepo, imgServ)
 
-	e.GET(config.AUTH_VIEW_ENDPOINT, authHandler.GetView)
-	e.GET(config.CLIENT_AUTH_ENDPOINT, authHandler.RedirectAuthz)
-	e.GET(config.CLIENT_AUTH_CALLBACK_ENDPOINT, authHandler.Callback)
+	e.GET(config.AUTH_VIEW_ENDPOINT, adminHandler.GetView)
+	e.GET(config.CLIENT_AUTH_ENDPOINT, adminHandler.RedirectAuthz)
+	e.GET(config.CLIENT_AUTH_CALLBACK_ENDPOINT, adminHandler.Callback)
 
 	e.GET(config.ERROR_VIEW_ENDPOINT, viewHandler.GetErrView)
 

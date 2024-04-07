@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/ucho456job/lgtmeme/config"
-	"github.com/ucho456job/lgtmeme/internal/auth/model"
+	"github.com/ucho456job/lgtmeme/internal/model"
 )
 
 type JWTService interface {

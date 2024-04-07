@@ -11,11 +11,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	authDto "github.com/ucho456job/lgtmeme/internal/auth/dto"
+	"github.com/ucho456job/lgtmeme/internal/dto"
 )
 
 type GeneralAccessTokenService interface {
-	CallToken(c echo.Context) (respBody *authDto.ClientCredentialsResponse, status int, err error)
+	CallToken(c echo.Context) (respBody *dto.ClientCredentialsResponse, status int, err error)
 }
 
 type generalAccessTokenService struct{}
@@ -24,7 +24,7 @@ func NewGeneralAccessTokenService() GeneralAccessTokenService {
 	return &generalAccessTokenService{}
 }
 
-func (s *generalAccessTokenService) CallToken(c echo.Context) (respBody *authDto.ClientCredentialsResponse, status int, err error) {
+func (s *generalAccessTokenService) CallToken(c echo.Context) (respBody *dto.ClientCredentialsResponse, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 	clientID := os.Getenv("GENERAL_CLIENT_ID")
 	clientSecret := os.Getenv("GENERAL_CLIENT_SECRET")

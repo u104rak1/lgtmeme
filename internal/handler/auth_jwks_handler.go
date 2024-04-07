@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/ucho456job/lgtmeme/internal/auth/service"
+	"github.com/ucho456job/lgtmeme/internal/service"
 )
 
 type JwksHandler interface {
