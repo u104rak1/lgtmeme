@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/labstack/echo/v4"
 	"golang.org/x/exp/slog"
 )
 
@@ -23,11 +22,4 @@ func NewLogger() {
 	}
 
 	Logger = slog.New(handler)
-}
-
-func LoggerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		Logger.Info("Received request", "method", c.Request().Method, "uri", c.Request().RequestURI)
-		return next(c)
-	}
 }

@@ -36,16 +36,16 @@ func NewAdminHandler(
 }
 
 func (h *adminHandler) GetView(c echo.Context) error {
-	return c.File(config.AUTH_VIEW_FILEPATH)
+	return c.File(config.ADMIN_VIEW_FILEPATH)
 }
 
 func (h *adminHandler) RedirectAuthz(c echo.Context) error {
-	accessToken, err := h.sessionManagerRepository.LoadToken(c, config.OWNER_ACCESS_TOKEN_SESSION_NAME)
+	accessToken, err := h.sessionManagerRepository.LoadToken(c, config.ADMIN_ACCESS_TOKEN_SESSION_NAME)
 	if err != nil {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 	if accessToken != "" {
-		return c.Redirect(http.StatusFound, config.AUTH_VIEW_ENDPOINT)
+		return c.Redirect(http.StatusFound, config.ADMIN_VIEW_ENDPOINT)
 	}
 
 	refreshToken, err := h.sessionManagerRepository.LoadToken(c, config.REFRESH_TOKEN_SESSION_NAME)
@@ -64,9 +64,9 @@ func (h *adminHandler) RedirectAuthz(c echo.Context) error {
 
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.AUTHZ_ENDPOINT
-	clientID := os.Getenv("OWNER_CLIENT_ID")
-	redirectURI := os.Getenv("OWNER_REDIRECT_URI")
-	scope := os.Getenv("OWNER_SCOPE")
+	clientID := os.Getenv("ADMIN_CLIENT_ID")
+	redirectURI := os.Getenv("ADMIN_REDIRECT_URI")
+	scope := os.Getenv("ADMIN_SCOPE")
 	state := uuid.New().String()
 	nonce := uuid.New().String()
 
@@ -125,7 +125,7 @@ func (h *adminHandler) Callback(c echo.Context) error {
 }
 
 func (h *adminHandler) commonSuccessProcess(c echo.Context, accessToken, refreshToken string) error {
-	if err := h.sessionManagerRepository.CacheToken(c, accessToken, config.OWNER_ACCESS_TOKEN_SESSION_NAME); err != nil {
+	if err := h.sessionManagerRepository.CacheToken(c, accessToken, config.ADMIN_ACCESS_TOKEN_SESSION_NAME); err != nil {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 
@@ -133,5 +133,5 @@ func (h *adminHandler) commonSuccessProcess(c echo.Context, accessToken, refresh
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 
-	return c.Redirect(http.StatusFound, config.AUTH_VIEW_ENDPOINT)
+	return c.Redirect(http.StatusFound, config.ADMIN_VIEW_ENDPOINT)
 }

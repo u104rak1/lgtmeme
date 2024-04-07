@@ -26,7 +26,7 @@ func main() {
 
 	e := echo.New()
 	e.Validator = validator
-	e.Use(config.SessionMiddleware(), config.LoggerMiddleware)
+	e.Use(middleware.SessionMiddleware(), middleware.LoggerMiddleware)
 	e.Static(config.STATIC_ENDPOINT, config.STATIC_FILEPATH)
 
 	newAuthServer(e)
@@ -89,9 +89,9 @@ func newClientServer(e *echo.Echo) {
 	homeHandler := handler.NewHomeHandler(sessManaRepo, generalAccessTokenServ)
 	imgHandler := handler.NewClientImageHandler(sessManaRepo, imgServ)
 
-	e.GET(config.AUTH_VIEW_ENDPOINT, adminHandler.GetView)
-	e.GET(config.CLIENT_AUTH_ENDPOINT, adminHandler.RedirectAuthz)
-	e.GET(config.CLIENT_AUTH_CALLBACK_ENDPOINT, adminHandler.Callback)
+	e.GET(config.ADMIN_VIEW_ENDPOINT, adminHandler.GetView)
+	e.GET(config.CLIENT_ADMIN_ENDPOINT, adminHandler.RedirectAuthz)
+	e.GET(config.CLIENT_ADMIN_CALLBACK_ENDPOINT, adminHandler.Callback)
 
 	e.GET(config.ERROR_VIEW_ENDPOINT, viewHandler.GetErrView)
 

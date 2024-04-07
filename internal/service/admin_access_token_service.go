@@ -30,9 +30,9 @@ func NewAdminAccessTokenService() AdminAccessTokenService {
 func (s *adminAccessTokenService) CallToken(c echo.Context) (respBody *dto.AuthzCodeResp, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.TOKEN_ENDPOINT
-	clientID := os.Getenv("OWNER_CLIENT_ID")
-	clientSecret := os.Getenv("OWNER_CLIENT_SECRET")
-	redirectURI := os.Getenv("OWNER_REDIRECT_URI")
+	clientID := os.Getenv("ADMIN_CLIENT_ID")
+	clientSecret := os.Getenv("ADMIN_CLIENT_SECRET")
+	redirectURI := os.Getenv("ADMIN_REDIRECT_URI")
 	code := c.QueryParam("code")
 
 	reqData := fmt.Sprintf("grant_type=authorization_code&client_id=%s&client_secret=%s&redirect_uri=%s&code=%s",
@@ -106,8 +106,8 @@ func (s *adminAccessTokenService) CallJWKS(c echo.Context) (keySet jwk.Set, stat
 func (s *adminAccessTokenService) CallTokenWithRefreshToken(c echo.Context, refreshToken *string) (respBody *dto.RefreshTokenResp, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.TOKEN_ENDPOINT
-	clientID := os.Getenv("OWNER_CLIENT_ID")
-	clientSecret := os.Getenv("OWNER_CLIENT_SECRET")
+	clientID := os.Getenv("ADMIN_CLIENT_ID")
+	clientSecret := os.Getenv("ADMIN_CLIENT_SECRET")
 
 	reqData := fmt.Sprintf("grant_type=refresh_token&client_id=%s&client_secret=%s&refresh_token=%s",
 		clientID, clientSecret, *refreshToken)

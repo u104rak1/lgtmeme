@@ -37,7 +37,7 @@ func VerifyAccessToken(requiredScope string) echo.MiddlewareFunc {
 
 			accessToken = strings.TrimPrefix(accessToken, "Bearer ")
 
-			keySet, err := callJWKS(c)
+			keySet, err := callJWKS()
 			if err != nil {
 				return response.InternalServerError(c, err)
 			}
@@ -56,7 +56,7 @@ func VerifyAccessToken(requiredScope string) echo.MiddlewareFunc {
 	}
 }
 
-func callJWKS(c echo.Context) (keySet jwk.Set, err error) {
+func callJWKS() (keySet jwk.Set, err error) {
 	cache.mux.Lock()
 	defer cache.mux.Unlock()
 

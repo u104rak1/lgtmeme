@@ -24,7 +24,7 @@ echo -e "\n"
 echo "Perform authorization processing..."
 RESPONSE_TYPE="code"
 CLIENT_ID="a74983c2-c578-41fd-993b-9e4716d244ac"
-REDIRECT_URI="http://localhost:8080/client-api/auth/callback"
+REDIRECT_URI="http://localhost:8080/client-api/admin/callback"
 SCOPE="images.read%20images.create%20images.update%20images.delete"
 STATE="xyz"
 NONCE="abc123"
@@ -37,7 +37,7 @@ rm -f $COOKIE_FILE
 
 echo "Obtain Access Token using authorization_code grant..."
 AUTH_CODE=$(echo "$AUTH_RESPONSE" | grep -oE 'code=[A-Za-z0-9\-]+' | cut -d'=' -f2 | cut -d'&' -f1)
-CLIENT_SECRET="owner_client_secret"
+CLIENT_SECRET="admin_client_secret"
 AUTHZ_RESPONSE=$(curl -X POST http://localhost:8080/auth-api/token \
  -H "Content-Type: application/x-www-form-urlencoded" \
  -d "grant_type=authorization_code" \

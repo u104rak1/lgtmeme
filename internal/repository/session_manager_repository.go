@@ -216,7 +216,7 @@ func (m *sessionManager) Logout(c echo.Context) error {
 	if err := m.clearSession(c, config.LOGIN_SESSION_NAME); err != nil {
 		return err
 	}
-	if err := m.clearSession(c, config.OWNER_ACCESS_TOKEN_SESSION_NAME); err != nil {
+	if err := m.clearSession(c, config.ADMIN_ACCESS_TOKEN_SESSION_NAME); err != nil {
 		return err
 	}
 	return nil
