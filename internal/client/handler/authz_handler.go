@@ -121,14 +121,6 @@ func (h *authzHandler) Callback(c echo.Context) error {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 
-	if err := h.sessionManagerRepository.CacheToken(c, tokenRespBody.AccessToken, config.OWNER_ACCESS_TOKEN_SESSION_NAME); err != nil {
-		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
-	}
-
-	if err := h.sessionManagerRepository.CacheToken(c, tokenRespBody.RefreshToken, config.REFRESH_TOKEN_SESSION_NAME); err != nil {
-		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
-	}
-
 	return h.commonSuccessProcess(c, tokenRespBody.AccessToken, tokenRespBody.RefreshToken)
 }
 
