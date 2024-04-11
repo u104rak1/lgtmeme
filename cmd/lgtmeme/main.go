@@ -100,6 +100,7 @@ func newClientServer(e *echo.Echo) {
 	e.POST(config.CLIENT_IMAGES_ENDPOINT, imgHandler.Post)
 	e.GET(config.CLIENT_IMAGES_ENDPOINT, imgHandler.BulkGet)
 	e.PATCH(config.CLIENT_IMAGES_ENDPOINT+"/:image_id", imgHandler.Patch)
+	e.DELETE(config.CLIENT_IMAGES_ENDPOINT+"/:image_id", imgHandler.Delete)
 }
 
 func newResourceServer(e *echo.Echo) {
@@ -116,4 +117,5 @@ func newResourceServer(e *echo.Echo) {
 	e.POST(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.Post, verifyAccessTokenMiddle.Verify(config.IMAGES_CREATE_SCOPE))
 	e.GET(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.BulkGet, verifyAccessTokenMiddle.Verify(config.IMAGES_READ_SCOPE))
 	e.PATCH(config.RESOURCE_IMAGES_ENDPOINT+"/:image_id", imgHandler.Patch, verifyAccessTokenMiddle.Verify(config.IMAGES_UPDATE_SCOPE))
+	e.DELETE(config.RESOURCE_IMAGES_ENDPOINT+"/:image_id", imgHandler.Delete, verifyAccessTokenMiddle.Verify(config.IMAGES_DELETE_SCOPE))
 }
