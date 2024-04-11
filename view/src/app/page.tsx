@@ -33,9 +33,9 @@ const HomePage = () => {
   return (
     <div>
       <ImageGallery css={imageGalleryCss} initImages={images} />
-      <Link href={PAGE_ENDPOINTS.createImage}>
+      <Link href={PAGE_ENDPOINTS.new}>
         <Button css={buttonCss} icon={<Svg icon="plus" color="white" />}>
-          Create image
+          New Image
         </Button>
       </Link>
     </div>

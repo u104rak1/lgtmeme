@@ -97,7 +97,7 @@ func newClientServer(e *echo.Echo) {
 
 	e.GET(config.HOME_VIEW_ENDPOINT, homeHandler.GetView)
 
-	e.GET(config.CREATE_IMAGE_VIEW_ENDPOINT, imgHandler.GetCreateImageView)
+	e.GET(config.IMAGE_NEW_VIEW_ENDPOINT, imgHandler.GetCreateImageView)
 	e.POST(config.CLIENT_IMAGES_ENDPOINT, imgHandler.Post)
 	e.GET(config.CLIENT_IMAGES_ENDPOINT, imgHandler.BulkGet)
 	e.PATCH(config.CLIENT_IMAGES_ENDPOINT+"/:image_id", imgHandler.Patch)

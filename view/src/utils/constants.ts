@@ -9,7 +9,7 @@ export const CLIENT_ENDPOINTS = {
 
 export const PAGE_ENDPOINTS = {
   home: "/",
-  createImage: "/create-image",
+  new: "/new",
   privacyPolicy: "/privacy-policy",
   termsOfService: "/terms-of-service",
 } as const;

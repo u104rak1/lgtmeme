@@ -46,7 +46,7 @@ const SIZE_MAP: SizeMap = new Map([
   ],
 ]);
 
-const CreateImagePage = () => {
+const NewPage = () => {
   const [imageInfo, setImageInfo] = useState({ url: "", width: 0, height: 0 });
   const [textStyle, setTextStyle] = useState<TextStyle>({
     left: 66,
@@ -381,4 +381,4 @@ const checkBoxCss = css({
 });
 const loadingCss = css({ marginTop: "4", marginX: "auto" });
 
-export default CreateImagePage;
+export default NewPage;

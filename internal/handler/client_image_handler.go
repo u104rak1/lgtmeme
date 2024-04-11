@@ -34,7 +34,7 @@ func NewClientImageHandler(
 }
 
 func (h *clientImageHandler) GetCreateImageView(c echo.Context) error {
-	return c.File(config.CREATE_IMAGE_VIEW_FILEPATH)
+	return c.File(config.IMAGE_NEW_VIEW_FILEPATH)
 }
 
 func (h *clientImageHandler) Post(c echo.Context) error {
