@@ -21,9 +21,9 @@ const Footer = () => {
         </Link> */}
         <Button
           visual="text"
-          onClick={() => (window.location.href = CLIENT_ENDPOINTS.auth)}
+          onClick={() => (window.location.href = CLIENT_ENDPOINTS.admin)}
         >
-          Management
+          Admin
         </Button>
       </div>
       <div className={copyrightCss}>

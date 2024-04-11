@@ -22,25 +22,23 @@ const (
 // client server
 const (
 	// api endpoint
-	CLIENT_AUTH_ENDPOINT          = "/client-api/auth"
-	CLIENT_AUTH_CALLBACK_ENDPOINT = "/client-api/auth/callback"
-	CLIENT_IMAGES_ENDPOINT        = "/client-api/images"
+	CLIENT_ADMIN_ENDPOINT          = "/client-api/admin"
+	CLIENT_ADMIN_CALLBACK_ENDPOINT = "/client-api/admin/callback"
+	CLIENT_IMAGES_ENDPOINT         = "/client-api/images"
 
 	// view endpoint
-	STATIC_ENDPOINT            = "/"
-	ERROR_VIEW_ENDPOINT        = "/error"
-	HOME_VIEW_ENDPOINT         = "/"
-	CREATE_IMAGE_VIEW_ENDPOINT = "/create-image"
-	PASSKEY_VIEW_ENDPOINT      = "/passkey"
-	AUTH_VIEW_ENDPOINT         = "/auth"
+	STATIC_ENDPOINT         = "/"
+	ERROR_VIEW_ENDPOINT     = "/error"
+	HOME_VIEW_ENDPOINT      = "/"
+	IMAGE_NEW_VIEW_ENDPOINT = "/new"
+	ADMIN_VIEW_ENDPOINT     = "/admin"
 
 	// file path
-	STATIC_FILEPATH            = "view/out"
-	ERROR_VIEW_FILEPATH        = "view/out/error.html"
-	HOME_VIEW_FILEPATH         = "view/out/index.html"
-	CREATE_IMAGE_VIEW_FILEPATH = "view/out/create-image.html"
-	PASSKEY_VIEW_FILEPATH      = "view/out/passkey.html"
-	AUTH_VIEW_FILEPATH         = "view/out/auth.html"
+	STATIC_FILEPATH         = "view/out"
+	ERROR_VIEW_FILEPATH     = "view/out/error.html"
+	HOME_VIEW_FILEPATH      = "view/out/index.html"
+	IMAGE_NEW_VIEW_FILEPATH = "view/out/new.html"
+	ADMIN_VIEW_FILEPATH     = "view/out/admin.html"
 )
 
 // resoruce server
@@ -54,7 +52,7 @@ const (
 	LOGIN_SESSION_NAME                = "login_session"
 	PRE_AUTHN_SESSION_NAME            = "pre_authn_session"
 	GENERAL_ACCESS_TOKEN_SESSION_NAME = "general_access_token"
-	OWNER_ACCESS_TOKEN_SESSION_NAME   = "owner_access_token"
+	ADMIN_ACCESS_TOKEN_SESSION_NAME   = "admin_access_token"
 	STATE_AND_NONCE_SESSION_NAME      = "state_and_nonce"
 	REFRESH_TOKEN_SESSION_NAME        = "refresh_token"
 )

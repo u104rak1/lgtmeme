@@ -97,6 +97,7 @@ const modalCss = css({
   paddingTop: "15px",
 });
 const messageCss = css({
+  marginTop: "3",
   width: "250px",
   height: "80px",
 });

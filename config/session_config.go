@@ -9,8 +9,6 @@ import (
 	"github.com/boj/redistore"
 	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
-	"github.com/labstack/echo/v4"
 )
 
 var Store *redistore.RediStore
@@ -57,8 +55,4 @@ func NewSessionStore() {
 	}
 
 	Pool = Store.Pool
-}
-
-func SessionMiddleware() echo.MiddlewareFunc {
-	return session.Middleware(Store)
 }

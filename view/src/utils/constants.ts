@@ -3,13 +3,13 @@ export const AUTH_ENDPOINTS = {
 } as const;
 
 export const CLIENT_ENDPOINTS = {
-  auth: "/client-api/auth",
+  admin: "/client-api/admin",
   images: "/client-api/images",
 } as const;
 
 export const PAGE_ENDPOINTS = {
   home: "/",
-  createImage: "/create-image",
+  new: "/new",
   privacyPolicy: "/privacy-policy",
   termsOfService: "/terms-of-service",
 } as const;

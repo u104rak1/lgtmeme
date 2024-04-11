@@ -9,16 +9,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
-	authHander "github.com/ucho456job/lgtmeme/internal/auth/handler"
-	authRepository "github.com/ucho456job/lgtmeme/internal/auth/repository"
-	authService "github.com/ucho456job/lgtmeme/internal/auth/service"
-	clientHandler "github.com/ucho456job/lgtmeme/internal/client/handler"
-	clientRepository "github.com/ucho456job/lgtmeme/internal/client/repository"
-	clientService "github.com/ucho456job/lgtmeme/internal/client/service"
-	resourceHandler "github.com/ucho456job/lgtmeme/internal/resource/handler"
-	"github.com/ucho456job/lgtmeme/internal/resource/middleware"
-	resourceRepository "github.com/ucho456job/lgtmeme/internal/resource/repository"
-	resourceService "github.com/ucho456job/lgtmeme/internal/resource/service"
+	"github.com/ucho456job/lgtmeme/internal/handler"
+	"github.com/ucho456job/lgtmeme/internal/middleware"
+	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/internal/service"
 	"github.com/ucho456job/lgtmeme/internal/util/clock"
 	"github.com/ucho456job/lgtmeme/internal/util/uuidgen"
 )
@@ -32,7 +26,7 @@ func main() {
 
 	e := echo.New()
 	e.Validator = validator
-	e.Use(config.SessionMiddleware(), config.LoggerMiddleware)
+	e.Use(middleware.SessionMiddleware(), middleware.LoggerMiddleware)
 	e.Static(config.STATIC_ENDPOINT, config.STATIC_FILEPATH)
 
 	newAuthServer(e)
@@ -59,20 +53,20 @@ func main() {
 }
 
 func newAuthServer(e *echo.Echo) {
-	healthRepo := authRepository.NewHealthRepository(config.DB)
-	oauthClientRepo := authRepository.NewOauthClientRepository(config.DB)
-	refreshTokenRepo := authRepository.NewRefreshTokenRepository(config.DB)
-	authSessManaRepo := authRepository.NewSessionManager(config.Store, config.Pool)
-	userRepo := authRepository.NewUserRepository(config.DB)
+	healthRepo := repository.NewHealthRepository(config.DB)
+	oauthClientRepo := repository.NewOauthClientRepository(config.DB)
+	refreshTokenRepo := repository.NewRefreshTokenRepository(config.DB)
+	authSessManaRepo := repository.NewSessionManager(config.Store, config.Pool)
+	userRepo := repository.NewUserRepository(config.DB)
 
-	jwtServ := authService.NewJWTService()
+	jwtServ := service.NewJWTService()
 
-	authzHandler := authHander.NewAuthzHandler(oauthClientRepo, userRepo, authSessManaRepo)
-	healthHandler := authHander.NewHealthHandler(healthRepo, authSessManaRepo)
-	jwksHandler := authHander.NewJwksHandler(jwtServ)
-	loginHandler := authHander.NewLoginHandler(userRepo, authSessManaRepo)
-	logoutHandler := authHander.NewLogoutHandler(authSessManaRepo)
-	tokenHandler := authHander.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, authSessManaRepo, jwtServ)
+	authzHandler := handler.NewAuthzHandler(oauthClientRepo, userRepo, authSessManaRepo)
+	healthHandler := handler.NewHealthHandler(healthRepo, authSessManaRepo)
+	jwksHandler := handler.NewJwksHandler(jwtServ)
+	loginHandler := handler.NewLoginHandler(userRepo, authSessManaRepo)
+	logoutHandler := handler.NewLogoutHandler(authSessManaRepo)
+	tokenHandler := handler.NewTokenHandler(oauthClientRepo, refreshTokenRepo, userRepo, authSessManaRepo, jwtServ)
 
 	e.GET(config.AUTHZ_ENDPOINT, authzHandler.Authorize)
 	e.HEAD(config.HEALTH_ENDPOINT, healthHandler.Check)
@@ -84,37 +78,37 @@ func newAuthServer(e *echo.Echo) {
 }
 
 func newClientServer(e *echo.Echo) {
-	sessManaRepo := clientRepository.NewSessionManager(config.Store, config.Pool)
+	sessManaRepo := repository.NewSessionManager(config.Store, config.Pool)
 
-	generalAccessTokenServ := clientService.NewGeneralAccessTokenService()
-	imgServ := clientService.NewImageService()
-	ownerAccessTokenServ := clientService.NewOwnerAccessTokenService()
+	generalAccessTokenServ := service.NewGeneralAccessTokenService()
+	imgServ := service.NewImageService()
+	adminAccessTokenServ := service.NewAdminAccessTokenService()
 
-	authHandler := clientHandler.NewAuthzHandler(sessManaRepo, ownerAccessTokenServ)
-	errHandler := clientHandler.NewErrHandler()
-	homeHandler := clientHandler.NewHomeHandler(sessManaRepo, generalAccessTokenServ)
-	imgHandler := clientHandler.NewImageHandler(sessManaRepo, imgServ)
+	adminHandler := handler.NewAdminHandler(sessManaRepo, adminAccessTokenServ)
+	viewHandler := handler.NewViewHandler()
+	homeHandler := handler.NewHomeHandler(sessManaRepo, generalAccessTokenServ)
+	imgHandler := handler.NewClientImageHandler(sessManaRepo, imgServ)
 
-	e.GET(config.AUTH_VIEW_ENDPOINT, authHandler.GetView)
-	e.GET(config.CLIENT_AUTH_ENDPOINT, authHandler.RedirectAuthz)
-	e.GET(config.CLIENT_AUTH_CALLBACK_ENDPOINT, authHandler.Callback)
+	e.GET(config.ADMIN_VIEW_ENDPOINT, adminHandler.GetView)
+	e.GET(config.CLIENT_ADMIN_ENDPOINT, adminHandler.RedirectAuthz)
+	e.GET(config.CLIENT_ADMIN_CALLBACK_ENDPOINT, adminHandler.Callback)
 
-	e.GET(config.ERROR_VIEW_ENDPOINT, errHandler.GetView)
+	e.GET(config.ERROR_VIEW_ENDPOINT, viewHandler.GetErrView)
 
 	e.GET(config.HOME_VIEW_ENDPOINT, homeHandler.GetView)
 
-	e.GET(config.CREATE_IMAGE_VIEW_ENDPOINT, imgHandler.GetCreateImageView)
+	e.GET(config.IMAGE_NEW_VIEW_ENDPOINT, imgHandler.GetCreateImageView)
 	e.POST(config.CLIENT_IMAGES_ENDPOINT, imgHandler.Post)
 	e.GET(config.CLIENT_IMAGES_ENDPOINT, imgHandler.BulkGet)
 	e.PATCH(config.CLIENT_IMAGES_ENDPOINT+"/:image_id", imgHandler.Patch)
 }
 
 func newResourceServer(e *echo.Echo) {
-	imgRepo := resourceRepository.NewImageRepository(config.DB, &clock.RealClocker{})
+	imgRepo := repository.NewImageRepository(config.DB, &clock.RealClocker{})
 
-	storageServ := resourceService.NewStorageService()
+	storageServ := service.NewStorageService()
 
-	imgHandler := resourceHandler.NewImageHandler(imgRepo, storageServ, &uuidgen.RealUUIDGenerator{})
+	imgHandler := handler.NewResourceImageHandler(imgRepo, storageServ, &uuidgen.RealUUIDGenerator{})
 
 	e.POST(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.Post, middleware.VerifyAccessToken(config.IMAGES_CREATE_SCOPE))
 	e.GET(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.BulkGet, middleware.VerifyAccessToken(config.IMAGES_READ_SCOPE))

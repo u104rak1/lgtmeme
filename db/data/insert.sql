@@ -19,7 +19,7 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO oauth_clients (id, name, client_id, client_secret, redirect_uri, application_url, client_type) VALUES
 ('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'General Public Client', '0411a9bb-b450-4951-8d95-dfbf19dd925b', 'public_client_secret', '', 'http://localhost:8080', 'confidential'),
-('4533d234-5f04-4a03-8171-f1f952736373', 'Owner Private Client', 'a74983c2-c578-41fd-993b-9e4716d244ac', 'owner_client_secret', 'http://localhost:8080/client-api/auth/callback', 'http://localhost:8080', 'confidential')
+('4533d234-5f04-4a03-8171-f1f952736373', 'Admin Private Client', 'a74983c2-c578-41fd-993b-9e4716d244ac', 'admin_client_secret', 'http://localhost:8080/client-api/admin/callback', 'http://localhost:8080', 'confidential')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO oauth_clients_scopes (client_id, scope_code) VALUES
