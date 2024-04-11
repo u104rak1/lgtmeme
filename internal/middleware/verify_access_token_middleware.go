@@ -62,6 +62,10 @@ func (m *verifyAccessTokenMiddleware) Verify(requiredScope string) echo.Middlewa
 				return response.Unauthorized(c, err)
 			}
 
+			if err := jwt.Validate(parsedToken); err != nil {
+				return response.Unauthorized(c, err)
+			}
+
 			if ok := tokenHasScope(parsedToken, requiredScope); !ok {
 				return response.Unauthorized(c, errors.New("invalid scope"))
 			}

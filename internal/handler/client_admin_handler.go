@@ -15,7 +15,6 @@ import (
 )
 
 type AdminHandler interface {
-	GetView(c echo.Context) error
 	RedirectAuthz(c echo.Context) error
 	Callback(c echo.Context) error
 }
@@ -33,10 +32,6 @@ func NewAdminHandler(
 		sessionManagerRepository: sessionManagerRepository,
 		accessTokenService:       accessTokenService,
 	}
-}
-
-func (h *adminHandler) GetView(c echo.Context) error {
-	return c.File(config.ADMIN_VIEW_FILEPATH)
 }
 
 func (h *adminHandler) RedirectAuthz(c echo.Context) error {
