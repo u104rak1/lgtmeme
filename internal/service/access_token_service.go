@@ -15,19 +15,56 @@ import (
 	"github.com/ucho456job/lgtmeme/internal/dto"
 )
 
-type AdminAccessTokenService interface {
-	CallToken(c echo.Context) (respBody *dto.AuthzCodeResp, status int, err error)
-	CallJWKS(c echo.Context) (keySet jwk.Set, status int, err error)
+type AccessTokenService interface {
+	CallTokenWithClientCredentials(c echo.Context) (respBody *dto.ClientCredentialsResponse, status int, err error)
+	CallTokenWithAuthzCode(c echo.Context) (respBody *dto.AuthzCodeResp, status int, err error)
 	CallTokenWithRefreshToken(c echo.Context, refreshToken *string) (respBody *dto.RefreshTokenResp, status int, err error)
+	CallJWKS(c echo.Context) (keySet jwk.Set, status int, err error)
 }
 
-type adminAccessTokenService struct{}
+type accessTokenService struct{}
 
-func NewAdminAccessTokenService() AdminAccessTokenService {
-	return &adminAccessTokenService{}
+func NewAccessTokenService() AccessTokenService {
+	return &accessTokenService{}
 }
 
-func (s *adminAccessTokenService) CallToken(c echo.Context) (respBody *dto.AuthzCodeResp, status int, err error) {
+func (s *accessTokenService) CallTokenWithClientCredentials(c echo.Context) (respBody *dto.ClientCredentialsResponse, status int, err error) {
+	baseURL := os.Getenv("BASE_URL")
+	clientID := os.Getenv("GENERAL_CLIENT_ID")
+	clientSecret := os.Getenv("GENERAL_CLIENT_SECRET")
+	reqData := fmt.Sprintf("grant_type=client_credentials&client_id=%s&client_secret=%s", clientID, clientSecret)
+
+	req, err := http.NewRequest("POST", baseURL+config.TOKEN_ENDPOINT, bytes.NewBufferString(reqData))
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, http.StatusServiceUnavailable, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, resp.StatusCode, errors.New("failed to get access token")
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	if err := json.Unmarshal(body, &respBody); err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	return respBody, resp.StatusCode, nil
+}
+
+func (s *accessTokenService) CallTokenWithAuthzCode(c echo.Context) (respBody *dto.AuthzCodeResp, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.TOKEN_ENDPOINT
 	clientID := os.Getenv("ADMIN_CLIENT_ID")
@@ -68,42 +105,7 @@ func (s *adminAccessTokenService) CallToken(c echo.Context) (respBody *dto.Authz
 	return respBody, resp.StatusCode, nil
 }
 
-func (s *adminAccessTokenService) CallJWKS(c echo.Context) (keySet jwk.Set, status int, err error) {
-	baseURL := os.Getenv("BASE_URL")
-	url := baseURL + config.JWKS_ENDPOINT
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	req.Header.Set("Content-Type", "application/jwk-set+json")
-
-	httpClient := &http.Client{}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, http.StatusServiceUnavailable, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, resp.StatusCode, errors.New("failed to get access token")
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	keySet, err = jwk.Parse(body)
-	if err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	return keySet, resp.StatusCode, nil
-}
-
-func (s *adminAccessTokenService) CallTokenWithRefreshToken(c echo.Context, refreshToken *string) (respBody *dto.RefreshTokenResp, status int, err error) {
+func (s *accessTokenService) CallTokenWithRefreshToken(c echo.Context, refreshToken *string) (respBody *dto.RefreshTokenResp, status int, err error) {
 	baseURL := os.Getenv("BASE_URL")
 	url := baseURL + config.TOKEN_ENDPOINT
 	clientID := os.Getenv("ADMIN_CLIENT_ID")
@@ -140,4 +142,39 @@ func (s *adminAccessTokenService) CallTokenWithRefreshToken(c echo.Context, refr
 	}
 
 	return respBody, resp.StatusCode, nil
+}
+
+func (s *accessTokenService) CallJWKS(c echo.Context) (keySet jwk.Set, status int, err error) {
+	baseURL := os.Getenv("BASE_URL")
+	url := baseURL + config.JWKS_ENDPOINT
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	req.Header.Set("Content-Type", "application/jwk-set+json")
+
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, http.StatusServiceUnavailable, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, resp.StatusCode, errors.New("failed to get access token")
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	keySet, err = jwk.Parse(body)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	return keySet, resp.StatusCode, nil
 }

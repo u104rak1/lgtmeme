@@ -80,13 +80,12 @@ func newAuthServer(e *echo.Echo) {
 func newClientServer(e *echo.Echo) {
 	sessManaRepo := repository.NewSessionManager(config.Store, config.Pool)
 
-	generalAccessTokenServ := service.NewGeneralAccessTokenService()
 	imgServ := service.NewImageService()
-	adminAccessTokenServ := service.NewAdminAccessTokenService()
+	accessTokenServ := service.NewAccessTokenService()
 
-	adminHandler := handler.NewAdminHandler(sessManaRepo, adminAccessTokenServ)
+	adminHandler := handler.NewAdminHandler(sessManaRepo, accessTokenServ)
 	viewHandler := handler.NewViewHandler()
-	homeHandler := handler.NewHomeHandler(sessManaRepo, generalAccessTokenServ)
+	homeHandler := handler.NewHomeHandler(sessManaRepo, accessTokenServ)
 	imgHandler := handler.NewClientImageHandler(sessManaRepo, imgServ)
 
 	e.GET(config.ADMIN_VIEW_ENDPOINT, adminHandler.GetView)

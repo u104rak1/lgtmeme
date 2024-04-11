@@ -22,16 +22,16 @@ type AdminHandler interface {
 
 type adminHandler struct {
 	sessionManagerRepository repository.SessionManager
-	adminAccessTokenService  service.AdminAccessTokenService
+	accessTokenService       service.AccessTokenService
 }
 
 func NewAdminHandler(
 	sessionManagerRepository repository.SessionManager,
-	adminAccessTokenService service.AdminAccessTokenService,
+	accessTokenService service.AccessTokenService,
 ) *adminHandler {
 	return &adminHandler{
 		sessionManagerRepository: sessionManagerRepository,
-		adminAccessTokenService:  adminAccessTokenService,
+		accessTokenService:       accessTokenService,
 	}
 }
 
@@ -53,7 +53,7 @@ func (h *adminHandler) RedirectAuthz(c echo.Context) error {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 	if refreshToken != "" {
-		respBody, status, err := h.adminAccessTokenService.CallTokenWithRefreshToken(c, &refreshToken)
+		respBody, status, err := h.accessTokenService.CallTokenWithRefreshToken(c, &refreshToken)
 		if err != nil {
 			errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
 			return c.Redirect(http.StatusFound, errURL)
@@ -81,13 +81,13 @@ func (h *adminHandler) RedirectAuthz(c echo.Context) error {
 }
 
 func (h *adminHandler) Callback(c echo.Context) error {
-	tokenRespBody, status, err := h.adminAccessTokenService.CallToken(c)
+	tokenRespBody, status, err := h.accessTokenService.CallTokenWithAuthzCode(c)
 	if err != nil {
 		errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
 		return c.Redirect(http.StatusFound, errURL)
 	}
 
-	keySet, status, err := h.adminAccessTokenService.CallJWKS(c)
+	keySet, status, err := h.accessTokenService.CallJWKS(c)
 	if err != nil {
 		errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
 		return c.Redirect(http.StatusFound, errURL)
