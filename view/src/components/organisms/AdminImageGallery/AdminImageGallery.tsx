@@ -10,8 +10,6 @@ import {
 import { ImageService } from "@/services/image.service";
 import { css } from "@@/styled-system/css";
 
-export const LOCAL_STORAGE_KEY_FAVORITE_IMAGE_IDS = "favoriteImageIds";
-
 type Props = {
   css?: string;
 };
