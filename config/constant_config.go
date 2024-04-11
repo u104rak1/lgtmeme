@@ -57,15 +57,12 @@ const (
 	REFRESH_TOKEN_SESSION_NAME        = "refresh_token"
 )
 
-// session expire
+// expire
 const (
 	DEFAULT_SESSION_EXPIRE_SEC       = 60 * 60 * 23
 	AUTHZ_CODE_EXPIRE_SEC            = 60
 	REFRESH_TOKEN_SESSION_EXPIRE_SEC = 60 * 60 * 24 * 30
-)
 
-// token expire
-const (
 	ACCESS_TOKEN_EXPIRES_IN = time.Hour * 24
 	ID_TOKEN_EXPIRES_IN     = time.Minute * 10
 )

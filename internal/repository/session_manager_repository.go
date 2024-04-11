@@ -2,10 +2,12 @@ package repository
 
 import (
 	"encoding/json"
+	"os"
 
 	"github.com/boj/redistore"
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
+	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/dto"
 
@@ -15,15 +17,24 @@ import (
 type SessionManager interface {
 	CacheLoginSession(c echo.Context, userID uuid.UUID) error
 	LoadLoginSession(c echo.Context) (userID uuid.UUID, isLogin bool, err error)
+
 	CachePreAuthnSession(c echo.Context, q dto.AuthzQuery) error
 	LoadPreAuthnSession(c echo.Context) (query *dto.AuthzQuery, exists bool, err error)
+
 	CacheAuthzCodeCtx(c echo.Context, q dto.AuthzQuery, authzCode string, userID uuid.UUID) error
 	LoadAuthzCodeCtx(c echo.Context, code string) (*AuthzCodeCtx, error)
+
 	Logout(c echo.Context) error
+
 	CacheToken(c echo.Context, token, sessionName string) error
 	LoadToken(c echo.Context, sessionName string) (string, error)
+
 	CacheStateAndNonce(c echo.Context, state, nonce string) error
 	LoadStateAndNonce(c echo.Context) (state string, nonce string, err error)
+
+	CachePublicKey(c echo.Context, keySet jwk.Set) error
+	LoadPublicKey(c echo.Context) (keySet jwk.Set, err error)
+
 	CheckRedis(c echo.Context, key string) (string, error)
 }
 
@@ -295,6 +306,40 @@ func (m *sessionManager) LoadStateAndNonce(c echo.Context) (state string, nonce 
 	}
 
 	return state, nonce, nil
+}
+
+func (m *sessionManager) CachePublicKey(c echo.Context, keySet jwk.Set) error {
+	jsonKeySet, err := json.Marshal(keySet)
+	if err != nil {
+		return err
+	}
+
+	conn := m.pool.Get()
+	defer conn.Close()
+
+	_, err = conn.Do("SET", os.Getenv("JWKS_REDIS_KEY"), jsonKeySet, "EX", config.DEFAULT_SESSION_EXPIRE_SEC)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *sessionManager) LoadPublicKey(c echo.Context) (keySet jwk.Set, err error) {
+	conn := m.pool.Get()
+	defer conn.Close()
+
+	value, err := redis.String(conn.Do("GET", os.Getenv("JWKS_REDIS_KEY")))
+	if err != nil {
+		return nil, err
+	}
+
+	keySet, err = jwk.Parse([]byte(value))
+	if err != nil {
+		return nil, err
+	}
+
+	return keySet, nil
 }
 
 func (m *sessionManager) CheckRedis(c echo.Context, key string) (value string, err error) {

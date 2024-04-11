@@ -104,12 +104,16 @@ func newClientServer(e *echo.Echo) {
 
 func newResourceServer(e *echo.Echo) {
 	imgRepo := repository.NewImageRepository(config.DB, &clock.RealClocker{})
+	sessManaRepo := repository.NewSessionManager(config.Store, config.Pool)
 
+	accessTokenServ := service.NewAccessTokenService()
 	storageServ := service.NewStorageService()
+
+	verifyAccessTokenMiddle := middleware.NewVerifyAccessTokenMiddleware(sessManaRepo, accessTokenServ)
 
 	imgHandler := handler.NewResourceImageHandler(imgRepo, storageServ, &uuidgen.RealUUIDGenerator{})
 
-	e.POST(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.Post, middleware.VerifyAccessToken(config.IMAGES_CREATE_SCOPE))
-	e.GET(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.BulkGet, middleware.VerifyAccessToken(config.IMAGES_READ_SCOPE))
-	e.PATCH(config.RESOURCE_IMAGES_ENDPOINT+"/:image_id", imgHandler.Patch, middleware.VerifyAccessToken(config.IMAGES_UPDATE_SCOPE))
+	e.POST(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.Post, verifyAccessTokenMiddle.Verify(config.IMAGES_CREATE_SCOPE))
+	e.GET(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.BulkGet, verifyAccessTokenMiddle.Verify(config.IMAGES_READ_SCOPE))
+	e.PATCH(config.RESOURCE_IMAGES_ENDPOINT+"/:image_id", imgHandler.Patch, verifyAccessTokenMiddle.Verify(config.IMAGES_UPDATE_SCOPE))
 }
