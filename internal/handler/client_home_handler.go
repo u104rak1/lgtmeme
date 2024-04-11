@@ -15,17 +15,17 @@ type HomeHandler interface {
 }
 
 type homeHandler struct {
-	sessionManagerRepository  repository.SessionManager
-	generalAccessTokenService service.GeneralAccessTokenService
+	sessionManagerRepository repository.SessionManager
+	accessTokenService       service.AccessTokenService
 }
 
 func NewHomeHandler(
 	sessionManagerRepository repository.SessionManager,
-	generalAccessTokenService service.GeneralAccessTokenService,
+	accessTokenService service.AccessTokenService,
 ) *homeHandler {
 	return &homeHandler{
-		sessionManagerRepository:  sessionManagerRepository,
-		generalAccessTokenService: generalAccessTokenService,
+		sessionManagerRepository: sessionManagerRepository,
+		accessTokenService:       accessTokenService,
 	}
 }
 
@@ -38,7 +38,7 @@ func (h *homeHandler) GetView(c echo.Context) error {
 	}
 
 	if accessToken == "" {
-		respBody, status, err := h.generalAccessTokenService.CallToken(c)
+		respBody, status, err := h.accessTokenService.CallTokenWithClientCredentials(c)
 		if err != nil && status != http.StatusOK {
 			errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
 			return c.Redirect(http.StatusFound, errURL)
