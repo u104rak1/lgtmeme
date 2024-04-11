@@ -4,6 +4,7 @@ import Loading from "@/components/atoms/Loading/Loading";
 import AdminImageCard from "@/components/molecules/AdminImageCard/AdminImageCard";
 import Modal from "@/components/molecules/Modal/Modal";
 import {
+  ACTIVE_TAB_ID,
   MAX_IMAGES_FETCH_COUNT,
   PATCH_IMAGE_REQUEST_TYPE,
 } from "@/utils/constants";
@@ -30,28 +31,28 @@ const AdminImageGallery = ({ css }: Props) => {
     setIsLoading(true);
     setPage(page);
     const service = new ImageService();
-    const res = await service.getImages({
+    const result = await service.getImages({
       page,
       keyword: "",
-      sort: "latest",
+      sort: ACTIVE_TAB_ID.latest,
       favoriteImageIds: [],
       authCheck: true,
     });
-    if (!res.ok) {
+    if (!result.ok) {
       setIsLoading(false);
-      setModal({ message: res.errorMessage, show: true });
+      setModal({ message: result.errorMessage, show: true });
       return;
     }
     if (page === 0) {
-      setImages(res.images);
+      setImages(result.images);
     } else {
       /** I am using Map to avoid duplicate images. */
       const imageMap = new Map();
       images.forEach((image) => imageMap.set(image.id, image));
-      res.images.forEach((image) => imageMap.set(image.id, image));
+      result.images.forEach((image) => imageMap.set(image.id, image));
       setImages(Array.from(imageMap.values()));
     }
-    if (res.images.length < MAX_IMAGES_FETCH_COUNT) setIsFull(true);
+    if (result.images.length < MAX_IMAGES_FETCH_COUNT) setIsFull(true);
     setIsLoading(false);
   };
 

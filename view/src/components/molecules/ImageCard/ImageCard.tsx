@@ -60,15 +60,17 @@ const ImageCard = ({
           >
             Favorite
           </Button>
-          <Button
-            css={buttonCss}
-            size="sm"
-            color="yellow"
-            icon={<Svg icon="flag" />}
-            onClick={handleClickReport}
-          >
-            Report
-          </Button>
+          {!image.reported && (
+            <Button
+              css={buttonCss}
+              size="sm"
+              color="yellow"
+              icon={<Svg icon="flag" />}
+              onClick={handleClickReport}
+            >
+              Report
+            </Button>
+          )}
         </div>
       </div>
     </div>

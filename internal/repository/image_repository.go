@@ -48,7 +48,7 @@ func (r *imageRepository) Create(c echo.Context, id uuid.UUID, url, keyword stri
 }
 
 func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {
-	sqlQ := r.DB.Model(&model.Image{}).Select("id", "url")
+	sqlQ := r.DB.Debug().Model(&model.Image{})
 
 	if q.FavoriteImageIDs != "" {
 		favoriteImageIDs := strings.Split(q.FavoriteImageIDs, ",")
@@ -60,8 +60,9 @@ func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]m
 	}
 
 	if q.AuthCheck {
-		sqlQ = sqlQ.Where("confirmed = ?", false)
-		sqlQ = sqlQ.Where("reported = ?", true)
+		sqlQ = sqlQ.Where("confirmed = ?", false).Where("reported = ?", true)
+	} else {
+		sqlQ = sqlQ.Where("confirmed = ? OR reported = ?", true, false)
 	}
 
 	if q.Sort == "latest" {

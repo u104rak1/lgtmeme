@@ -1,6 +1,11 @@
 type Image = {
   id: string;
   url: string;
+  keyword: string;
+  usedCount: string;
+  reported: boolean;
+  confirmed: boolean;
+  createdAt: string;
 };
 
 /** GET */

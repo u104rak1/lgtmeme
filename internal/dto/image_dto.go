@@ -20,8 +20,13 @@ type GetImagesQuery struct {
 }
 
 type GetImagesImages struct {
-	ID  uuid.UUID `json:"id"`
-	URL string    `json:"url"`
+	ID        uuid.UUID `json:"id"`
+	URL       string    `json:"url"`
+	Keyword   string    `json:"keyword"`
+	UsedCount int       `json:"usedCount"`
+	Reported  bool      `json:"reported"`
+	Confirmed bool      `json:"confirmed"`
+	CreatedAt string    `json:"createdAt"`
 }
 
 type GetImagesResp struct {

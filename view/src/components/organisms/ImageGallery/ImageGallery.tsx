@@ -19,10 +19,9 @@ export const LOCAL_STORAGE_KEY_FAVORITE_IMAGE_IDS = "favoriteImageIds";
 
 type Props = {
   css?: string;
-  initImages: Image[];
 };
 
-const ImageGallery = ({ css, initImages }: Props) => {
+const ImageGallery = ({ css }: Props) => {
   const [images, setImages] = useState<Image[]>([]);
   const [page, setPage] = useState(0);
   const [keyword, setKeyword] = useState("");
@@ -35,13 +34,12 @@ const ImageGallery = ({ css, initImages }: Props) => {
   const [modal, setModal] = useState({ message: "", show: false });
 
   useEffect(() => {
-    setImages(initImages);
     const favoriteImageIds = JSON.parse(
       localStorage.getItem(LOCAL_STORAGE_KEY_FAVORITE_IMAGE_IDS) || "[]"
     ) as string[];
     setFavoriteImageIds(favoriteImageIds);
-    setIsLoading(false);
-  }, [initImages]);
+    handleGetImages([], 0, "", ACTIVE_TAB_ID.latest, favoriteImageIds);
+  }, []);
 
   const tabs: { id: ActiveTabId; label: string }[] = [
     { id: ACTIVE_TAB_ID.latest, label: "Latest" },
@@ -56,40 +54,37 @@ const ImageGallery = ({ css, initImages }: Props) => {
     activeTabId: ActiveTabId,
     favoriteImageIds: string[]
   ) => {
-    try {
-      setIsLoading(true);
-      setPage(page);
-      setActiveTabId(activeTabId);
-      const service = new ImageService();
-      const res = await service.getImages({
-        page,
-        keyword,
-        sort: activeTabId === "popular" ? "popular" : "latest",
-        favoriteImageIds: activeTabId === "favorite" ? favoriteImageIds : [],
-        authCheck: false,
-      });
-      if (!res.ok) {
-        setModal({ message: res.errorMessage, show: true });
-        return;
-      }
-      if (page === 0) {
-        setImages(res.images);
-      } else {
-        /** I am using Map to avoid duplicate images. */
-        const imageMap = new Map();
-        images.forEach((image) => imageMap.set(image.id, image));
-        res.images.forEach((image) => imageMap.set(image.id, image));
-        setImages(Array.from(imageMap.values()));
-      }
-      if (res.images.length < MAX_IMAGES_FETCH_COUNT) setIsFull(true);
-    } catch {
-      setModal({
-        message: "Failed to get images. Please try again later.",
-        show: true,
-      });
-    } finally {
+    setIsLoading(true);
+    setPage(page);
+    setActiveTabId(activeTabId);
+    const service = new ImageService();
+    const result = await service.getImages({
+      page,
+      keyword,
+      sort:
+        activeTabId === ACTIVE_TAB_ID.popular
+          ? ACTIVE_TAB_ID.popular
+          : ACTIVE_TAB_ID.latest,
+      favoriteImageIds:
+        activeTabId === ACTIVE_TAB_ID.favorite ? favoriteImageIds : [],
+      authCheck: false,
+    });
+    if (!result.ok) {
       setIsLoading(false);
+      setModal({ message: result.errorMessage, show: true });
+      return;
     }
+    if (page === 0) {
+      setImages(result.images);
+    } else {
+      /** I am using Map to avoid duplicate images. */
+      const imageMap = new Map();
+      images.forEach((image) => imageMap.set(image.id, image));
+      result.images.forEach((image) => imageMap.set(image.id, image));
+      setImages(Array.from(imageMap.values()));
+    }
+    if (result.images.length < MAX_IMAGES_FETCH_COUNT) setIsFull(true);
+    setIsLoading(false);
   };
 
   const handleClickTab = (id: string) => {
@@ -144,7 +139,12 @@ const ImageGallery = ({ css, initImages }: Props) => {
 
   const [reportImage, setReportImage] = useState<Image | null>(null);
   const handleOpenReportModal = async (image: Image) => setReportImage(image);
-  const handleCloseReportModal = () => setReportImage(null);
+  const handleCloseReportModal = () => {
+    if (!reportImage) return;
+    const imageId = reportImage.id;
+    setImages(images.filter((i) => i.id !== imageId));
+    setReportImage(null);
+  };
 
   return (
     <div className={css}>

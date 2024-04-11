@@ -17,22 +17,15 @@ const ReportModal = ({ css, image, onClickClose }: Props) => {
   const [modal, setModal] = useState({ message: "", show: false });
 
   const handleReport = async () => {
-    try {
-      if (!image) return;
-      const service = new ImageService();
-      const res = await service.patchImage(image.id, {
-        type: PATCH_IMAGE_REQUEST_TYPE.report,
-      });
-      const message = res.ok
-        ? "The report was successful! Please wait a moment for the operator to confirm."
-        : res.errorMessage;
-      setModal({ message, show: true });
-    } catch {
-      setModal({
-        message: "Report failed. Please try again later.",
-        show: true,
-      });
-    }
+    if (!image) return;
+    const service = new ImageService();
+    const result = await service.patchImage(image.id, {
+      type: PATCH_IMAGE_REQUEST_TYPE.report,
+    });
+    const message = result.ok
+      ? "The report was successful! Please wait a moment for the operator to confirm."
+      : result.errorMessage;
+    setModal({ message, show: true });
   };
 
   const handleComplete = () => {

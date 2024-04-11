@@ -86,17 +86,18 @@ func newClientServer(e *echo.Echo) {
 	adminHandler := handler.NewAdminHandler(sessManaRepo, accessTokenServ)
 	viewHandler := handler.NewViewHandler()
 	homeHandler := handler.NewHomeHandler(sessManaRepo, accessTokenServ)
-	imgHandler := handler.NewClientImageHandler(sessManaRepo, imgServ)
+	imgHandler := handler.NewClientImageHandler(sessManaRepo, accessTokenServ, imgServ)
 
-	e.GET(config.ADMIN_VIEW_ENDPOINT, adminHandler.GetView)
 	e.GET(config.CLIENT_ADMIN_ENDPOINT, adminHandler.RedirectAuthz)
 	e.GET(config.CLIENT_ADMIN_CALLBACK_ENDPOINT, adminHandler.Callback)
 
-	e.GET(config.ERROR_VIEW_ENDPOINT, viewHandler.GetErrView)
-
+	e.GET(config.ADMIN_VIEW_ENDPOINT, adminHandler.GetView)
 	e.GET(config.HOME_VIEW_ENDPOINT, homeHandler.GetView)
+	e.GET(config.IMAGE_NEW_VIEW_ENDPOINT, imgHandler.GetView)
+	e.GET(config.ERROR_VIEW_ENDPOINT, viewHandler.GetErrView)
+	e.GET(config.PRIVACY_POLICY_ENDPOINT, viewHandler.GetPrivacyPolicyView)
+	e.GET(config.TERMS_OF_SERVICE_ENDPOINT, viewHandler.GetTermsOfServiceView)
 
-	e.GET(config.IMAGE_NEW_VIEW_ENDPOINT, imgHandler.GetCreateImageView)
 	e.POST(config.CLIENT_IMAGES_ENDPOINT, imgHandler.Post)
 	e.GET(config.CLIENT_IMAGES_ENDPOINT, imgHandler.BulkGet)
 	e.PATCH(config.CLIENT_IMAGES_ENDPOINT+"/:image_id", imgHandler.Patch)
