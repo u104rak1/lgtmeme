@@ -2,31 +2,36 @@ package middleware
 
 import (
 	"errors"
-	"io"
-	"net/http"
-	"os"
 	"strings"
-	"sync"
-	"time"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo/v4"
-	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/lestrrat-go/jwx/jwt"
-	"github.com/ucho456job/lgtmeme/config"
+	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/internal/service"
 	"github.com/ucho456job/lgtmeme/internal/util/response"
 )
 
-type jwksCache struct {
-	keySet     jwk.Set
-	lastUpdate time.Time
-	mux        sync.Mutex
+type VerifyAccessTokenMiddleware interface {
+	Verify(requiredScope string) echo.MiddlewareFunc
 }
 
-var cache = &jwksCache{}
+type verifyAccessTokenMiddleware struct {
+	sessionManagerRepository repository.SessionManager
+	accessTokenService       service.AccessTokenService
+}
 
-const cacheDuration = 24 * time.Hour
+func NewVerifyAccessTokenMiddleware(
+	sessionManagerRepository repository.SessionManager,
+	accessTokenService service.AccessTokenService,
+) VerifyAccessTokenMiddleware {
+	return &verifyAccessTokenMiddleware{
+		sessionManagerRepository: sessionManagerRepository,
+		accessTokenService:       accessTokenService,
+	}
+}
 
-func VerifyAccessToken(requiredScope string) echo.MiddlewareFunc {
+func (m *verifyAccessTokenMiddleware) Verify(requiredScope string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			accessToken := c.Request().Header.Get("Authorization")
@@ -37,8 +42,18 @@ func VerifyAccessToken(requiredScope string) echo.MiddlewareFunc {
 
 			accessToken = strings.TrimPrefix(accessToken, "Bearer ")
 
-			keySet, err := callJWKS()
-			if err != nil {
+			keySet, err := m.sessionManagerRepository.LoadPublicKey(c)
+			if err == redis.ErrNil {
+				var status int
+				keySet, status, err = m.accessTokenService.CallJWKS(c)
+				if err != nil {
+					return response.HandleErrResp(c, status, err)
+				}
+
+				if err := m.sessionManagerRepository.CachePublicKey(c, keySet); err != nil {
+					return response.InternalServerError(c, err)
+				}
+			} else if err != nil {
 				return response.InternalServerError(c, err)
 			}
 
@@ -54,51 +69,6 @@ func VerifyAccessToken(requiredScope string) echo.MiddlewareFunc {
 			return next(c)
 		}
 	}
-}
-
-func callJWKS() (keySet jwk.Set, err error) {
-	cache.mux.Lock()
-	defer cache.mux.Unlock()
-
-	if cache.keySet != nil && time.Since(cache.lastUpdate) < cacheDuration {
-		return cache.keySet, nil
-	}
-
-	baseURL := os.Getenv("BASE_URL")
-	url := baseURL + config.JWKS_ENDPOINT
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Content-Type", "application/jwk-set+json")
-
-	httpClient := &http.Client{}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("failed to get access token")
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	keySet, err = jwk.Parse(body)
-	if err != nil {
-		return nil, err
-	}
-
-	cache.keySet = keySet
-	cache.lastUpdate = time.Now()
-
-	return keySet, nil
 }
 
 func tokenHasScope(token jwt.Token, scope string) bool {
