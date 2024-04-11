@@ -107,3 +107,19 @@ func (h *clientImageHandler) Patch(c echo.Context) error {
 
 	return c.JSON(http.StatusNoContent, nil)
 }
+
+func (h *clientImageHandler) Delete(c echo.Context) error {
+	accessToken, err := h.sessionManagerRepository.LoadToken(c, config.ADMIN_ACCESS_TOKEN_SESSION_NAME)
+	if err != nil {
+		return response.InternalServerError(c, err)
+	}
+
+	imageID := c.Param("image_id")
+
+	status, err := h.imageService.Delete(c, imageID, accessToken)
+	if err != nil {
+		return response.HandleErrResp(c, status, err)
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}

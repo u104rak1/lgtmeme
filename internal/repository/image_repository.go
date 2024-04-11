@@ -14,8 +14,10 @@ import (
 type ImageRepository interface {
 	Create(c echo.Context, id uuid.UUID, url, keyword string) error
 	FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error)
+	FindURLByID(c echo.Context, id uuid.UUID) (*string, error)
 	ExistsByID(c echo.Context, id uuid.UUID) (bool, error)
 	Update(c echo.Context, id uuid.UUID, reqType dto.PatchImageReqType) error
+	Delete(c echo.Context, id uuid.UUID) error
 }
 
 type imageRepository struct {
@@ -76,6 +78,15 @@ func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]m
 	return &images, nil
 }
 
+func (r *imageRepository) FindURLByID(c echo.Context, id uuid.UUID) (*string, error) {
+	var image model.Image
+	if err := r.DB.Model(&model.Image{}).Where("id = ?", id).First(&image).Error; err != nil {
+		return nil, err
+	}
+
+	return &image.URL, nil
+}
+
 func (r *imageRepository) ExistsByID(c echo.Context, id uuid.UUID) (bool, error) {
 	var count int64
 	if err := r.DB.Model(&model.Image{}).Where("id = ?", id).Count(&count).Error; err != nil {
@@ -96,6 +107,14 @@ func (r *imageRepository) Update(c echo.Context, id uuid.UUID, reqType dto.Patch
 	}
 
 	if err := r.DB.Model(&model.Image{}).Where("id = ?", id).Updates(updateData).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *imageRepository) Delete(c echo.Context, id uuid.UUID) error {
+	if err := r.DB.Where("id = ?", id).Delete(&model.Image{}).Error; err != nil {
 		return err
 	}
 

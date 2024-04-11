@@ -18,6 +18,7 @@ type ImageService interface {
 	Post(c echo.Context, b dto.PostImageReqBody, token string) (respBody *dto.PostImageResp, status int, err error)
 	BulkGet(c echo.Context, q dto.GetImagesQuery, token string) (respBody *dto.GetImagesResp, status int, err error)
 	Patch(c echo.Context, b dto.PatchImageReqBody, imageID, token string) (status int, err error)
+	Delete(c echo.Context, imageID, token string) (status int, err error)
 }
 
 type imageService struct{}
@@ -134,6 +135,33 @@ func (s *imageService) Patch(c echo.Context, b dto.PatchImageReqBody, imageID, t
 
 	if resp.StatusCode != http.StatusNoContent {
 		return resp.StatusCode, errors.New("failed to update image")
+	}
+
+	return resp.StatusCode, nil
+}
+
+func (s *imageService) Delete(c echo.Context, imageID, token string) (status int, err error) {
+	baseURL := os.Getenv("BASE_URL")
+
+	url := fmt.Sprintf("%s%s/%s", baseURL, config.RESOURCE_IMAGES_ENDPOINT, imageID)
+
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return http.StatusServiceUnavailable, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		return resp.StatusCode, errors.New("failed to delete image")
 	}
 
 	return resp.StatusCode, nil

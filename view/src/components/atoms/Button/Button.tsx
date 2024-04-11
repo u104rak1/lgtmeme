@@ -3,7 +3,7 @@ import { css, cva } from "@@/styled-system/css";
 type Props = {
   css?: string;
   visual?: "solid" | "text";
-  color?: "black" | "yellow" | "lightPink";
+  color?: "black" | "yellow" | "lightPink" | "red";
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   icon?: JSX.Element;
@@ -59,6 +59,7 @@ const buttonRecipe = cva({
       black: { color: "BLACK" },
       yellow: { bgColor: "YELLOW", color: "BLACK" },
       lightPink: { bgColor: "LIGHT_PINK", color: "BLACK" },
+      red: { bgColor: "RED", color: "WHITE" },
     },
     size: {
       sm: { padding: "2", fontSize: "sm", minWidth: "15" },

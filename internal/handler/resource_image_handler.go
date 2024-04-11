@@ -16,6 +16,7 @@ type ResourceImageHandler interface {
 	Post(c echo.Context) error
 	BulkGet(c echo.Context) error
 	Patch(c echo.Context) error
+	Delete(c echo.Context) error
 }
 
 type resourceImageHandler struct {
@@ -120,6 +121,32 @@ func (h *resourceImageHandler) Patch(c echo.Context) error {
 	}
 
 	if err := h.imageRepository.Update(c, imageID, body.Type); err != nil {
+		return response.InternalServerError(c, err)
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (h *resourceImageHandler) Delete(c echo.Context) error {
+	imageIDStr := c.Param("image_id")
+	imageID, err := uuid.Parse(imageIDStr)
+	if err != nil {
+		return response.BadRequest(c, err)
+	}
+
+	imgURL, err := h.imageRepository.FindURLByID(c, imageID)
+	if imgURL == nil {
+		return response.NotFound(c, nil)
+	}
+	if err != nil {
+		return response.InternalServerError(c, err)
+	}
+
+	if err := h.imageRepository.Delete(c, imageID); err != nil {
+		return response.InternalServerError(c, err)
+	}
+
+	if err := h.storageService.Delete(c, *imgURL); err != nil {
 		return response.InternalServerError(c, err)
 	}
 
