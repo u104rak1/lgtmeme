@@ -317,7 +317,7 @@ func (m *sessionManager) CachePublicKey(c echo.Context, keySet jwk.Set) error {
 	conn := m.pool.Get()
 	defer conn.Close()
 
-	_, err = conn.Do("SET", os.Getenv("JWKS_REDIS_KEY"), jsonKeySet, "EX", 60*60*24)
+	_, err = conn.Do("SET", os.Getenv("JWKS_REDIS_KEY"), jsonKeySet, "EX", config.DEFAULT_SESSION_EXPIRE_SEC)
 	if err != nil {
 		return err
 	}
