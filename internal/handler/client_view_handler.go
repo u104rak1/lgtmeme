@@ -18,3 +18,11 @@ func NewViewHandler() *viewHandler {
 func (h *viewHandler) GetErrView(c echo.Context) error {
 	return c.File(config.ERROR_VIEW_FILEPATH)
 }
+
+func (h *viewHandler) GetPrivacyPolicyView(c echo.Context) error {
+	return c.File(config.PRIVACY_POLICY_FILEPATH)
+}
+
+func (h *viewHandler) GetTermsOfServiceView(c echo.Context) error {
+	return c.File(config.TERMS_OF_SERVICE_FILEPATH)
+}

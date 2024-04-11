@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/dto"
@@ -12,7 +14,7 @@ import (
 )
 
 type ClientImageHandler interface {
-	GetCreateImageView(c echo.Context) error
+	GetView(c echo.Context) error
 	Post(c echo.Context) error
 	BulkGet(c echo.Context) error
 	Patch(c echo.Context) error
@@ -20,20 +22,38 @@ type ClientImageHandler interface {
 
 type clientImageHandler struct {
 	sessionManagerRepository repository.SessionManager
+	accessTokenService       service.AccessTokenService
 	imageService             service.ImageService
 }
 
 func NewClientImageHandler(
 	sessionManagerRepository repository.SessionManager,
+	accessTokenService service.AccessTokenService,
 	imageService service.ImageService,
 ) *clientImageHandler {
 	return &clientImageHandler{
 		sessionManagerRepository: sessionManagerRepository,
+		accessTokenService:       accessTokenService,
 		imageService:             imageService,
 	}
 }
 
-func (h *clientImageHandler) GetCreateImageView(c echo.Context) error {
+func (h *clientImageHandler) GetView(c echo.Context) error {
+	_, err := h.sessionManagerRepository.LoadGeneralAccessToken(c)
+	if err == redis.ErrNil {
+		respBody, status, err := h.accessTokenService.CallTokenWithClientCredentials(c)
+		if err != nil && status != http.StatusOK {
+			errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
+			return c.Redirect(http.StatusFound, errURL)
+		}
+
+		if err := h.sessionManagerRepository.CacheGeneralAccessToken(c, respBody.AccessToken); err != nil {
+			return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+		}
+	} else if err != nil {
+		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+	}
+
 	return c.File(config.IMAGE_NEW_VIEW_FILEPATH)
 }
 

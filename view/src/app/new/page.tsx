@@ -188,42 +188,37 @@ const NewPage = () => {
 
   const [modal, setModal] = useState({ message: "", show: false });
   const handleCreateImage = async () => {
-    try {
-      setIsUpload(true);
-      const diff = SIZE_MAP.get(textStyle.fontSize)?.diff;
-      if (!canvasRef.current || !diff) return;
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.fillStyle = textStyle.color;
-      ctx.font = `${textStyle.fontSize}px ${textStyle.fontFamily}`;
-      const text = "LGTM";
-      const textX = textStyle.left;
-      const textY = textStyle.top + diff;
-      ctx.fillText(text, textX, textY);
+    setIsUpload(true);
+    const diff = SIZE_MAP.get(textStyle.fontSize)?.diff;
+    if (!canvasRef.current || !diff) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.fillStyle = textStyle.color;
+    ctx.font = `${textStyle.fontSize}px ${textStyle.fontFamily}`;
+    const text = "LGTM";
+    const textX = textStyle.left;
+    const textY = textStyle.top + diff;
+    ctx.fillText(text, textX, textY);
 
-      const image = canvas.toDataURL("image/webp");
-      const service = new ImageService();
-      const res = await service.postImage({ base64image: image, keyword });
-      if (!res.ok) {
-        setModal({ message: res.errorMessage, show: true });
-        return;
-      }
-      try {
-        await navigator.clipboard.writeText(`![LGTM](${res.imageUrl})`);
-        setModal({
-          message: "Created an image and copied it to the clipboard!",
-          show: true,
-        });
-      } catch {
-        setModal({
-          message: `Created an image!\nPlease copy markdown below:\n\n![LGTM](${res.imageUrl})`,
-          show: true,
-        });
-      }
+    const image = canvas.toDataURL("image/webp");
+    const service = new ImageService();
+    const res = await service.postImage({ base64image: image, keyword });
+    if (!res.ok) {
+      setIsUpload(false);
+      setModal({ message: res.errorMessage, show: true });
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(`![LGTM](${res.imageUrl})`);
+      setModal({
+        message: "Created an image and copied it to the clipboard!",
+        show: true,
+      });
     } catch {
       setModal({
-        message: "Failed to create image. Please try again later.",
+        message: `Created an image!\nPlease copy markdown below:\n\n![LGTM](${res.imageUrl})`,
         show: true,
       });
     } finally {

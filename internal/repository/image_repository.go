@@ -60,8 +60,9 @@ func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]m
 	}
 
 	if q.AuthCheck {
-		sqlQ = sqlQ.Where("confirmed = ?", false)
-		sqlQ = sqlQ.Where("reported = ?", true)
+		sqlQ = sqlQ.Where("confirmed = ?", false).Where("reported = ?", true)
+	} else {
+		sqlQ = sqlQ.Where("confirmed = ? OR reported = ?", true, false)
 	}
 
 	if q.Sort == "latest" {

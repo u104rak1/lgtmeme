@@ -10,7 +10,7 @@ const Footer = () => {
   return (
     <footer className={footerCss}>
       <div className={buttonsCss}>
-        {/* <Link href={PAGE_ENDPOINTS.home}>
+        <Link href={PAGE_ENDPOINTS.home}>
           <Button visual="text">Home</Button>
         </Link>
         <Link href={PAGE_ENDPOINTS.termsOfService}>
@@ -18,7 +18,7 @@ const Footer = () => {
         </Link>
         <Link href={PAGE_ENDPOINTS.privacyPolicy}>
           <Button visual="text">Privacy policy</Button>
-        </Link> */}
+        </Link>
         <Button
           visual="text"
           onClick={() => (window.location.href = CLIENT_ENDPOINTS.admin)}

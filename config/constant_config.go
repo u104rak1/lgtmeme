@@ -27,18 +27,22 @@ const (
 	CLIENT_IMAGES_ENDPOINT         = "/client-api/images"
 
 	// view endpoint
-	STATIC_ENDPOINT         = "/"
-	ERROR_VIEW_ENDPOINT     = "/error"
-	HOME_VIEW_ENDPOINT      = "/"
-	IMAGE_NEW_VIEW_ENDPOINT = "/new"
-	ADMIN_VIEW_ENDPOINT     = "/admin"
+	STATIC_ENDPOINT           = "/"
+	ERROR_VIEW_ENDPOINT       = "/error"
+	HOME_VIEW_ENDPOINT        = "/"
+	IMAGE_NEW_VIEW_ENDPOINT   = "/new"
+	ADMIN_VIEW_ENDPOINT       = "/admin"
+	PRIVACY_POLICY_ENDPOINT   = "/privacy-policy"
+	TERMS_OF_SERVICE_ENDPOINT = "/terms-of-service"
 
 	// file path
-	STATIC_FILEPATH         = "view/out"
-	ERROR_VIEW_FILEPATH     = "view/out/error.html"
-	HOME_VIEW_FILEPATH      = "view/out/index.html"
-	IMAGE_NEW_VIEW_FILEPATH = "view/out/new.html"
-	ADMIN_VIEW_FILEPATH     = "view/out/admin.html"
+	STATIC_FILEPATH           = "view/out"
+	ERROR_VIEW_FILEPATH       = "view/out/error.html"
+	HOME_VIEW_FILEPATH        = "view/out/index.html"
+	IMAGE_NEW_VIEW_FILEPATH   = "view/out/new.html"
+	ADMIN_VIEW_FILEPATH       = "view/out/admin.html"
+	PRIVACY_POLICY_FILEPATH   = "view/out/privacy-policy.html"
+	TERMS_OF_SERVICE_FILEPATH = "view/out/terms-of-service.html"
 )
 
 // resoruce server

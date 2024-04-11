@@ -29,3 +29,5 @@ export const PATCH_IMAGE_REQUEST_TYPE = {
   report: "report",
   confirm: "confirm",
 } as const;
+
+export const TWITTER_LINK_ENDPOINT = "https://twitter.com/ucho456job";
