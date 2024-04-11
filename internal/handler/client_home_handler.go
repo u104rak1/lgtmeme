@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/repository"
@@ -30,23 +31,19 @@ func NewHomeHandler(
 }
 
 func (h *homeHandler) GetView(c echo.Context) error {
-	sessName := config.GENERAL_ACCESS_TOKEN_SESSION_NAME
-
-	accessToken, err := h.sessionManagerRepository.LoadToken(c, sessName)
-	if err != nil {
-		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
-	}
-
-	if accessToken == "" {
+	_, err := h.sessionManagerRepository.LoadGeneralAccessToken(c)
+	if err == redis.ErrNil {
 		respBody, status, err := h.accessTokenService.CallTokenWithClientCredentials(c)
 		if err != nil && status != http.StatusOK {
 			errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
 			return c.Redirect(http.StatusFound, errURL)
 		}
 
-		if err := h.sessionManagerRepository.CacheToken(c, respBody.AccessToken, sessName); err != nil {
+		if err := h.sessionManagerRepository.CacheGeneralAccessToken(c, respBody.AccessToken); err != nil {
 			return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 		}
+	} else if err != nil {
+		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 
 	return c.File(config.HOME_VIEW_FILEPATH)

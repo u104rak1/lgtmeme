@@ -29,6 +29,9 @@ type SessionManager interface {
 	CacheToken(c echo.Context, token, sessionName string) error
 	LoadToken(c echo.Context, sessionName string) (string, error)
 
+	CacheGeneralAccessToken(c echo.Context, token string) error
+	LoadGeneralAccessToken(c echo.Context) (string, error)
+
 	CacheStateAndNonce(c echo.Context, state, nonce string) error
 	LoadStateAndNonce(c echo.Context) (state string, nonce string, err error)
 
@@ -268,6 +271,30 @@ func (m *sessionManager) LoadToken(c echo.Context, sessionName string) (string, 
 	token, ok := sess.Values[sessionName].(string)
 	if !ok {
 		return "", nil
+	}
+
+	return token, nil
+}
+
+func (m *sessionManager) CacheGeneralAccessToken(c echo.Context, token string) error {
+	conn := m.pool.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("SET", os.Getenv("GENERAL_ACCESS_TOKEN_REDIS_KEY"), token, "EX", config.DEFAULT_SESSION_EXPIRE_SEC)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *sessionManager) LoadGeneralAccessToken(c echo.Context) (string, error) {
+	conn := m.pool.Get()
+	defer conn.Close()
+
+	token, err := redis.String(conn.Do("GET", os.Getenv("GENERAL_ACCESS_TOKEN_REDIS_KEY")))
+	if err != nil {
+		return "", err
 	}
 
 	return token, nil

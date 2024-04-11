@@ -47,7 +47,7 @@ func (h *clientImageHandler) Post(c echo.Context) error {
 		return response.BadRequest(c, err)
 	}
 
-	accessToken, err := h.sessionManagerRepository.LoadToken(c, config.GENERAL_ACCESS_TOKEN_SESSION_NAME)
+	accessToken, err := h.sessionManagerRepository.LoadGeneralAccessToken(c)
 	if err != nil {
 		return response.InternalServerError(c, err)
 	}
@@ -70,7 +70,7 @@ func (h *clientImageHandler) BulkGet(c echo.Context) error {
 		return response.BadRequest(c, err)
 	}
 
-	accessToken, err := h.sessionManagerRepository.LoadToken(c, config.GENERAL_ACCESS_TOKEN_SESSION_NAME)
+	accessToken, err := h.sessionManagerRepository.LoadGeneralAccessToken(c)
 	if err != nil {
 		return response.InternalServerError(c, err)
 	}
@@ -93,7 +93,7 @@ func (h *clientImageHandler) Patch(c echo.Context) error {
 		return response.BadRequest(c, err)
 	}
 
-	accessToken, err := h.sessionManagerRepository.LoadToken(c, config.GENERAL_ACCESS_TOKEN_SESSION_NAME)
+	accessToken, err := h.sessionManagerRepository.LoadGeneralAccessToken(c)
 	if err != nil {
 		return response.InternalServerError(c, err)
 	}
