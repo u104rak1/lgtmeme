@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { PAGE_ENDPOINTS, TWITTER_LINK_ENDPOINT } from "@/utils/constants";
 import { css } from "@@/styled-system/css";
 
@@ -53,9 +52,9 @@ const TermsOfService = () => {
           {
             "4.1. User privacy will be in accordance with the Operator's privacy policy. Please refer to the privacy policy "
           }
-          <Link className={linkCss} href={PAGE_ENDPOINTS.privacyPolicy}>
+          <a className={linkCss} href={PAGE_ENDPOINTS.privacyPolicy}>
             here
-          </Link>
+          </a>
           .
         </p>
         <h2 className={h2Css}>5. Legal Dispute Resolution</h2>

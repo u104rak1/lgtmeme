@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Button from "@/components/atoms/Button/Button";
 import Svg from "@/components/atoms/Svg/Svg";
 import ImageGallery from "@/components/organisms/ImageGallery/ImageGallery";
@@ -11,11 +10,11 @@ const HomePage = () => {
   return (
     <div>
       <ImageGallery css={imageGalleryCss} />
-      <Link href={PAGE_ENDPOINTS.new}>
+      <a href={PAGE_ENDPOINTS.new}>
         <Button css={buttonCss} icon={<Svg icon="plus" color="white" />}>
           New Image
         </Button>
-      </Link>
+      </a>
     </div>
   );
 };

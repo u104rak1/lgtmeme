@@ -15,6 +15,7 @@ type ClientImageHandler interface {
 	Post(c echo.Context) error
 	BulkGet(c echo.Context) error
 	Patch(c echo.Context) error
+	Delete(c echo.Context) error
 }
 
 type clientImageHandler struct {

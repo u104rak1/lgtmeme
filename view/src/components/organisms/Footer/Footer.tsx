@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import Button from "@/components/atoms/Button/Button";
-import { CLIENT_ENDPOINTS, PAGE_ENDPOINTS } from "@/utils/constants";
+import { PAGE_ENDPOINTS } from "@/utils/constants";
 import packageJson from "@@/package.json";
 import { css } from "@@/styled-system/css";
 
@@ -10,21 +9,18 @@ const Footer = () => {
   return (
     <footer className={footerCss}>
       <div className={buttonsCss}>
-        <Link href={PAGE_ENDPOINTS.home}>
+        <a href={PAGE_ENDPOINTS.home}>
           <Button visual="text">Home</Button>
-        </Link>
-        <Link href={PAGE_ENDPOINTS.termsOfService}>
+        </a>
+        <a href={PAGE_ENDPOINTS.termsOfService}>
           <Button visual="text">Terms of service</Button>
-        </Link>
-        <Link href={PAGE_ENDPOINTS.privacyPolicy}>
+        </a>
+        <a href={PAGE_ENDPOINTS.privacyPolicy}>
           <Button visual="text">Privacy policy</Button>
-        </Link>
-        <Button
-          visual="text"
-          onClick={() => (window.location.href = CLIENT_ENDPOINTS.admin)}
-        >
-          Admin
-        </Button>
+        </a>
+        <a href={PAGE_ENDPOINTS.admin}>
+          <Button visual="text">Admin</Button>
+        </a>
       </div>
       <div className={copyrightCss}>
         ©2024 ~ LGTMeme version {packageJson.version}
