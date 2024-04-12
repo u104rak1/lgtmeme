@@ -2,6 +2,6 @@
 /docker/volumes/db/data
 /docker/volumes/storage/stub
 .env.prod
-.env.local.private
+.env.local.secret
 private_key.pem
 public_key.pem

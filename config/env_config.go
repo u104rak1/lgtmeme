@@ -11,7 +11,7 @@ func NewEnv() {
 		if err := godotenv.Load(".env.local"); err != nil {
 			panic(err)
 		}
-		if err := godotenv.Load(".env.local.private"); err != nil {
+		if err := godotenv.Load(".env.local.secret"); err != nil {
 			panic(err)
 		}
 	}
