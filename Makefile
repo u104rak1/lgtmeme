@@ -37,6 +37,9 @@ development_start: ## Start the development environment
 get_token: ## Get Access Token
 	@bash -c './script/get_token.sh'
 
+unit_test: ## Run the unit test
+	@go test ./internal/handler/... ./internal/middleware/... ./internal/repository/... ./internal/service/... -v
+
 migrate_up_for_prod: ## Run the migration for production
 	@bash -c 'source .env.prod && migrate -path ./db/migration -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" up'
 
