@@ -2,18 +2,17 @@ package repository_test
 
 import (
 	"errors"
-	"net/http"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/ucho456job/lgtmeme/internal/repository"
+	"github.com/ucho456job/lgtmeme/testutil"
 	"gorm.io/gorm"
 )
 
 func TestCheckPostgres(t *testing.T) {
-	gormDB, mock := SetupMockDB(t)
-	c, _ := SetupMinEchoContext(http.MethodGet, "/")
+	gormDB, mock := testutil.SetupMockDB(t)
 
 	expectQuery := `SELECT "value" FROM "health_checks" WHERE key = \$1 ORDER BY "health_checks"\."key" LIMIT \$2`
 
@@ -56,6 +55,7 @@ func TestCheckPostgres(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
 			repo := repository.NewHealthRepository(gormDB)
 			value, err := repo.CheckPostgres(c, tt.key)
