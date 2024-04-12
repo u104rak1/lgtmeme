@@ -27,7 +27,7 @@ func TestCheckPostgres(t *testing.T) {
 		{
 			name:          "positive: Return value",
 			key:           "testKey",
-			expectedValue: "testValue",
+			expectedValue: "testValueaaaaaa",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"value"}).AddRow("testValue")
 				mock.ExpectQuery(expectQuery).WithArgs("testKey", 1).WillReturnRows(rows)
