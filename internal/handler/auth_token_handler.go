@@ -20,7 +20,7 @@ type tokenHandler struct {
 	oauthClientRepository    repository.OauthClientRepository
 	refreshTokenRepository   repository.RefreshTokenRepository
 	userRepository           repository.UserRepository
-	sessionManagerRepository repository.SessionManager
+	sessionManagerRepository repository.SessionManagerRepository
 	jwtService               service.JWTService
 }
 
@@ -28,7 +28,7 @@ func NewTokenHandler(
 	oauthClientRepository repository.OauthClientRepository,
 	refreshTokenRepository repository.RefreshTokenRepository,
 	userRepository repository.UserRepository,
-	sessionManagerRepository repository.SessionManager,
+	sessionManagerRepository repository.SessionManagerRepository,
 	jwtService service.JWTService,
 ) *tokenHandler {
 	return &tokenHandler{

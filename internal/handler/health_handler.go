@@ -15,12 +15,12 @@ type HealthHandler interface {
 
 type healthHandler struct {
 	healthRepository repository.HealthRepository
-	sessionManager   repository.SessionManager
+	sessionManager   repository.SessionManagerRepository
 }
 
 func NewHealthHandler(
 	healthRepository repository.HealthRepository,
-	sessionManager repository.SessionManager,
+	sessionManager repository.SessionManagerRepository,
 ) *healthHandler {
 	return &healthHandler{
 		healthRepository: healthRepository,

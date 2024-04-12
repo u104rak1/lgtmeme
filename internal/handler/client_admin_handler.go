@@ -17,12 +17,12 @@ type AdminHandler interface {
 }
 
 type adminHandler struct {
-	sessionManagerRepository repository.SessionManager
+	sessionManagerRepository repository.SessionManagerRepository
 	accessTokenService       service.AccessTokenService
 }
 
 func NewAdminHandler(
-	sessionManagerRepository repository.SessionManager,
+	sessionManagerRepository repository.SessionManagerRepository,
 	accessTokenService service.AccessTokenService,
 ) *adminHandler {
 	return &adminHandler{

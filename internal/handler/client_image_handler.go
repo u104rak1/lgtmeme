@@ -19,13 +19,13 @@ type ClientImageHandler interface {
 }
 
 type clientImageHandler struct {
-	sessionManagerRepository repository.SessionManager
+	sessionManagerRepository repository.SessionManagerRepository
 	accessTokenService       service.AccessTokenService
 	imageService             service.ImageService
 }
 
 func NewClientImageHandler(
-	sessionManagerRepository repository.SessionManager,
+	sessionManagerRepository repository.SessionManagerRepository,
 	accessTokenService service.AccessTokenService,
 	imageService service.ImageService,
 ) *clientImageHandler {

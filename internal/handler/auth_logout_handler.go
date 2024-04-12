@@ -14,10 +14,10 @@ type LogoutHandler interface {
 }
 
 type logoutHandler struct {
-	sessionManager repository.SessionManager
+	sessionManager repository.SessionManagerRepository
 }
 
-func NewLogoutHandler(sessionManager repository.SessionManager) *logoutHandler {
+func NewLogoutHandler(sessionManager repository.SessionManagerRepository) *logoutHandler {
 	return &logoutHandler{
 		sessionManager: sessionManager,
 	}

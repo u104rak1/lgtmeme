@@ -56,7 +56,7 @@ func newAuthServer(e *echo.Echo) {
 	healthRepo := repository.NewHealthRepository(config.DB)
 	oauthClientRepo := repository.NewOauthClientRepository(config.DB)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(config.DB)
-	authSessManaRepo := repository.NewSessionManager(config.Store, config.Pool)
+	authSessManaRepo := repository.NewSessionManagerRepository(config.Store, config.Pool)
 	userRepo := repository.NewUserRepository(config.DB)
 
 	jwtServ := service.NewJWTService()
@@ -78,7 +78,7 @@ func newAuthServer(e *echo.Echo) {
 }
 
 func newClientServer(e *echo.Echo) {
-	sessManaRepo := repository.NewSessionManager(config.Store, config.Pool)
+	sessManaRepo := repository.NewSessionManagerRepository(config.Store, config.Pool)
 
 	imgServ := service.NewImageService()
 	accessTokenServ := service.NewAccessTokenService()
@@ -105,7 +105,7 @@ func newClientServer(e *echo.Echo) {
 
 func newResourceServer(e *echo.Echo) {
 	imgRepo := repository.NewImageRepository(config.DB, &clock.RealClocker{})
-	sessManaRepo := repository.NewSessionManager(config.Store, config.Pool)
+	sessManaRepo := repository.NewSessionManagerRepository(config.Store, config.Pool)
 
 	accessTokenServ := service.NewAccessTokenService()
 	storageServ := service.NewStorageService()
