@@ -12,6 +12,7 @@ export const PAGE_ENDPOINTS = {
   new: "/new",
   privacyPolicy: "/privacy-policy",
   termsOfService: "/terms-of-service",
+  admin: "/admin",
 } as const;
 
 export const MAX_IMAGES_FETCH_COUNT = 9;

@@ -83,21 +83,20 @@ func newClientServer(e *echo.Echo) {
 	imgServ := service.NewImageService()
 	accessTokenServ := service.NewAccessTokenService()
 
-	adminHandler := handler.NewAdminHandler(sessManaRepo, accessTokenServ)
+	accessTokenMiddle := middleware.NewAccessTokenMiddleware(sessManaRepo, accessTokenServ)
+
 	viewHandler := handler.NewViewHandler()
-	homeHandler := handler.NewHomeHandler(sessManaRepo, accessTokenServ)
-	imgHandler := handler.NewClientImageHandler(sessManaRepo, accessTokenServ, imgServ)
-
-	e.GET(config.CLIENT_ADMIN_ENDPOINT, adminHandler.RedirectAuthz)
-	e.GET(config.CLIENT_ADMIN_CALLBACK_ENDPOINT, adminHandler.Callback)
-
-	e.GET(config.ADMIN_VIEW_ENDPOINT, adminHandler.GetView)
-	e.GET(config.HOME_VIEW_ENDPOINT, homeHandler.GetView)
-	e.GET(config.IMAGE_NEW_VIEW_ENDPOINT, imgHandler.GetView)
+	e.GET(config.ADMIN_VIEW_ENDPOINT, viewHandler.GetAdminView, accessTokenMiddle.SetAdminAccessToken())
+	e.GET(config.HOME_VIEW_ENDPOINT, viewHandler.GetHomeView, accessTokenMiddle.SetGeneralAccessToken())
+	e.GET(config.IMAGE_NEW_VIEW_ENDPOINT, viewHandler.GetImageView, accessTokenMiddle.SetGeneralAccessToken())
 	e.GET(config.ERROR_VIEW_ENDPOINT, viewHandler.GetErrView)
 	e.GET(config.PRIVACY_POLICY_ENDPOINT, viewHandler.GetPrivacyPolicyView)
 	e.GET(config.TERMS_OF_SERVICE_ENDPOINT, viewHandler.GetTermsOfServiceView)
 
+	adminHandler := handler.NewAdminHandler(sessManaRepo, accessTokenServ)
+	e.GET(config.CLIENT_ADMIN_CALLBACK_ENDPOINT, adminHandler.Callback)
+
+	imgHandler := handler.NewClientImageHandler(sessManaRepo, accessTokenServ, imgServ)
 	e.POST(config.CLIENT_IMAGES_ENDPOINT, imgHandler.Post)
 	e.GET(config.CLIENT_IMAGES_ENDPOINT, imgHandler.BulkGet)
 	e.PATCH(config.CLIENT_IMAGES_ENDPOINT+"/:image_id", imgHandler.Patch)
@@ -111,12 +110,12 @@ func newResourceServer(e *echo.Echo) {
 	accessTokenServ := service.NewAccessTokenService()
 	storageServ := service.NewStorageService()
 
-	verifyAccessTokenMiddle := middleware.NewVerifyAccessTokenMiddleware(sessManaRepo, accessTokenServ)
+	accessTokenMiddle := middleware.NewAccessTokenMiddleware(sessManaRepo, accessTokenServ)
 
 	imgHandler := handler.NewResourceImageHandler(imgRepo, storageServ, &uuidgen.RealUUIDGenerator{})
 
-	e.POST(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.Post, verifyAccessTokenMiddle.Verify(config.IMAGES_CREATE_SCOPE))
-	e.GET(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.BulkGet, verifyAccessTokenMiddle.Verify(config.IMAGES_READ_SCOPE))
-	e.PATCH(config.RESOURCE_IMAGES_ENDPOINT+"/:image_id", imgHandler.Patch, verifyAccessTokenMiddle.Verify(config.IMAGES_UPDATE_SCOPE))
-	e.DELETE(config.RESOURCE_IMAGES_ENDPOINT+"/:image_id", imgHandler.Delete, verifyAccessTokenMiddle.Verify(config.IMAGES_DELETE_SCOPE))
+	e.POST(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.Post, accessTokenMiddle.VerifyAccessToken(config.IMAGES_CREATE_SCOPE))
+	e.GET(config.RESOURCE_IMAGES_ENDPOINT, imgHandler.BulkGet, accessTokenMiddle.VerifyAccessToken(config.IMAGES_READ_SCOPE))
+	e.PATCH(config.RESOURCE_IMAGES_ENDPOINT+"/:image_id", imgHandler.Patch, accessTokenMiddle.VerifyAccessToken(config.IMAGES_UPDATE_SCOPE))
+	e.DELETE(config.RESOURCE_IMAGES_ENDPOINT+"/:image_id", imgHandler.Delete, accessTokenMiddle.VerifyAccessToken(config.IMAGES_DELETE_SCOPE))
 }

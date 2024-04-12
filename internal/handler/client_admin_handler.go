@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/ucho456job/lgtmeme/config"
@@ -15,8 +13,6 @@ import (
 )
 
 type AdminHandler interface {
-	GetView(c echo.Context) error
-	RedirectAuthz(c echo.Context) error
 	Callback(c echo.Context) error
 }
 
@@ -33,51 +29,6 @@ func NewAdminHandler(
 		sessionManagerRepository: sessionManagerRepository,
 		accessTokenService:       accessTokenService,
 	}
-}
-
-func (h *adminHandler) GetView(c echo.Context) error {
-	return c.File(config.ADMIN_VIEW_FILEPATH)
-}
-
-func (h *adminHandler) RedirectAuthz(c echo.Context) error {
-	accessToken, err := h.sessionManagerRepository.LoadToken(c, config.ADMIN_ACCESS_TOKEN_SESSION_NAME)
-	if err != nil {
-		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
-	}
-	if accessToken != "" {
-		return c.Redirect(http.StatusFound, config.ADMIN_VIEW_ENDPOINT)
-	}
-
-	refreshToken, err := h.sessionManagerRepository.LoadToken(c, config.REFRESH_TOKEN_SESSION_NAME)
-	if err != nil {
-		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
-	}
-	if refreshToken != "" {
-		respBody, status, err := h.accessTokenService.CallTokenWithRefreshToken(c, &refreshToken)
-		if err != nil {
-			errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
-			return c.Redirect(http.StatusFound, errURL)
-		}
-
-		return h.commonSuccessProcess(c, respBody.AccessToken, respBody.RefreshToken)
-	}
-
-	baseURL := os.Getenv("BASE_URL")
-	url := baseURL + config.AUTHZ_ENDPOINT
-	clientID := os.Getenv("ADMIN_CLIENT_ID")
-	redirectURI := os.Getenv("ADMIN_REDIRECT_URI")
-	scope := os.Getenv("ADMIN_SCOPE")
-	state := uuid.New().String()
-	nonce := uuid.New().String()
-
-	if err := h.sessionManagerRepository.CacheStateAndNonce(c, state, nonce); err != nil {
-		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
-	}
-
-	q := fmt.Sprintf("%s?response_type=code&client_id=%s&redirect_uri=%s&scope=%s&state=%s&nonce=%s",
-		url, clientID, redirectURI, scope, state, nonce)
-
-	return c.Redirect(http.StatusFound, q)
 }
 
 func (h *adminHandler) Callback(c echo.Context) error {
@@ -121,15 +72,11 @@ func (h *adminHandler) Callback(c echo.Context) error {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 
-	return h.commonSuccessProcess(c, tokenRespBody.AccessToken, tokenRespBody.RefreshToken)
-}
-
-func (h *adminHandler) commonSuccessProcess(c echo.Context, accessToken, refreshToken string) error {
-	if err := h.sessionManagerRepository.CacheToken(c, accessToken, config.ADMIN_ACCESS_TOKEN_SESSION_NAME); err != nil {
+	if err := h.sessionManagerRepository.CacheToken(c, tokenRespBody.AccessToken, config.ADMIN_ACCESS_TOKEN_SESSION_NAME); err != nil {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 
-	if err := h.sessionManagerRepository.CacheToken(c, refreshToken, config.REFRESH_TOKEN_SESSION_NAME); err != nil {
+	if err := h.sessionManagerRepository.CacheToken(c, tokenRespBody.RefreshToken, config.REFRESH_TOKEN_SESSION_NAME); err != nil {
 		return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
 	}
 

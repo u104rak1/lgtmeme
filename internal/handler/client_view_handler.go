@@ -6,6 +6,11 @@ import (
 )
 
 type ViewHandler interface {
+	GetHomeView(c echo.Context, filePath string) error
+	GetImageView(c echo.Context) error
+	GetPrivacyPolicyView(c echo.Context) error
+	GetTermsOfServiceView(c echo.Context) error
+	GetAdminView(c echo.Context) error
 	GetErrView(c echo.Context) error
 }
 
@@ -15,8 +20,12 @@ func NewViewHandler() *viewHandler {
 	return &viewHandler{}
 }
 
-func (h *viewHandler) GetErrView(c echo.Context) error {
-	return c.File(config.ERROR_VIEW_FILEPATH)
+func (h *viewHandler) GetHomeView(c echo.Context) error {
+	return c.File(config.HOME_VIEW_FILEPATH)
+}
+
+func (h *viewHandler) GetImageView(c echo.Context) error {
+	return c.File(config.IMAGE_NEW_VIEW_FILEPATH)
 }
 
 func (h *viewHandler) GetPrivacyPolicyView(c echo.Context) error {
@@ -25,4 +34,12 @@ func (h *viewHandler) GetPrivacyPolicyView(c echo.Context) error {
 
 func (h *viewHandler) GetTermsOfServiceView(c echo.Context) error {
 	return c.File(config.TERMS_OF_SERVICE_FILEPATH)
+}
+
+func (h *viewHandler) GetAdminView(c echo.Context) error {
+	return c.File(config.ADMIN_VIEW_FILEPATH)
+}
+
+func (h *viewHandler) GetErrView(c echo.Context) error {
+	return c.File(config.ERROR_VIEW_FILEPATH)
 }
