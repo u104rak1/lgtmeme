@@ -2,6 +2,15 @@
 
 source .env.local
 
+if [ ! -f .env.local.secret ]; then
+  echo ".env.local.secret does not exist. Creating keys..."
+  openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048
+  openssl rsa -pubout -in private_key.pem -out public_key.pem
+  
+  echo "JWT_PRIVATE_KEY_BASE64=$(base64 private_key.pem | tr -d '\n')" > .env.local.secret
+  echo "JWT_PUBLIC_KEY_BASE64=$(base64 public_key.pem | tr -d '\n')" >> .env.local.secret
+fi
+
 rm -rf ./docker/volumes/storage/stub
 
 make dependencies_start
