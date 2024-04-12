@@ -265,6 +265,3 @@ openssl rsa -pubout -in private_key.pem -out public_key.pem
 cat private_key.pem | base64 | tr -d '\n'
 cat public_key.pem | base64 | tr -d '\n'
 ```
-# start_development.shを修正
-# login画面を装飾
-# テストを書いてく。ただし認証系以外を先に。OIDCはスコープ認可も考えるので一旦保留。
