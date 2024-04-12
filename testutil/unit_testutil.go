@@ -1,11 +1,15 @@
-package repository_test
+package testutil
 
 import (
+	"io"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/labstack/echo/v4"
+	"github.com/ucho456job/lgtmeme/config"
+	"golang.org/x/exp/slog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -27,10 +31,15 @@ func SetupMockDB(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
 	return gormDB, mock
 }
 
-func SetupMinEchoContext(method, path string) (echo.Context, *httptest.ResponseRecorder) {
+func SetupMinEchoContext() (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
-	req := httptest.NewRequest(method, path, nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
+	c.SetResponse(echo.NewResponse(rec, e))
 	return c, rec
+}
+
+func SetupTestLogger() {
+	config.Logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
 }

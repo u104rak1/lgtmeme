@@ -20,13 +20,13 @@ type AuthzHandler interface {
 type authzHandler struct {
 	oauthClientRepository    repository.OauthClientRepository
 	userRepository           repository.UserRepository
-	sessionManagerRepository repository.SessionManager
+	sessionManagerRepository repository.SessionManagerRepository
 }
 
 func NewAuthzHandler(
 	oauthClientRepository repository.OauthClientRepository,
 	userRepository repository.UserRepository,
-	sessionManagerRepository repository.SessionManager,
+	sessionManagerRepository repository.SessionManagerRepository,
 ) *authzHandler {
 	return &authzHandler{
 		oauthClientRepository:    oauthClientRepository,

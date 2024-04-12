@@ -24,12 +24,12 @@ type AccessTokenMiddleware interface {
 }
 
 type accessTokenMiddleware struct {
-	sessionManagerRepository repository.SessionManager
+	sessionManagerRepository repository.SessionManagerRepository
 	accessTokenService       service.AccessTokenService
 }
 
 func NewAccessTokenMiddleware(
-	sessionManagerRepository repository.SessionManager,
+	sessionManagerRepository repository.SessionManagerRepository,
 	accessTokenService service.AccessTokenService,
 ) AccessTokenMiddleware {
 	return &accessTokenMiddleware{

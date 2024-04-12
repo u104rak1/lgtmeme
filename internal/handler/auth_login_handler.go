@@ -21,12 +21,12 @@ type LoginHandler interface {
 
 type loginHandler struct {
 	userRepository repository.UserRepository
-	sessionManager repository.SessionManager
+	sessionManager repository.SessionManagerRepository
 }
 
 func NewLoginHandler(
 	userRepository repository.UserRepository,
-	sessionManager repository.SessionManager,
+	sessionManager repository.SessionManagerRepository,
 ) *loginHandler {
 	return &loginHandler{
 		userRepository: userRepository,
