@@ -40,10 +40,10 @@ describe("ImageService", () => {
       const result = await imageService.getImages(query);
       expect(result).toEqual({ ...mockResponse, ok: true });
     });
-    test("negative: Return error, when validation error occurs", async () => {
+    test("negative: Return error, when bad request error occurs", async () => {
       const mockResponse = {
         errorCode: "bad_request",
-        errorMessage: "keyword must be a string and less than 50 characters",
+        errorMessage: "bad request error occured",
       };
       const mockFetch = jest.fn().mockResolvedValue({
         ok: false,
@@ -84,10 +84,10 @@ describe("ImageService", () => {
       const result = await imageService.postImage(body);
       expect(result).toEqual({ ...mockResponse, ok: true });
     });
-    test("negative: Return error, when validtaion error occurs", async () => {
+    test("negative: Return error, when bad request error occurs", async () => {
       const mockResponse = {
         errorCode: "bad_request",
-        errorMessage: "keyword must be a string and less than 50 characters",
+        errorMessage: "bad request error occured",
       };
       const mockFetch = jest.fn().mockResolvedValue({
         ok: false,
@@ -124,10 +124,10 @@ describe("ImageService", () => {
       const result = await imageService.patchImage(id, body);
       expect(result).toEqual({ ok: true });
     });
-    test("negative: Return error, when validation error occurs", async () => {
+    test("negative: Return error, when bad request error occurs", async () => {
       const mockResponse = {
         errorCode: "bad_request",
-        errorMessage: "keyword must be a string and less than 50 characters",
+        errorMessage: "bad request error occured",
       };
       const mockFetch = jest.fn().mockResolvedValue({
         ok: false,

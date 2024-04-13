@@ -9,8 +9,4 @@ type ErrRespBody = {
   errorMessage: string;
 };
 
-type ErrResult = {
-  errorCode: string;
-  errorMessage: string;
-  ok: false;
-};
+type ErrResult = ErrRespBody & { ok: false };

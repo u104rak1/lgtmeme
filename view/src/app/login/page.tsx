@@ -1,72 +1,69 @@
 "use client";
 
-import { AUTH_ENDPOINTS } from "@/utils/constants";
 import { useState } from "react";
-
-type ResBody = {
-  redirectURL?: string;
-  error?: string;
-};
+import Button from "@/components/atoms/Button/Button";
+import TextBox from "@/components/atoms/InputText/InputText";
+import { css } from "@@/styled-system/css";
+import { LoginService } from "@/services/login.service";
+import Modal from "@/components/molecules/Modal/Modal";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [modal, setModal] = useState({ message: "", show: false });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const formData = new URLSearchParams();
-    formData.append("username", username);
-    formData.append("password", password);
-
-    try {
-      const res = await fetch(AUTH_ENDPOINTS.login, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData.toString(),
-      });
-
-      if (res.ok) {
-        const resBody: ResBody = await res.json();
-        if (resBody.redirectURL) {
-          window.location.href = resBody.redirectURL;
-        } else {
-          alert(JSON.stringify(resBody));
-        }
-      } else {
-        const errText = await res.text();
-        alert("Login failed: " + errText);
-      }
-    } catch (ex) {
-      alert("Login failed: " + ex);
+    const service = new LoginService();
+    const result = await service.postLogin(username, password);
+    if (result.ok) {
+      window.location.href = result.redirectURL;
+    } else {
+      setModal({ message: result.errorMessage, show: true });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
-      <button type="submit">Login</button>
+    <form className={formCss} onSubmit={handleSubmit}>
+      <TextBox
+        type="text"
+        placeholder="username"
+        value={username}
+        onChange={(v) => setUsername(v)}
+      />
+      <TextBox
+        css={marginCss}
+        type="password"
+        placeholder="password"
+        value={password}
+        onChange={(v) => setPassword(v)}
+      />
+      <Button css={marginCss} type="submit">
+        Login
+      </Button>
+      <Modal
+        {...modal}
+        onClick={() => setModal({ message: "", show: false })}
+      />
     </form>
   );
 };
+
+const formCss = css({
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  margin: "100px auto",
+  padding: "5",
+  border: "1px solid #ccc",
+  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  width: "300px",
+  boxSizing: "border-box",
+});
+
+const marginCss = css({
+  marginTop: "5",
+});
 
 export default LoginPage;
