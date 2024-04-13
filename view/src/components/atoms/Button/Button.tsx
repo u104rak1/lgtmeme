@@ -7,6 +7,7 @@ type Props = {
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   icon?: JSX.Element;
+  type?: "button" | "submit" | "reset";
   children: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
@@ -18,6 +19,7 @@ const Button = ({
   size,
   disabled,
   icon,
+  type = "button",
   children,
   onClick,
 }: Props) => {
@@ -26,6 +28,7 @@ const Button = ({
       <button
         className={buttonRecipe({ visual, color, size, disabled })}
         disabled={disabled}
+        type={type}
         onClick={onClick}
       >
         {icon}

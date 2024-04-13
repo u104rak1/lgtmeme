@@ -19,10 +19,7 @@ type GetImagesQuery = {
 type GetImagesRespBody = {
   images: Image[];
 };
-type GetImagesSuccessResult = {
-  images: Image[];
-  ok: true;
-};
+type GetImagesSuccessResult = GetImagesRespBody & { ok: true };
 type GetImagesResult = GetImagesSuccessResult | ErrResult;
 
 /** POST */
@@ -33,10 +30,7 @@ type PostImageReqBody = {
 type PostImageRespBody = {
   imageUrl: string;
 };
-type PostImageSuccessResult = {
-  imageUrl: string;
-  ok: true;
-};
+type PostImageSuccessResult = PostImageRespBody & { ok: true };
 type PostImageResult = PostImageSuccessResult | ErrResult;
 
 /** PATCH */
@@ -44,9 +38,7 @@ type PatchRequestType = "used" | "report" | "confirm";
 type PatchImageReqBody = {
   type: PatchRequestType;
 };
-type PatchImageSuccessResult = {
-  ok: true;
-};
+type PatchImageSuccessResult = { ok: true };
 type PatchImageResult = PatchImageSuccessResult | ErrResult;
 
 /** DELETE */
