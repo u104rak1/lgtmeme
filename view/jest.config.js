@@ -9,7 +9,7 @@ const customJestConfig = {
   testEnvironment: "jest-environment-jsdom",
   setupFilesAfterEnv: ["./jest.setup.ts"],
   moduleNameMapper: {
-    "^@/(.*)$": "./src/$1",
+    "^@/(.*)$": "<rootDir>/src/$1",
   },
   testPathIgnorePatterns: ["<rootDir>/e2e/"],
 };

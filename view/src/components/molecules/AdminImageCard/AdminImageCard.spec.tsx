@@ -4,7 +4,7 @@ import AdminImageCard from "@/components/molecules/AdminImageCard/AdminImageCard
 
 describe("AdminImageCard", () => {
   const imageMock = {
-    id: "1",
+    id: "a2128761-21a8-53c6-b6cd-1578eaf12c14",
     url: "https://placehold.jp/300x300.png",
     keyword: "",
     usedCount: 0,
