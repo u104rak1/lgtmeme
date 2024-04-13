@@ -2,7 +2,7 @@ type Image = {
   id: string;
   url: string;
   keyword: string;
-  usedCount: string;
+  usedCount: number;
   reported: boolean;
   confirmed: boolean;
   createdAt: string;
