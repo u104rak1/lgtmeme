@@ -41,6 +41,14 @@ func Unauthorized(c echo.Context, err error) error {
 	})
 }
 
+func Forbidden(c echo.Context, err error) error {
+	config.Logger.Warn("Forbidden", "error", err.Error())
+	return c.JSON(http.StatusForbidden, ErrResp{
+		ErrCode: "forbidden",
+		ErrMsg:  err.Error(),
+	})
+}
+
 func NotFound(c echo.Context, err error) error {
 	config.Logger.Warn("Not found", "error", err.Error())
 	return c.JSON(http.StatusNotFound, ErrResp{

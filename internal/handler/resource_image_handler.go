@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -21,17 +22,20 @@ type ResourceImageHandler interface {
 
 type resourceImageHandler struct {
 	imageRepository repository.ImageRepository
+	userRepository  repository.UserRepository
 	storageService  service.StorageService
 	uuidGenerator   uuidgen.UUIDGenerator
 }
 
 func NewResourceImageHandler(
 	imageRepository repository.ImageRepository,
+	userRepository repository.UserRepository,
 	storageService service.StorageService,
 	uuidGenerator uuidgen.UUIDGenerator,
 ) ResourceImageHandler {
 	return &resourceImageHandler{
 		imageRepository: imageRepository,
+		userRepository:  userRepository,
 		storageService:  storageService,
 		uuidGenerator:   uuidGenerator,
 	}
@@ -139,9 +143,24 @@ func (h *resourceImageHandler) Delete(c echo.Context) error {
 		return response.BadRequest(c, err)
 	}
 
+	tmpUserID := c.Get("userID").(string)
+	userID, err := uuid.Parse(tmpUserID)
+	if err != nil {
+		return response.InternalServerError(c, err)
+	}
+
+	user, err := h.userRepository.FindByID(c, userID)
+	if err != nil {
+		return response.InternalServerError(c, err)
+	}
+
+	if user.Role != "admin" {
+		return response.Forbidden(c, errors.New("permission denied"))
+	}
+
 	imgURL, err := h.imageRepository.FindURLByID(c, imageID)
 	if imgURL == nil {
-		return response.NotFound(c, nil)
+		return response.NotFound(c, errors.New("image not found"))
 	}
 	if err != nil {
 		return response.InternalServerError(c, err)
