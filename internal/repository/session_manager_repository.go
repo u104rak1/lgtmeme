@@ -235,6 +235,9 @@ func (r *sessionManagerRepository) Logout(c echo.Context) error {
 	if err := r.clearSession(c, config.ADMIN_ACCESS_TOKEN_SESSION_NAME); err != nil {
 		return err
 	}
+	if err := r.clearSession(c, config.REFRESH_TOKEN_SESSION_NAME); err != nil {
+		return err
+	}
 	return nil
 }
 

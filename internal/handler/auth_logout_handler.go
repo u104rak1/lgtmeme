@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/ucho456job/lgtmeme/internal/dto"
+	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/repository"
 	"github.com/ucho456job/lgtmeme/internal/util/response"
 )
@@ -27,5 +27,5 @@ func (h *logoutHandler) Logout(c echo.Context) error {
 	if err := h.sessionManager.Logout(c); err != nil {
 		return response.InternalServerError(c, err)
 	}
-	return c.JSON(http.StatusOK, dto.LogoutResp{OK: true})
+	return c.Redirect(http.StatusFound, config.HOME_VIEW_ENDPOINT)
 }
