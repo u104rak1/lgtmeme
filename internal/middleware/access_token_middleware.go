@@ -152,6 +152,10 @@ func (m *accessTokenMiddleware) VerifyAccessToken(requiredScope string) echo.Mid
 				return response.Unauthorized(c, errors.New("invalid scope"))
 			}
 
+			if sub, ok := parsedToken.Get("sub"); ok {
+				c.Set("userID", sub)
+			}
+
 			return next(c)
 		}
 	}
