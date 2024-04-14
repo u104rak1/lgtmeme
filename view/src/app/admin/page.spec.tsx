@@ -10,6 +10,7 @@ jest.mock("@/components/organisms/AdminImageGallery/AdminImageGallery", () => ({
 describe("AdminPage", () => {
   it("Page is rendered", () => {
     render(<AdminPage />);
+    expect(screen.getByRole("button", { name: "Logout" })).toBeInTheDocument();
     expect(screen.getByText("MockAdminImageGallery")).toBeInTheDocument();
   });
 });
