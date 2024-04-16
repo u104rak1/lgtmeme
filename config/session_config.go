@@ -56,3 +56,11 @@ func NewSessionStore() {
 
 	Pool = Store.Pool
 }
+
+func CloseSessionStore() {
+	if Store != nil {
+		if err := Store.Close(); err != nil {
+			panic(err)
+		}
+	}
+}
