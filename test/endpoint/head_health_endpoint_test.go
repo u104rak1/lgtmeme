@@ -12,14 +12,13 @@ import (
 )
 
 func TestHealthCheckHandler(t *testing.T) {
-	e := testutil.BeforeAll(t)
+	e, gol := testutil.BeforeAll(t, "HealthCheckHead")
 	defer testutil.AfterAll(t)
 
 	tests := []struct {
 		name           string
 		prepare        func(t *testing.T)
 		expectedStatus int
-		expectedBody   string
 	}{
 		{
 			name: "positive: Return 200",
@@ -33,18 +32,43 @@ func TestHealthCheckHandler(t *testing.T) {
 				testutil.PrepareRedisData(t, key, "healthCheckValue")
 			},
 			expectedStatus: http.StatusOK,
-			expectedBody:   "Server is healthy!",
+		},
+		{
+			name:           "negative: Return 500, because health_checks not found",
+			prepare:        func(t *testing.T) {},
+			expectedStatus: http.StatusInternalServerError,
+		},
+		{
+			name: "negative: Return 500, because redis value not found",
+			prepare: func(t *testing.T) {
+				key := "healthCheckKey"
+				prepareHealthCheck := model.HealthCheck{
+					Key:   key,
+					Value: "healthCheckValue",
+				}
+				testutil.PrepareDBData(t, &prepareHealthCheck)
+			},
+			expectedStatus: http.StatusInternalServerError,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.prepare(t)
+			beforeDBData := testutil.FetchDBData(t, []string{"health_checks"})
+			beforeRedisData := testutil.FetchRedisData(t)
+
 			req := httptest.NewRequest(http.MethodHead, config.HEALTH_ENDPOINT, nil)
 			rec := httptest.NewRecorder()
 			e.ServeHTTP(rec, req)
 			assert.Equal(t, tt.expectedStatus, rec.Code)
-			assert.Equal(t, tt.expectedBody, rec.Body.String())
+
+			afterDBData := testutil.FetchDBData(t, []string{"health_checks"})
+			afterRedisData := testutil.FetchRedisData(t)
+
+			resultJSON := testutil.GenerateResultJSON(t, beforeDBData, afterDBData, beforeRedisData, afterRedisData, req, rec)
+			gol.Assert(t, tt.name, resultJSON)
+			testutil.ClearAllData(t)
 		})
 	}
 }
