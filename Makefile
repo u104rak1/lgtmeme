@@ -1,4 +1,4 @@
-.PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data run view_build development_start get_token unit_test help
+.PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data run view_build development_start get_token unit_test endpoint_test help
 
 dependencies_start: ## Start the postgres and redis
 	@docker compose --env-file .env.local -f ./docker/docker-compose.local.yaml up -d
