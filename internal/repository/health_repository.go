@@ -1,6 +1,6 @@
 package repository
 
-// mockgen -source=internal/repository/health_repository.go -destination=testutil/mock/repository/mock_health_repository.go -package=repository_mock
+// mockgen -source=internal/repository/health_repository.go -destination=test/mock/repository/mock_health_repository.go -package=repository_mock
 
 import (
 	"github.com/labstack/echo/v4"

@@ -10,8 +10,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/ucho456job/lgtmeme/internal/handler"
-	"github.com/ucho456job/lgtmeme/testutil"
-	mock_repository "github.com/ucho456job/lgtmeme/testutil/mock/repository"
+	mock_repository "github.com/ucho456job/lgtmeme/test/mock/repository"
+	"github.com/ucho456job/lgtmeme/test/testutil"
 )
 
 func TestHealthHandler_Check(t *testing.T) {
