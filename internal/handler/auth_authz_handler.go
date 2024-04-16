@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -20,17 +21,20 @@ type AuthzHandler interface {
 type authzHandler struct {
 	oauthClientRepository    repository.OauthClientRepository
 	userRepository           repository.UserRepository
+	scopeRepository          repository.ScopeRepository
 	sessionManagerRepository repository.SessionManagerRepository
 }
 
 func NewAuthzHandler(
 	oauthClientRepository repository.OauthClientRepository,
 	userRepository repository.UserRepository,
+	scopeRepository repository.ScopeRepository,
 	sessionManagerRepository repository.SessionManagerRepository,
 ) *authzHandler {
 	return &authzHandler{
 		oauthClientRepository:    oauthClientRepository,
 		userRepository:           userRepository,
+		scopeRepository:          scopeRepository,
 		sessionManagerRepository: sessionManagerRepository,
 	}
 }
@@ -71,7 +75,25 @@ func (h *authzHandler) Authorize(c echo.Context) error {
 		if err := h.sessionManagerRepository.CachePreAuthnSession(c, *q); err != nil {
 			return response.InternalServerError(c, err)
 		}
-		return c.Redirect(http.StatusFound, config.LOGIN_VIEW_ENDPOINT)
+
+		scopes, err := h.scopeRepository.FindByScopesStr(c, q.Scope)
+		if err != nil {
+			return response.InternalServerError(c, err)
+		}
+
+		scopesStr := ""
+		descriptionsStr := ""
+		for i, s := range scopes {
+			if i != 0 {
+				scopesStr += ","
+				descriptionsStr += ","
+			}
+			scopesStr += s.Code
+			descriptionsStr += s.Description
+		}
+
+		redirectURL := fmt.Sprintf("%s?scopes=%s&descriptions=%s", config.LOGIN_VIEW_ENDPOINT, scopesStr, descriptionsStr)
+		return c.Redirect(http.StatusFound, redirectURL)
 	}
 
 	exists, err = h.userRepository.ExistsByID(c, userID)

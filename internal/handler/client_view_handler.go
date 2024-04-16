@@ -11,7 +11,6 @@ type ViewHandler interface {
 	GetPrivacyPolicyView(c echo.Context) error
 	GetTermsOfServiceView(c echo.Context) error
 	GetAdminView(c echo.Context) error
-	GetErrView(c echo.Context) error
 }
 
 type viewHandler struct{}
@@ -38,8 +37,4 @@ func (h *viewHandler) GetTermsOfServiceView(c echo.Context) error {
 
 func (h *viewHandler) GetAdminView(c echo.Context) error {
 	return c.File(config.ADMIN_VIEW_FILEPATH)
-}
-
-func (h *viewHandler) GetErrView(c echo.Context) error {
-	return c.File(config.ERROR_VIEW_FILEPATH)
 }

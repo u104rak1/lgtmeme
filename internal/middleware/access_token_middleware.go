@@ -42,18 +42,18 @@ func (m *accessTokenMiddleware) SetGeneralAccessToken() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			_, err := m.sessionManagerRepository.LoadGeneralAccessToken(c)
-			if err == redis.ErrNil {
-				respBody, status, err := m.accessTokenService.CallTokenWithClientCredentials(c)
-				if err != nil && status != http.StatusOK {
-					errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
-					return c.Redirect(http.StatusFound, errURL)
-				}
+			if err != nil {
+				if err == redis.ErrNil {
+					respBody, status, err := m.accessTokenService.CallTokenWithClientCredentials(c)
+					if err != nil && status != http.StatusOK {
+						return response.HandleErrResp(c, status, err)
+					}
 
-				if err := m.sessionManagerRepository.CacheGeneralAccessToken(c, respBody.AccessToken); err != nil {
-					return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+					if err := m.sessionManagerRepository.CacheGeneralAccessToken(c, respBody.AccessToken); err != nil {
+						return response.InternalServerError(c, err)
+					}
 				}
-			} else if err != nil {
-				return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+				return response.InternalServerError(c, err)
 			}
 			return next(c)
 		}
@@ -65,7 +65,7 @@ func (m *accessTokenMiddleware) SetAdminAccessToken() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			accessToken, err := m.sessionManagerRepository.LoadToken(c, config.ADMIN_ACCESS_TOKEN_SESSION_NAME)
 			if err != nil {
-				return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+				return response.InternalServerError(c, err)
 			}
 			if accessToken != "" {
 				return next(c)
@@ -73,21 +73,20 @@ func (m *accessTokenMiddleware) SetAdminAccessToken() echo.MiddlewareFunc {
 
 			refreshToken, err := m.sessionManagerRepository.LoadToken(c, config.REFRESH_TOKEN_SESSION_NAME)
 			if err != nil {
-				return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+				return response.InternalServerError(c, err)
 			}
 			if refreshToken != "" {
 				respBody, status, err := m.accessTokenService.CallTokenWithRefreshToken(c, &refreshToken)
 				if err != nil {
-					errURL := fmt.Sprintf("%s?code=%d", config.ERROR_VIEW_ENDPOINT, status)
-					return c.Redirect(http.StatusFound, errURL)
+					return response.HandleErrResp(c, status, err)
 				}
 
 				if err := m.sessionManagerRepository.CacheToken(c, respBody.AccessToken, config.ADMIN_ACCESS_TOKEN_SESSION_NAME); err != nil {
-					return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+					return response.InternalServerError(c, err)
 				}
 
 				if err := m.sessionManagerRepository.CacheToken(c, respBody.RefreshToken, config.REFRESH_TOKEN_SESSION_NAME); err != nil {
-					return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+					return response.InternalServerError(c, err)
 				}
 
 				return next(c)
@@ -102,7 +101,7 @@ func (m *accessTokenMiddleware) SetAdminAccessToken() echo.MiddlewareFunc {
 			nonce := uuid.New().String()
 
 			if err := m.sessionManagerRepository.CacheStateAndNonce(c, state, nonce); err != nil {
-				return c.Redirect(http.StatusFound, config.ERROR_VIEW_ENDPOINT)
+				return response.InternalServerError(c, err)
 			}
 
 			q := fmt.Sprintf("%s?response_type=code&client_id=%s&redirect_uri=%s&scope=%s&state=%s&nonce=%s",
