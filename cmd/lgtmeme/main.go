@@ -56,12 +56,13 @@ func newAuthServer(e *echo.Echo) {
 	healthRepo := repository.NewHealthRepository(config.DB)
 	oauthClientRepo := repository.NewOauthClientRepository(config.DB)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(config.DB)
+	scopeRepo := repository.NewScopeRepository(config.DB)
 	authSessManaRepo := repository.NewSessionManagerRepository(config.Store, config.Pool)
 	userRepo := repository.NewUserRepository(config.DB)
 
 	jwtServ := service.NewJWTService()
 
-	authzHandler := handler.NewAuthzHandler(oauthClientRepo, userRepo, authSessManaRepo)
+	authzHandler := handler.NewAuthzHandler(oauthClientRepo, userRepo, scopeRepo, authSessManaRepo)
 	healthHandler := handler.NewHealthHandler(healthRepo, authSessManaRepo)
 	jwksHandler := handler.NewJwksHandler(jwtServ)
 	loginHandler := handler.NewLoginHandler(userRepo, authSessManaRepo)
@@ -89,7 +90,6 @@ func newClientServer(e *echo.Echo) {
 	e.GET(config.ADMIN_VIEW_ENDPOINT, viewHandler.GetAdminView, accessTokenMiddle.SetAdminAccessToken())
 	e.GET(config.HOME_VIEW_ENDPOINT, viewHandler.GetHomeView, accessTokenMiddle.SetGeneralAccessToken())
 	e.GET(config.IMAGE_NEW_VIEW_ENDPOINT, viewHandler.GetImageView, accessTokenMiddle.SetGeneralAccessToken())
-	e.GET(config.ERROR_VIEW_ENDPOINT, viewHandler.GetErrView)
 	e.GET(config.PRIVACY_POLICY_ENDPOINT, viewHandler.GetPrivacyPolicyView)
 	e.GET(config.TERMS_OF_SERVICE_ENDPOINT, viewHandler.GetTermsOfServiceView)
 

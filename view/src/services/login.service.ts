@@ -19,12 +19,14 @@ type PostLoginResult = PostLoginSuccessResult | PostLoginErrorResult;
 export class LoginService extends CommonService {
   async postLogin(
     username: string,
-    password: string
+    password: string,
+    scopeConsent: boolean
   ): Promise<PostLoginResult> {
     try {
       const formData = new URLSearchParams();
       formData.append("username", username);
       formData.append("password", password);
+      formData.append("scopeConsent", scopeConsent.toString());
       const result = await fetch(AUTH_ENDPOINTS.login, {
         method: "POST",
         headers: {

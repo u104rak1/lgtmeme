@@ -13,7 +13,7 @@ describe("LoginService", () => {
     });
     global.fetch = mockFetch;
 
-    const result = await loginService.postLogin("user", "password");
+    const result = await loginService.postLogin("user", "password", true);
 
     expect(result).toEqual({ ...mockResponse, ok: true });
   });
@@ -28,7 +28,7 @@ describe("LoginService", () => {
     });
     global.fetch = mockFetch;
 
-    const result = await loginService.postLogin("user", "password");
+    const result = await loginService.postLogin("user", "password", true);
 
     expect(result).toEqual({ ...mockResponse, ok: true });
   });
@@ -36,7 +36,7 @@ describe("LoginService", () => {
     const mockFetch = jest.fn().mockRejectedValue(new Error());
     global.fetch = mockFetch;
     global.fetch = mockFetch;
-    const result = await loginService.postLogin("user", "password");
+    const result = await loginService.postLogin("user", "password", true);
     expect(result).toEqual({
       errorCode: "unknown",
       errorMessage: "an unknown error occured",

@@ -28,7 +28,6 @@ const (
 
 	// view endpoint
 	STATIC_ENDPOINT           = "/"
-	ERROR_VIEW_ENDPOINT       = "/error"
 	HOME_VIEW_ENDPOINT        = "/"
 	IMAGE_NEW_VIEW_ENDPOINT   = "/new"
 	ADMIN_VIEW_ENDPOINT       = "/admin"
@@ -37,7 +36,6 @@ const (
 
 	// file path
 	STATIC_FILEPATH           = "view/out"
-	ERROR_VIEW_FILEPATH       = "view/out/error.html"
 	HOME_VIEW_FILEPATH        = "view/out/index.html"
 	IMAGE_NEW_VIEW_FILEPATH   = "view/out/new.html"
 	ADMIN_VIEW_FILEPATH       = "view/out/admin.html"

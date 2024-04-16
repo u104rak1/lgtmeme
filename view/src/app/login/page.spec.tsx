@@ -16,6 +16,7 @@ describe("LoginPage", () => {
       value: {
         ...window.location,
         href: "http://localhost",
+        search: "?scopes=read,write&descriptions=Read data,Write data",
       },
       writable: true,
     });
@@ -29,9 +30,11 @@ describe("LoginPage", () => {
 
     const usernameTextBox = screen.getByPlaceholderText("username");
     const passwordTextBox = screen.getByPlaceholderText("password");
+    const consentCheckbox = screen.getByLabelText("Agree to scopes");
     const loginButton = screen.getByRole("button", { name: "Login" });
     expect(usernameTextBox).toBeInTheDocument();
     expect(passwordTextBox).toBeInTheDocument();
+    expect(consentCheckbox).toBeInTheDocument();
     expect(loginButton).toBeInTheDocument();
   });
   test("The login is successful and you will be redirected to the destination", async () => {
@@ -50,10 +53,12 @@ describe("LoginPage", () => {
 
     const usernameTextBox = screen.getByPlaceholderText("username");
     const passwordTextBox = screen.getByPlaceholderText("password");
+    const consentCheckbox = screen.getByLabelText("Agree to scopes");
     const loginButton = screen.getByRole("button", { name: "Login" });
 
     userEvent.type(usernameTextBox, "username");
     userEvent.type(passwordTextBox, "password");
+    userEvent.click(consentCheckbox);
     userEvent.click(loginButton);
 
     await waitFor(() => {
@@ -74,10 +79,12 @@ describe("LoginPage", () => {
 
     const usernameTextBox = screen.getByPlaceholderText("username");
     const passwordTextBox = screen.getByPlaceholderText("password");
+    const consentCheckbox = screen.getByLabelText("Agree to scopes");
     const loginButton = screen.getByRole("button", { name: "Login" });
 
     userEvent.type(usernameTextBox, "username");
     userEvent.type(passwordTextBox, "password");
+    userEvent.click(consentCheckbox);
     userEvent.click(loginButton);
 
     await waitFor(() => {
