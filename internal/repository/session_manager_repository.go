@@ -1,6 +1,6 @@
 package repository
 
-// mockgen -source=internal/repository/session_manager_repository.go -destination=testutil/mock/repository/mock_session_manager_repository.go -package=repository_mock
+// mockgen -source=internal/repository/session_manager_repository.go -destination=test/mock/repository/mock_session_manager_repository.go -package=repository_mock
 
 import (
 	"encoding/json"

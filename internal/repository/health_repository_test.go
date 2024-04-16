@@ -7,7 +7,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/ucho456job/lgtmeme/internal/repository"
-	"github.com/ucho456job/lgtmeme/testutil"
+	"github.com/ucho456job/lgtmeme/test/testutil"
 	"gorm.io/gorm"
 )
 
