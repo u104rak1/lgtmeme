@@ -2,11 +2,12 @@ package config
 
 import "time"
 
+const HEALTH_ENDPOINT = "/api/health"
+
 // auth server
 const (
 	// api endpoint
 	AUTHZ_ENDPOINT  = "/auth-api/authorize"
-	HEALTH_ENDPOINT = "/auth-api/health"
 	JWKS_ENDPOINT   = "/auth-api/jwks"
 	LOGIN_ENDPOINT  = "/auth-api/login"
 	LOGOUT_ENDPOINT = "/auth-api/logout"

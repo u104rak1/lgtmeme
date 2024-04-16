@@ -1,0 +1,19 @@
+{
+  "beforeDB": {
+    "health_checks": []
+  },
+  "afterDB": {
+    "health_checks": []
+  },
+  "beforeRedis": null,
+  "afterRedis": null,
+  "request": {
+    "url": "/api/health",
+    "method": "HEAD",
+    "header": {}
+  },
+  "response": {
+    "statusCode": 500,
+    "body": {}
+  }
+}

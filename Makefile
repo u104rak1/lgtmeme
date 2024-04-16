@@ -1,4 +1,4 @@
-.PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data run view_build development_start get_token unit_test help
+.PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data run view_build development_start get_token unit_test endpoint_test help
 
 dependencies_start: ## Start the postgres and redis
 	@docker compose --env-file .env.local -f ./docker/docker-compose.local.yaml up -d
@@ -39,6 +39,9 @@ get_token: ## Get Access Token
 
 unit_test: ## Run the unit test
 	@go test ./internal/handler/... ./internal/middleware/... ./internal/repository/... ./internal/service/... -v
+
+endpoint_test: ## Run the endpoint test
+	@go test ./test/endpoint/... -v -update
 
 migrate_up_for_prod: ## Run the migration for production
 	@bash -c 'source .env.prod && migrate -path ./db/migration -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" up'

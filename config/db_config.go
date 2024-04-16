@@ -26,3 +26,13 @@ func NewDB() {
 		panic(err)
 	}
 }
+
+func CloseDB() {
+	sqlDB, err := DB.DB()
+	if err != nil {
+		panic(err)
+	}
+	if err = sqlDB.Close(); err != nil {
+		panic(err)
+	}
+}

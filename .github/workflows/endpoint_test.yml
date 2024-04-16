@@ -1,4 +1,4 @@
-name: Unit Test
+name: Endpoint Test
 
 on:
   push:
@@ -12,8 +12,8 @@ on:
       - feature/*
 
 jobs:
-  unit_test:
-    name: Run Unit Test
+  endpoint_test:
+    name: Run Endpoint Test
     runs-on: ubuntu-latest
 
     steps:
@@ -28,5 +28,8 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
+      - name: Dependencies start
+        run: make dependencies_start
+
       - name: Run test
-        run: make unit_test
+        run: make endpoint_test
