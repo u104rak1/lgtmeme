@@ -31,8 +31,5 @@ jobs:
       - name: Dependencies start
         run: make dependencies_start
 
-      - name: Run the migration
-        run: make migrate_up
-
       - name: Run tests
         run: make endpoint_test

@@ -54,7 +54,7 @@ func BeforeAll(t *testing.T, folderName string) (*echo.Echo, *goldie.Goldie) {
 	t.Setenv("LOG_LEVEL", "SILENT")
 	e := setup.SetupServer()
 
-	ClearAllData(t)
+	DropDBAndMigrate(t)
 
 	goldieDir := filepath.Join("test", "endpoint", "testdata", folderName)
 	gol := goldie.New(t, goldie.WithFixtureDir(goldieDir))
@@ -64,6 +64,41 @@ func BeforeAll(t *testing.T, folderName string) (*echo.Echo, *goldie.Goldie) {
 
 func AfterAll(t *testing.T) {
 	setup.CloseConnection()
+}
+
+func DropDBAndMigrate(t *testing.T) {
+	db := config.DB
+
+	tables := []string{
+		"images",
+		"health_checks",
+		"refresh_tokens",
+		"oauth_clients_application_types",
+		"oauth_clients_scopes",
+		"oauth_clients",
+		"users",
+		"master_application_types",
+		"master_scopes",
+	}
+
+	for _, table := range tables {
+		if err := db.Migrator().DropTable(table); err != nil {
+			t.Fatal(err)
+		}
+		if err := db.AutoMigrate(
+			&model.HealthCheck{},
+			&model.User{},
+			&model.OauthClient{},
+			&model.MasterScope{},
+			&model.OauthClientsScopes{},
+			&model.MasterApplicationType{},
+			&model.OauthClientsApplicationTypes{},
+			&model.RefreshToken{},
+			&model.Image{},
+		); err != nil {
+			t.Fatal(err)
+		}
+	}
 }
 
 func ClearDB(t *testing.T) {
