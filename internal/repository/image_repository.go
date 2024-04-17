@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/dto"
 	"github.com/ucho456job/lgtmeme/internal/model"
 	"github.com/ucho456job/lgtmeme/internal/util/timer"
@@ -71,7 +72,7 @@ func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]m
 	}
 
 	var images []model.Image
-	if err := sqlQ.Offset(q.Page * 9).Limit(9).Find(&images).Error; err != nil {
+	if err := sqlQ.Offset(q.Page * config.GET_IMAGES_LIMIT).Limit(config.GET_IMAGES_LIMIT).Find(&images).Error; err != nil {
 		return nil, err
 	}
 

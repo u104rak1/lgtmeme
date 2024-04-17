@@ -18,39 +18,39 @@ func TestCheckPostgres(t *testing.T) {
 	sqlStatement := `SELECT "value" FROM "health_checks" WHERE key = $1 ORDER BY "health_checks"."key" LIMIT $2`
 
 	tests := []struct {
-		name          string
-		key           string
-		setupMock     func()
-		expectedValue string
-		expectErr     bool
+		name      string
+		setupMock func()
+		key       string
+		result    string
+		isErr     bool
 	}{
 		{
-			name:          "positive: Return value",
-			key:           "testKey",
-			expectedValue: "testValue",
+			name: "positive: Return value",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"value"}).AddRow("testValue")
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).WithArgs("testKey", 1).WillReturnRows(rows)
 			},
-			expectErr: false,
+			key:    "testKey",
+			result: "testValue",
+			isErr:  false,
 		},
 		{
-			name:          "negative: Return error, because record not found",
-			key:           "missingKey",
-			expectedValue: "",
+			name: "negative: Return error, because record not found",
 			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).WithArgs("missingKey", 1).WillReturnError(gorm.ErrRecordNotFound)
 			},
-			expectErr: true,
+			key:    "missingKey",
+			result: "",
+			isErr:  true,
 		},
 		{
-			name:          "negative: Return error, because database connection error",
-			key:           "anyKey",
-			expectedValue: "",
+			name: "negative: Return error, because database connection error",
 			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).WithArgs("anyKey", 1).WillReturnError(errors.New("database connection failed"))
 			},
-			expectErr: true,
+			key:    "anyKey",
+			result: "",
+			isErr:  true,
 		},
 	}
 
@@ -59,14 +59,15 @@ func TestCheckPostgres(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
 			repo := repository.NewHealthRepository(gormDB)
-			value, err := repo.CheckPostgres(c, tt.key)
+			result, err := repo.CheckPostgres(c, tt.key)
 
-			if tt.expectErr {
+			if tt.isErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedValue, value)
 			}
+			assert.Equal(t, tt.result, result)
+			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
 }

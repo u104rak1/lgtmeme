@@ -73,6 +73,7 @@ const (
 // number
 const (
 	REFRESH_TOKEN_SIZE = 64
+	GET_IMAGES_LIMIT   = 9
 )
 
 // scope
