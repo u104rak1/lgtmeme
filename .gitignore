@@ -1,4 +1,4 @@
-/cmd/lgtmeme/__debug*
+__debug*
 /docker/volumes/db/data
 /docker/volumes/storage/stub
 .env.prod

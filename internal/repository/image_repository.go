@@ -80,12 +80,12 @@ func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]m
 }
 
 func (r *imageRepository) FindURLByID(c echo.Context, id uuid.UUID) (*string, error) {
-	var image model.Image
-	if err := r.DB.Model(&model.Image{}).Where("id = ?", id).First(&image).Error; err != nil {
+	var url string
+	if err := r.DB.Model(&model.Image{}).Select("url").Where("id = ?", id).First(&url).Error; err != nil {
 		return nil, err
 	}
 
-	return &image.URL, nil
+	return &url, nil
 }
 
 func (r *imageRepository) ExistsByID(c echo.Context, id uuid.UUID) (bool, error) {
@@ -107,17 +107,9 @@ func (r *imageRepository) Update(c echo.Context, id uuid.UUID, reqType dto.Patch
 		updateData = map[string]interface{}{"confirmed": true}
 	}
 
-	if err := r.DB.Model(&model.Image{}).Where("id = ?", id).Updates(updateData).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return r.DB.Model(&model.Image{}).Where("id = ?", id).Updates(updateData).Error
 }
 
 func (r *imageRepository) Delete(c echo.Context, id uuid.UUID) error {
-	if err := r.DB.Where("id = ?", id).Delete(&model.Image{}).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return r.DB.Where("id = ?", id).Delete(&model.Image{}).Error
 }

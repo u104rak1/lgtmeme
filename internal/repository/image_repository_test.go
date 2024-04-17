@@ -17,11 +17,9 @@ import (
 	"github.com/ucho456job/lgtmeme/test/testutil"
 )
 
-func TestImageRepository(t *testing.T) {
-	gormDB, mock := testutil.SetupMockDB(t)
-	mockTimer := timer.MockTimer{}
-
-	testImages := []model.Image{
+var (
+	mockTimer  = timer.MockTimer{}
+	testImages = []model.Image{
 		{
 			ID:        uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
 			URL:       "http://example.com/image.jpg",
@@ -50,13 +48,17 @@ func TestImageRepository(t *testing.T) {
 			CreatedAt: mockTimer.Now(),
 		},
 	}
-	i1 := testImages[0]
-	i2 := testImages[1]
-	i3 := testImages[2]
+	i1 = testImages[0]
+	i2 = testImages[1]
+	i3 = testImages[2]
+)
+
+func TestCreate(t *testing.T) {
+	gormDB, mock := testutil.SetupMockDB(t)
 
 	sqlStatement := `INSERT INTO "images" ("url","keyword","used_count","reported","confirmed","id","created_at") VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING "id","created_at"`
 
-	createTests := []struct {
+	tests := []struct {
 		name      string
 		setupMock func()
 		isErr     bool
@@ -85,7 +87,7 @@ func TestImageRepository(t *testing.T) {
 		},
 	}
 
-	for _, tt := range createTests {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
@@ -100,8 +102,12 @@ func TestImageRepository(t *testing.T) {
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
+}
 
-	findImagesTests := []struct {
+func TestFindImages(t *testing.T) {
+	gormDB, mock := testutil.SetupMockDB(t)
+
+	tests := []struct {
 		name      string
 		setupMock func()
 		query     dto.GetImagesQuery
@@ -226,7 +232,7 @@ func TestImageRepository(t *testing.T) {
 		},
 	}
 
-	for _, tt := range findImagesTests {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
@@ -242,10 +248,70 @@ func TestImageRepository(t *testing.T) {
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
+}
 
-	findURLByIDTests := []struct {
+func TestFindURLByID(t *testing.T) {
+	gormDB, mock := testutil.SetupMockDB(t)
+
+	tests := []struct {
 		name      string
 		setupMock func()
+		id        uuid.UUID
+		result    *string
+		isErr     bool
+	}{
+		{
+			name: "positive: Return url",
+			setupMock: func() {
+				rows := sqlmock.NewRows([]string{"url"}).AddRow(i1.URL)
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT "url" FROM "images" WHERE id = $1 ORDER BY "images"."id" LIMIT $2`)).
+					WithArgs(i1.ID, 1).
+					WillReturnRows(rows)
+			},
+			id:     i1.ID,
+			result: &i1.URL,
+			isErr:  false,
+		},
+		{
+			name: "negative: Return error, because database connection error",
+			setupMock: func() {
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT "url" FROM "images" WHERE id = $1 ORDER BY "images"."id" LIMIT $2`)).
+					WithArgs(i1.ID, 1).
+					WillReturnError(errors.New("database connection failed"))
+			},
+			id:     i1.ID,
+			result: nil,
+			isErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c, _ := testutil.SetupMinEchoContext()
+			tt.setupMock()
+			repo := repository.NewImageRepository(gormDB, &mockTimer)
+			result, err := repo.FindURLByID(c, tt.id)
+
+			if tt.isErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tt.result, result)
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestExistsByID(t *testing.T) {
+	gormDB, mock := testutil.SetupMockDB(t)
+
+	nonExistingID := uuid.MustParse("423e4567-e89b-12d3-a456-426614174000")
+
+	tests := []struct {
+		name      string
+		setupMock func()
+		id        uuid.UUID
 		result    bool
 		isErr     bool
 	}{
@@ -257,17 +323,41 @@ func TestImageRepository(t *testing.T) {
 					WithArgs(i1.ID).
 					WillReturnRows(rows)
 			},
+			id:     i1.ID,
 			result: true,
 			isErr:  false,
 		},
+		{
+			name: "positive: Return false, with non-existing ID",
+			setupMock: func() {
+				rows := sqlmock.NewRows([]string{"count"}).AddRow(0)
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "images" WHERE id = $1`)).
+					WithArgs(nonExistingID).
+					WillReturnRows(rows)
+			},
+			id:     nonExistingID,
+			result: false,
+			isErr:  false,
+		},
+		{
+			name: "negative: Return error, because database connection error",
+			setupMock: func() {
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "images" WHERE id = $1`)).
+					WithArgs(i1.ID).
+					WillReturnError(errors.New("database connection failed"))
+			},
+			id:     i1.ID,
+			result: false,
+			isErr:  true,
+		},
 	}
 
-	for _, tt := range findURLByIDTests {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
 			repo := repository.NewImageRepository(gormDB, &mockTimer)
-			result, err := repo.ExistsByID(c, i1.ID)
+			result, err := repo.ExistsByID(c, tt.id)
 
 			if tt.isErr {
 				assert.Error(t, err)
