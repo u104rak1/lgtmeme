@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/ucho456job/lgtmeme/internal/dto"
 	"github.com/ucho456job/lgtmeme/internal/model"
-	"github.com/ucho456job/lgtmeme/internal/util/clock"
+	"github.com/ucho456job/lgtmeme/internal/util/timer"
 	"gorm.io/gorm"
 )
 
@@ -21,14 +21,14 @@ type ImageRepository interface {
 }
 
 type imageRepository struct {
-	DB      *gorm.DB
-	Clocker clock.Clocker
+	DB    *gorm.DB
+	Timer timer.Timer
 }
 
-func NewImageRepository(db *gorm.DB, clocker clock.Clocker) ImageRepository {
+func NewImageRepository(db *gorm.DB, timer timer.Timer) ImageRepository {
 	return &imageRepository{
-		DB:      db,
-		Clocker: clocker,
+		DB:    db,
+		Timer: timer,
 	}
 }
 
@@ -37,14 +37,13 @@ func (r *imageRepository) Create(c echo.Context, id uuid.UUID, url, keyword stri
 		ID:        id,
 		URL:       url,
 		Keyword:   keyword,
-		CreatedAt: r.Clocker.Now(),
+		UsedCount: 0,
+		Reported:  false,
+		Confirmed: false,
+		CreatedAt: r.Timer.Now(),
 	}
 
-	if err := r.DB.Create(newImage).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return r.DB.Debug().Create(newImage).Error
 }
 
 func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {

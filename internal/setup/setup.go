@@ -7,7 +7,7 @@ import (
 	"github.com/ucho456job/lgtmeme/internal/middleware"
 	"github.com/ucho456job/lgtmeme/internal/repository"
 	"github.com/ucho456job/lgtmeme/internal/service"
-	"github.com/ucho456job/lgtmeme/internal/util/clock"
+	"github.com/ucho456job/lgtmeme/internal/util/timer"
 	"github.com/ucho456job/lgtmeme/internal/util/uuidgen"
 )
 
@@ -87,7 +87,7 @@ func newClientServer(e *echo.Echo) {
 }
 
 func newResourceServer(e *echo.Echo) {
-	imgRepo := repository.NewImageRepository(config.DB, &clock.RealClocker{})
+	imgRepo := repository.NewImageRepository(config.DB, &timer.RealTimer{})
 	sessManaRepo := repository.NewSessionManagerRepository(config.Store, config.Pool)
 	userRepo := repository.NewUserRepository(config.DB)
 

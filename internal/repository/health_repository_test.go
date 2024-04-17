@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"errors"
+	"regexp"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -14,14 +15,14 @@ import (
 func TestCheckPostgres(t *testing.T) {
 	gormDB, mock := testutil.SetupMockDB(t)
 
-	expectQuery := `SELECT "value" FROM "health_checks" WHERE key = \$1 ORDER BY "health_checks"\."key" LIMIT \$2`
+	sqlStatement := `SELECT "value" FROM "health_checks" WHERE key = $1 ORDER BY "health_checks"."key" LIMIT $2`
 
 	tests := []struct {
 		name          string
 		key           string
 		setupMock     func()
 		expectedValue string
-		expectError   bool
+		expectErr     bool
 	}{
 		{
 			name:          "positive: Return value",
@@ -29,27 +30,27 @@ func TestCheckPostgres(t *testing.T) {
 			expectedValue: "testValue",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"value"}).AddRow("testValue")
-				mock.ExpectQuery(expectQuery).WithArgs("testKey", 1).WillReturnRows(rows)
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).WithArgs("testKey", 1).WillReturnRows(rows)
 			},
-			expectError: false,
+			expectErr: false,
 		},
 		{
 			name:          "negative: Return error, because record not found",
 			key:           "missingKey",
 			expectedValue: "",
 			setupMock: func() {
-				mock.ExpectQuery(expectQuery).WithArgs("missingKey", 1).WillReturnError(gorm.ErrRecordNotFound)
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).WithArgs("missingKey", 1).WillReturnError(gorm.ErrRecordNotFound)
 			},
-			expectError: true,
+			expectErr: true,
 		},
 		{
 			name:          "negative: Return error, because database connection error",
 			key:           "anyKey",
 			expectedValue: "",
 			setupMock: func() {
-				mock.ExpectQuery(expectQuery).WithArgs("anyKey", 1).WillReturnError(errors.New("database connection failed"))
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).WithArgs("anyKey", 1).WillReturnError(errors.New("database connection failed"))
 			},
-			expectError: true,
+			expectErr: true,
 		},
 	}
 
@@ -60,7 +61,7 @@ func TestCheckPostgres(t *testing.T) {
 			repo := repository.NewHealthRepository(gormDB)
 			value, err := repo.CheckPostgres(c, tt.key)
 
-			if tt.expectError {
+			if tt.expectErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
