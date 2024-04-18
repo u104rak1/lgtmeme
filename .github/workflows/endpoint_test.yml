@@ -20,6 +20,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Setup Cache for Docker
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.docker
+          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
+      - name: Load Cached Docker Layers
+        run: |
+          mkdir -p /tmp/.docker
+          if [ -d "/tmp/.docker" ]; then
+            docker load < /tmp/.docker/image.tar || true
+          fi
+
+      - name: Build and Cache Docker
+        run: |
+          DOCKER_BUILDKIT=1 docker build . -t my-app
+          mkdir -p /tmp/.docker
+          docker save -o /tmp/.docker/image.tar my-app
+
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
