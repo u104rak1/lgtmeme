@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestCheckPostgres(t *testing.T) {
+func TestHealthRepositoryCheckPostgres(t *testing.T) {
 	gormDB, mock := testutil.SetupMockDB(t)
 
 	sqlStatement := `SELECT "value" FROM "health_checks" WHERE key = $1 ORDER BY "health_checks"."key" LIMIT $2`
