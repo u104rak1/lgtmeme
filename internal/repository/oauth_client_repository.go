@@ -1,5 +1,7 @@
 package repository
 
+// mockgen -source=internal/repository/oauth_client_repository.go -destination=test/mock/repository/mock_oauth_client_repository.go -package=repository_mock
+
 import (
 	"errors"
 	"strings"

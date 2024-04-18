@@ -1,5 +1,7 @@
 package repository
 
+// mockgen -source=internal/repository/scope_repository.go -destination=test/mock/repository/mock_scope_repository.go -package=repository_mock
+
 import (
 	"strings"
 

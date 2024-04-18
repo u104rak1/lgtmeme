@@ -1,5 +1,7 @@
 package repository
 
+// mockgen -source=internal/repository/refresh_token_repository.go -destination=test/mock/repository/mock_refresh_token_repository.go -package=repository_mock
+
 import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
