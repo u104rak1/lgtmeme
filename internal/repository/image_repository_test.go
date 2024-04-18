@@ -369,3 +369,136 @@ func TestExistsByID(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdate(t *testing.T) {
+	gormDB, mock := testutil.SetupMockDB(t)
+
+	tests := []struct {
+		name      string
+		setupMock func()
+		id        uuid.UUID
+		reqType   dto.PatchImageReqType
+		isErr     bool
+	}{
+		{
+			name: "positive: Return nil, Update was successful, with PatchImageReqTypeUsed",
+			setupMock: func() {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "used_count"=used_count + $1 WHERE id = $2`)).
+					WithArgs(1, i1.ID).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+			id:      i1.ID,
+			reqType: dto.PatchImageReqTypeUsed,
+			isErr:   false,
+		},
+		{
+			name: "positive: Return nil, Update was successful, with PatchImageReqTypeReport",
+			setupMock: func() {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "reported"=$1 WHERE id = $2`)).
+					WithArgs(true, i1.ID).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+			id:      i1.ID,
+			reqType: dto.PatchImageReqTypeReport,
+			isErr:   false,
+		},
+		{
+			name: "positive: Return nil, Update was successful, with PatchImageReqTypeConfirm",
+			setupMock: func() {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "confirmed"=$1 WHERE id = $2`)).
+					WithArgs(true, i2.ID).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+			id:      i2.ID,
+			reqType: dto.PatchImageReqTypeConfirm,
+			isErr:   false,
+		},
+		{
+			name: "negative: Return error, because database connection error",
+			setupMock: func() {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "used_count"=used_count + $1 WHERE id = $2`)).
+					WithArgs(1, i1.ID).
+					WillReturnError(errors.New("database connection failed"))
+				mock.ExpectRollback()
+			},
+			id:      i1.ID,
+			reqType: dto.PatchImageReqTypeUsed,
+			isErr:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c, _ := testutil.SetupMinEchoContext()
+			tt.setupMock()
+			repo := repository.NewImageRepository(gormDB, &mockTimer)
+			err := repo.Update(c, tt.id, tt.reqType)
+
+			if tt.isErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestDelete(t *testing.T) {
+	gormDB, mock := testutil.SetupMockDB(t)
+
+	tests := []struct {
+		name      string
+		setupMock func()
+		id        uuid.UUID
+		isErr     bool
+	}{
+		{
+			name: "positive: Return nil, Delete was successful",
+			setupMock: func() {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "images" WHERE id = $1`)).
+					WithArgs(i1.ID).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+			id:    i1.ID,
+			isErr: false,
+		},
+		{
+			name: "negative: Return error, because database connection error",
+			setupMock: func() {
+				mock.ExpectBegin()
+				mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "images" WHERE id = $1`)).
+					WithArgs(i1.ID).
+					WillReturnError(errors.New("database connection failed"))
+				mock.ExpectRollback()
+			},
+			id:    i1.ID,
+			isErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c, _ := testutil.SetupMinEchoContext()
+			tt.setupMock()
+			repo := repository.NewImageRepository(gormDB, &mockTimer)
+			err := repo.Delete(c, tt.id)
+
+			if tt.isErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
