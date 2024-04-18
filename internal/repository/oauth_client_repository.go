@@ -27,8 +27,13 @@ func NewOauthClientRepository(db *gorm.DB) OauthClientRepository {
 }
 
 func (r *oauthClientRepository) ExistsForAuthz(c echo.Context, q dto.AuthzQuery) (bool, error) {
-	var oauthClient model.OauthClient
-	if err := r.DB.Model(&model.OauthClient{}).Preload("Scopes").Where("client_id = ? AND redirect_uri = ?", q.ClientID, q.RedirectURI).First(&oauthClient).Error; err != nil {
+	var dbScopes []model.OauthClientsScopes
+	if err := r.DB.Raw(`
+			SELECT osc.scope_code
+			FROM oauth_clients oc
+			INNER JOIN oauth_clients_scopes osc ON oc.id = osc.oauth_client_id
+			WHERE oc.client_id = ? AND oc.redirect_uri = ?
+	`, q.ClientID, q.RedirectURI).Scan(&dbScopes).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return false, nil
 		}
@@ -38,8 +43,8 @@ func (r *oauthClientRepository) ExistsForAuthz(c echo.Context, q dto.AuthzQuery)
 	scopes := strings.Split(q.Scope, " ")
 	for _, s := range scopes {
 		found := false
-		for _, cs := range oauthClient.Scopes {
-			if s == cs.Code {
+		for _, dbS := range dbScopes {
+			if s == dbS.ScopeCode {
 				found = true
 				break
 			}

@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"errors"
 	"regexp"
 	"testing"
 
@@ -12,23 +11,25 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestHealthRepositoryCheckPostgres(t *testing.T) {
-	gormDB, mock := testutil.SetupMockDB(t)
+func TestHealthRepository_CheckPostgres(t *testing.T) {
+	db, mock := testutil.SetupMockDB(t)
 
 	sqlStatement := `SELECT "value" FROM "health_checks" WHERE key = $1 ORDER BY "health_checks"."key" LIMIT $2`
 
 	tests := []struct {
 		name      string
-		setupMock func()
+		setupMock func(key string)
 		key       string
 		result    string
 		isErr     bool
 	}{
 		{
 			name: "positive: Return value",
-			setupMock: func() {
+			setupMock: func(key string) {
 				rows := sqlmock.NewRows([]string{"value"}).AddRow("testValue")
-				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).WithArgs("testKey", 1).WillReturnRows(rows)
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
+					WithArgs(key, 1).
+					WillReturnRows(rows)
 			},
 			key:    "testKey",
 			result: "testValue",
@@ -36,8 +37,10 @@ func TestHealthRepositoryCheckPostgres(t *testing.T) {
 		},
 		{
 			name: "negative: Return error, because record not found",
-			setupMock: func() {
-				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).WithArgs("missingKey", 1).WillReturnError(gorm.ErrRecordNotFound)
+			setupMock: func(key string) {
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
+					WithArgs(key, 1).
+					WillReturnError(gorm.ErrRecordNotFound)
 			},
 			key:    "missingKey",
 			result: "",
@@ -45,8 +48,10 @@ func TestHealthRepositoryCheckPostgres(t *testing.T) {
 		},
 		{
 			name: "negative: Return error, because database connection error",
-			setupMock: func() {
-				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).WithArgs("anyKey", 1).WillReturnError(errors.New("database connection failed"))
+			setupMock: func(key string) {
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
+					WithArgs(key, 1).
+					WillReturnError(testutil.ErrDBConnection)
 			},
 			key:    "anyKey",
 			result: "",
@@ -57,8 +62,8 @@ func TestHealthRepositoryCheckPostgres(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
-			tt.setupMock()
-			repo := repository.NewHealthRepository(gormDB)
+			tt.setupMock(tt.key)
+			repo := repository.NewHealthRepository(db)
 			result, err := repo.CheckPostgres(c, tt.key)
 
 			if tt.isErr {

@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"testing"
@@ -54,8 +53,8 @@ var (
 	i3 = testImages[2]
 )
 
-func TestImageRepositoryCreate(t *testing.T) {
-	gormDB, mock := testutil.SetupMockDB(t)
+func TestImageRepository_Create(t *testing.T) {
+	db, mock := testutil.SetupMockDB(t)
 
 	sqlStatement := `INSERT INTO "images" ("url","keyword","used_count","reported","confirmed","id","created_at") VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING "id","created_at"`
 
@@ -81,7 +80,7 @@ func TestImageRepositoryCreate(t *testing.T) {
 				mock.ExpectBegin()
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
 					WithArgs(i1.URL, i1.Keyword, i1.UsedCount, i1.Reported, i1.Confirmed, i1.ID, i1.CreatedAt).
-					WillReturnError(errors.New("database connection failed"))
+					WillReturnError(testutil.ErrDBConnection)
 				mock.ExpectRollback()
 			},
 			isErr: true,
@@ -92,7 +91,7 @@ func TestImageRepositoryCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
-			repo := repository.NewImageRepository(gormDB, &mockTimer)
+			repo := repository.NewImageRepository(db, &mockTimer)
 			err := repo.Create(c, i1.ID, i1.URL, i1.Keyword)
 
 			if tt.isErr {
@@ -105,8 +104,8 @@ func TestImageRepositoryCreate(t *testing.T) {
 	}
 }
 
-func TestImageRepositoryFindImages(t *testing.T) {
-	gormDB, mock := testutil.SetupMockDB(t)
+func TestImageRepository_FindImages(t *testing.T) {
+	db, mock := testutil.SetupMockDB(t)
 
 	tests := []struct {
 		name      string
@@ -237,7 +236,7 @@ func TestImageRepositoryFindImages(t *testing.T) {
 			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
 					WithArgs(true, false, config.GET_IMAGES_LIMIT).
-					WillReturnError(errors.New("database connection failed"))
+					WillReturnError(testutil.ErrDBConnection)
 			},
 			query: dto.GetImagesQuery{
 				Page:             0,
@@ -255,7 +254,7 @@ func TestImageRepositoryFindImages(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
-			repo := repository.NewImageRepository(gormDB, &mockTimer)
+			repo := repository.NewImageRepository(db, &mockTimer)
 			result, err := repo.FindImages(c, tt.query)
 
 			if tt.isErr {
@@ -269,8 +268,8 @@ func TestImageRepositoryFindImages(t *testing.T) {
 	}
 }
 
-func TestImageRepositoryFindURLByID(t *testing.T) {
-	gormDB, mock := testutil.SetupMockDB(t)
+func TestImageRepository_FindURLByID(t *testing.T) {
+	db, mock := testutil.SetupMockDB(t)
 
 	tests := []struct {
 		name      string
@@ -307,7 +306,7 @@ func TestImageRepositoryFindURLByID(t *testing.T) {
 			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT "url" FROM "images" WHERE id = $1 ORDER BY "images"."id" LIMIT $2`)).
 					WithArgs(i1.ID, 1).
-					WillReturnError(errors.New("database connection failed"))
+					WillReturnError(testutil.ErrDBConnection)
 			},
 			id:     i1.ID,
 			result: nil,
@@ -319,7 +318,7 @@ func TestImageRepositoryFindURLByID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
-			repo := repository.NewImageRepository(gormDB, &mockTimer)
+			repo := repository.NewImageRepository(db, &mockTimer)
 			result, err := repo.FindURLByID(c, tt.id)
 
 			if tt.isErr {
@@ -333,8 +332,8 @@ func TestImageRepositoryFindURLByID(t *testing.T) {
 	}
 }
 
-func TestImageRepositoryExistsByID(t *testing.T) {
-	gormDB, mock := testutil.SetupMockDB(t)
+func TestImageRepository_ExistsByID(t *testing.T) {
+	db, mock := testutil.SetupMockDB(t)
 
 	nonExistingID := uuid.MustParse("423e4567-e89b-12d3-a456-426614174000")
 
@@ -374,7 +373,7 @@ func TestImageRepositoryExistsByID(t *testing.T) {
 			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "images" WHERE id = $1`)).
 					WithArgs(i1.ID).
-					WillReturnError(errors.New("database connection failed"))
+					WillReturnError(testutil.ErrDBConnection)
 			},
 			id:     i1.ID,
 			result: false,
@@ -386,7 +385,7 @@ func TestImageRepositoryExistsByID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
-			repo := repository.NewImageRepository(gormDB, &mockTimer)
+			repo := repository.NewImageRepository(db, &mockTimer)
 			result, err := repo.ExistsByID(c, tt.id)
 
 			if tt.isErr {
@@ -400,8 +399,8 @@ func TestImageRepositoryExistsByID(t *testing.T) {
 	}
 }
 
-func TestImageRepositoryUpdate(t *testing.T) {
-	gormDB, mock := testutil.SetupMockDB(t)
+func TestImageRepository_Update(t *testing.T) {
+	db, mock := testutil.SetupMockDB(t)
 
 	tests := []struct {
 		name      string
@@ -475,7 +474,7 @@ func TestImageRepositoryUpdate(t *testing.T) {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "used_count"=used_count + $1 WHERE id = $2`)).
 					WithArgs(1, i1.ID).
-					WillReturnError(errors.New("database connection failed"))
+					WillReturnError(testutil.ErrDBConnection)
 				mock.ExpectRollback()
 			},
 			id:      i1.ID,
@@ -488,7 +487,7 @@ func TestImageRepositoryUpdate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
-			repo := repository.NewImageRepository(gormDB, &mockTimer)
+			repo := repository.NewImageRepository(db, &mockTimer)
 			err := repo.Update(c, tt.id, tt.reqType)
 
 			if tt.isErr {
@@ -501,8 +500,8 @@ func TestImageRepositoryUpdate(t *testing.T) {
 	}
 }
 
-func TestImageRepositoryDelete(t *testing.T) {
-	gormDB, mock := testutil.SetupMockDB(t)
+func TestImageRepository_Delete(t *testing.T) {
+	db, mock := testutil.SetupMockDB(t)
 
 	tests := []struct {
 		name      string
@@ -540,7 +539,7 @@ func TestImageRepositoryDelete(t *testing.T) {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "images" WHERE id = $1`)).
 					WithArgs(i1.ID).
-					WillReturnError(errors.New("database connection failed"))
+					WillReturnError(testutil.ErrDBConnection)
 				mock.ExpectRollback()
 			},
 			id:    i1.ID,
@@ -552,7 +551,7 @@ func TestImageRepositoryDelete(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
-			repo := repository.NewImageRepository(gormDB, &mockTimer)
+			repo := repository.NewImageRepository(db, &mockTimer)
 			err := repo.Delete(c, tt.id)
 
 			if tt.isErr {

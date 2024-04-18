@@ -29,10 +29,10 @@ CREATE TABLE IF NOT EXISTS master_scopes (
 );
 
 CREATE TABLE IF NOT EXISTS oauth_clients_scopes (
-    client_id UUID,
+    oauth_client_id UUID,
     scope_code VARCHAR(20),
-    PRIMARY KEY (client_id, scope_code),
-    FOREIGN KEY (client_id) REFERENCES oauth_clients(id),
+    PRIMARY KEY (oauth_client_id, scope_code),
+    FOREIGN KEY (oauth_client_id) REFERENCES oauth_clients(id),
     FOREIGN KEY (scope_code) REFERENCES master_scopes(code)
 );
 

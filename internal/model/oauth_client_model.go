@@ -12,6 +12,6 @@ type OauthClient struct {
 	RedirectURI      string                  `gorm:"column:redirect_uri;type:text"`
 	ApplicationURL   string                  `gorm:"column:application_url;type:text;not null"`
 	ClientType       string                  `gorm:"column:client_type;type:varchar(50)"`
-	Scopes           []MasterScope           `gorm:"many2many:oauth_clients_scopes;foreignKey:ID;joinForeignKey:client_id;references:Code;joinReferences:scope_code"`
+	Scopes           []MasterScope           `gorm:"many2many:oauth_clients_scopes;foreignKey:ID;joinForeignKey:oauth_client_id;references:Code;joinReferences:scope_code"`
 	ApplicationTypes []MasterApplicationType `gorm:"many2many:oauth_clients_application_types;foreignKey:ID;joinForeignKey:client_id;references:Type;joinReferences:application_type"`
 }
