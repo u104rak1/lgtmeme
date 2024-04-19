@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/ucho456job/lgtmeme/internal/dto"
 	"github.com/ucho456job/lgtmeme/internal/model"
@@ -120,105 +119,7 @@ func TestOauthClientRepository_IsValidOAuthClient(t *testing.T) {
 	}
 }
 
-func TestOauthClientRepository_FindByClientID(t *testing.T) {
-	db, mock := testutil.SetupMockDB(t)
-
-	oc := model.OauthClient{
-		ID:             testutil.TestUUIDs[0],
-		Name:           "testName",
-		ClientID:       testutil.TestUUIDs[1],
-		ClientSecret:   "testSecret",
-		RedirectURI:    "http://example.com/callback",
-		ApplicationURL: "http://example.com",
-		ClientType:     "confidential",
-	}
-
-	sqlStatement := `SELECT * FROM "oauth_clients" WHERE client_id = $1 ORDER BY "oauth_clients"."id" LIMIT $2`
-
-	tests := []struct {
-		name      string
-		setupMock func()
-		arg       func() (uuid.UUID, []string)
-		want      *model.OauthClient
-		isErr     bool
-	}{
-		{
-			name: "Return oauth_client, do not specify columns",
-			setupMock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "client_id", "client_secret", "redirect_uri", "application_url", "client_type"}).
-					AddRow(oc.ID, oc.Name, oc.ClientID, oc.ClientSecret, oc.RedirectURI, oc.ApplicationURL, oc.ClientType)
-				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
-					WithArgs(oc.ClientID, 1).
-					WillReturnRows(rows)
-			},
-			arg: func() (uuid.UUID, []string) {
-				return oc.ClientID, []string{}
-			},
-			want:  &oc,
-			isErr: false,
-		},
-		{
-			name: "Return oauth_client, specify columns",
-			setupMock: func() {
-				rows := sqlmock.NewRows([]string{"client_id", "client_secret", "application_url"}).
-					AddRow(oc.ClientID, oc.ClientSecret, oc.ApplicationURL)
-				mock.ExpectQuery(regexp.QuoteMeta(`SELECT "client_id","client_secret","application_url" FROM "oauth_clients" WHERE client_id = $1 ORDER BY "oauth_clients"."id" LIMIT $2`)).
-					WithArgs(oc.ClientID, 1).
-					WillReturnRows(rows)
-			},
-			arg: func() (uuid.UUID, []string) {
-				return oc.ClientID, []string{"client_id", "client_secret", "application_url"}
-			},
-			want: &model.OauthClient{
-				ClientID:       oc.ClientID,
-				ClientSecret:   oc.ClientSecret,
-				ApplicationURL: oc.ApplicationURL,
-			},
-			isErr: false,
-		},
-		{
-			name: "Return error, because record not found",
-			setupMock: func() {
-				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
-					WithArgs(oc.ClientID, 1).
-					WillReturnError(gorm.ErrRecordNotFound)
-			},
-			arg: func() (uuid.UUID, []string) {
-				return oc.ClientID, []string{}
-			},
-			want:  nil,
-			isErr: true,
-		},
-		{
-			name: "Return error, because db error",
-			setupMock: func() {
-				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
-					WithArgs(oc.ClientID, 1).
-					WillReturnError(testutil.ErrDB)
-			},
-			arg: func() (uuid.UUID, []string) {
-				return oc.ClientID, []string{}
-			},
-			want:  nil,
-			isErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c, _ := testutil.SetupMinEchoContext()
-			tt.setupMock()
-			repo := repository.NewOauthClientRepository(db)
-			clientID, columns := tt.arg()
-			actual, err := repo.FirstByClientID(c, clientID, columns)
-
-			if tt.isErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-			assert.Equal(t, tt.want, actual)
-			assert.NoError(t, mock.ExpectationsWereMet())
-		})
-	}
+// TODO: Implement test
+func TestOauthClientRepository_FindByClientIDWithScopes(t *testing.T) {
+	t.Skip("Skip because sqlmock does not work well when using 'Preload'")
 }

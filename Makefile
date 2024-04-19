@@ -1,4 +1,4 @@
-.PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data run view_build development_start get_token unit_test endpoint_test help
+.PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data clear_redis run view_build development_start get_token unit_test endpoint_test help
 
 dependencies_start: ## Start the postgres and redis
 	@docker compose --env-file .env.local -f ./docker/docker-compose.local.yaml up -d
@@ -21,6 +21,9 @@ insert_data: ## Insert data into the database
 
 clear_data: ## Clear data from the database
 	@bash -c 'source .env.local && PGPASSWORD=$${POSTGRES_PASSWORD} psql -h $${POSTGRES_HOST} -U $${POSTGRES_USER} -d $${POSTGRES_DB} -f ./db/data/clear.sql'
+
+clear_redis: ## Clear data from the redis
+	@docker exec -it lgtmeme_redis redis-cli FLUSHALL
 
 run: ## Run the application
 	@ECHO_MODE=local go run ./cmd/lgtmeme/main.go

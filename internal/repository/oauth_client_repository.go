@@ -15,7 +15,7 @@ import (
 
 type OauthClientRepository interface {
 	IsValidOAuthClient(c echo.Context, q dto.AuthzQuery) (bool, error)
-	FirstByClientID(c echo.Context, clientID uuid.UUID, columns []string) (*model.OauthClient, error)
+	FirstByClientIDWithScopes(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error)
 }
 
 type oauthClientRepository struct {
@@ -57,16 +57,12 @@ func (r *oauthClientRepository) IsValidOAuthClient(c echo.Context, q dto.AuthzQu
 	return true, nil
 }
 
-// If columns is empty, return all columns. However, related records are excluded.
-func (r *oauthClientRepository) FirstByClientID(c echo.Context, clientID uuid.UUID, columns []string) (*model.OauthClient, error) {
+func (r *oauthClientRepository) FirstByClientIDWithScopes(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error) {
 	var oauthClient model.OauthClient
-	q := r.DB.Model(&model.OauthClient{}).Where("client_id = ?", clientID)
-
-	if len(columns) > 0 {
-		q = q.Select(columns)
-	}
-
-	if err := q.First(&oauthClient).Error; err != nil {
+	if err := r.DB.Model(&model.OauthClient{}).
+		Preload("Scopes").
+		Where("client_id = ?", clientID).
+		First(&oauthClient).Error; err != nil {
 		return nil, err
 	}
 	return &oauthClient, nil
