@@ -15,63 +15,71 @@ func TestHealthRepository_CheckPostgres(t *testing.T) {
 	db, mock := testutil.SetupMockDB(t)
 
 	sqlStatement := `SELECT "value" FROM "health_checks" WHERE key = $1 ORDER BY "health_checks"."key" LIMIT $2`
+	ckey := "testKey"
 
 	tests := []struct {
 		name      string
-		setupMock func(key string)
-		key       string
-		result    string
+		setupMock func()
+		arg       func() string
+		want      string
 		isErr     bool
 	}{
 		{
-			name: "positive: Return value",
-			setupMock: func(key string) {
+			name: "Return value",
+			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"value"}).AddRow("testValue")
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
-					WithArgs(key, 1).
+					WithArgs(ckey, 1).
 					WillReturnRows(rows)
 			},
-			key:    "testKey",
-			result: "testValue",
-			isErr:  false,
+			arg: func() string {
+				return ckey
+			},
+			want:  "testValue",
+			isErr: false,
 		},
 		{
-			name: "negative: Return error, because record not found",
-			setupMock: func(key string) {
+			name: "Return error, because record not found",
+			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
-					WithArgs(key, 1).
+					WithArgs("missingKey", 1).
 					WillReturnError(gorm.ErrRecordNotFound)
 			},
-			key:    "missingKey",
-			result: "",
-			isErr:  true,
+			arg: func() string {
+				return "missingKey"
+			},
+			want:  "",
+			isErr: true,
 		},
 		{
-			name: "negative: Return error, because database connection error",
-			setupMock: func(key string) {
+			name: "Return error, because db error",
+			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
-					WithArgs(key, 1).
+					WithArgs(ckey, 1).
 					WillReturnError(testutil.ErrDB)
 			},
-			key:    "anyKey",
-			result: "",
-			isErr:  true,
+			arg: func() string {
+				return ckey
+			},
+			want:  "",
+			isErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
-			tt.setupMock(tt.key)
+			tt.setupMock()
 			repo := repository.NewHealthRepository(db)
-			result, err := repo.CheckPostgres(c, tt.key)
+			key := tt.arg()
+			actual, err := repo.CheckPostgres(c, key)
 
 			if tt.isErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
-			assert.Equal(t, tt.result, result)
+			assert.Equal(t, tt.want, actual)
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}

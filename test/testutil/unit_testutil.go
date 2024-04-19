@@ -1,7 +1,6 @@
 package testutil
 
 import (
-	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -47,5 +46,3 @@ func SetupMinEchoContext() (echo.Context, *httptest.ResponseRecorder) {
 func SetupTestLogger() {
 	config.Logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
 }
-
-var ErrDB = errors.New("database connection failed")
