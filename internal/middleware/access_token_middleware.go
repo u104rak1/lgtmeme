@@ -52,8 +52,9 @@ func (m *accessTokenMiddleware) SetGeneralAccessToken() echo.MiddlewareFunc {
 					if err := m.sessionManagerRepository.CacheGeneralAccessToken(c, respBody.AccessToken); err != nil {
 						return response.InternalServerError(c, err)
 					}
+				} else {
+					return response.InternalServerError(c, err)
 				}
-				return response.InternalServerError(c, err)
 			}
 			return next(c)
 		}
@@ -64,7 +65,7 @@ func (m *accessTokenMiddleware) SetAdminAccessToken() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			accessToken, err := m.sessionManagerRepository.LoadToken(c, config.ADMIN_ACCESS_TOKEN_SESSION_NAME)
-			if err != nil {
+			if err != nil && err != redis.ErrNil {
 				return response.InternalServerError(c, err)
 			}
 			if accessToken != "" {
@@ -72,7 +73,7 @@ func (m *accessTokenMiddleware) SetAdminAccessToken() echo.MiddlewareFunc {
 			}
 
 			refreshToken, err := m.sessionManagerRepository.LoadToken(c, config.REFRESH_TOKEN_SESSION_NAME)
-			if err != nil {
+			if err != nil && err != redis.ErrNil {
 				return response.InternalServerError(c, err)
 			}
 			if refreshToken != "" {
