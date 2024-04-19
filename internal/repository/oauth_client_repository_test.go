@@ -18,7 +18,7 @@ func TestOauthClientRepository_IsValidOAuthClient(t *testing.T) {
 	db, mock := testutil.SetupMockDB(t)
 
 	query := dto.AuthzQuery{
-		ClientID:    uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
+		ClientID:    testutil.TestUUIDs[0],
 		RedirectURI: "http://example.com/callback",
 		Scope:       "scope1 scope2",
 	}
@@ -124,9 +124,9 @@ func TestOauthClientRepository_FindByClientID(t *testing.T) {
 	db, mock := testutil.SetupMockDB(t)
 
 	oc := model.OauthClient{
-		ID:             uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
+		ID:             testutil.TestUUIDs[0],
 		Name:           "testName",
-		ClientID:       uuid.MustParse("223e4567-e89b-12d3-a456-426614174000"),
+		ClientID:       testutil.TestUUIDs[1],
 		ClientSecret:   "testSecret",
 		RedirectURI:    "http://example.com/callback",
 		ApplicationURL: "http://example.com",

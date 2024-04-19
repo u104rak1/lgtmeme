@@ -283,7 +283,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 	}
 }
 
-func TestImageRepository_FindByID(t *testing.T) {
+func TestImageRepository_FirstByID(t *testing.T) {
 	db, mock := testutil.SetupMockDB(t)
 
 	sqlStatement := `SELECT * FROM "images" WHERE id = $1 ORDER BY "images"."id" LIMIT $2`

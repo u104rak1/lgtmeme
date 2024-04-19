@@ -83,7 +83,7 @@ func (h *authzHandler) Authorize(c echo.Context) error {
 
 		scopesStr := ""
 		descriptionsStr := ""
-		for i, s := range scopes {
+		for i, s := range *scopes {
 			if i != 0 {
 				scopesStr += ","
 				descriptionsStr += ","

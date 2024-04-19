@@ -109,7 +109,7 @@ func (h *tokenHandler) Generate(c echo.Context) error {
 		})
 
 	case "refresh_token":
-		refreshTokenData, err := h.refreshTokenRepository.FindByToken(c, form.RefreshToken)
+		refreshTokenData, err := h.refreshTokenRepository.FirstByToken(c, form.RefreshToken)
 		if err != nil {
 			return response.NotFound(c, err)
 		}

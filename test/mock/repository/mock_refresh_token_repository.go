@@ -50,19 +50,19 @@ func (mr *MockRefreshTokenRepositoryMockRecorder) Create(c, userID, clientID, to
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRefreshTokenRepository)(nil).Create), c, userID, clientID, token, scope)
 }
 
-// FindByToken mocks base method.
-func (m *MockRefreshTokenRepository) FindByToken(c echo.Context, token string) (model.RefreshToken, error) {
+// FirstByToken mocks base method.
+func (m *MockRefreshTokenRepository) FirstByToken(c echo.Context, token string) (model.RefreshToken, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByToken", c, token)
+	ret := m.ctrl.Call(m, "FirstByToken", c, token)
 	ret0, _ := ret[0].(model.RefreshToken)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindByToken indicates an expected call of FindByToken.
-func (mr *MockRefreshTokenRepositoryMockRecorder) FindByToken(c, token interface{}) *gomock.Call {
+// FirstByToken indicates an expected call of FirstByToken.
+func (mr *MockRefreshTokenRepositoryMockRecorder) FirstByToken(c, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByToken", reflect.TypeOf((*MockRefreshTokenRepository)(nil).FindByToken), c, token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FirstByToken", reflect.TypeOf((*MockRefreshTokenRepository)(nil).FirstByToken), c, token)
 }
 
 // Update mocks base method.
