@@ -41,10 +41,10 @@ CREATE TABLE IF NOT EXISTS master_application_types (
 );
 
 CREATE TABLE IF NOT EXISTS oauth_clients_application_types (
-    client_id UUID,
+    oauth_client_id UUID,
     application_type VARCHAR(20),
-    PRIMARY KEY (client_id, application_type),
-    FOREIGN KEY (client_id) REFERENCES oauth_clients(id),
+    PRIMARY KEY (oauth_client_id, application_type),
+    FOREIGN KEY (oauth_client_id) REFERENCES oauth_clients(id),
     FOREIGN KEY (application_type) REFERENCES master_application_types(type)
 );
 

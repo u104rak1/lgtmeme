@@ -48,4 +48,4 @@ func SetupTestLogger() {
 	config.Logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
 }
 
-var ErrDBConnection = errors.New("database connection failed")
+var ErrDB = errors.New("database connection failed")

@@ -80,7 +80,7 @@ func TestImageRepository_Create(t *testing.T) {
 				mock.ExpectBegin()
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
 					WithArgs(i1.URL, i1.Keyword, i1.UsedCount, i1.Reported, i1.Confirmed, i1.ID, i1.CreatedAt).
-					WillReturnError(testutil.ErrDBConnection)
+					WillReturnError(testutil.ErrDB)
 				mock.ExpectRollback()
 			},
 			isErr: true,
@@ -236,7 +236,7 @@ func TestImageRepository_FindImages(t *testing.T) {
 			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
 					WithArgs(true, false, config.GET_IMAGES_LIMIT).
-					WillReturnError(testutil.ErrDBConnection)
+					WillReturnError(testutil.ErrDB)
 			},
 			query: dto.GetImagesQuery{
 				Page:             0,
@@ -306,7 +306,7 @@ func TestImageRepository_FindURLByID(t *testing.T) {
 			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT "url" FROM "images" WHERE id = $1 ORDER BY "images"."id" LIMIT $2`)).
 					WithArgs(i1.ID, 1).
-					WillReturnError(testutil.ErrDBConnection)
+					WillReturnError(testutil.ErrDB)
 			},
 			id:     i1.ID,
 			result: nil,
@@ -373,7 +373,7 @@ func TestImageRepository_ExistsByID(t *testing.T) {
 			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "images" WHERE id = $1`)).
 					WithArgs(i1.ID).
-					WillReturnError(testutil.ErrDBConnection)
+					WillReturnError(testutil.ErrDB)
 			},
 			id:     i1.ID,
 			result: false,
@@ -474,7 +474,7 @@ func TestImageRepository_Update(t *testing.T) {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "used_count"=used_count + $1 WHERE id = $2`)).
 					WithArgs(1, i1.ID).
-					WillReturnError(testutil.ErrDBConnection)
+					WillReturnError(testutil.ErrDB)
 				mock.ExpectRollback()
 			},
 			id:      i1.ID,
@@ -539,7 +539,7 @@ func TestImageRepository_Delete(t *testing.T) {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "images" WHERE id = $1`)).
 					WithArgs(i1.ID).
-					WillReturnError(testutil.ErrDBConnection)
+					WillReturnError(testutil.ErrDB)
 				mock.ExpectRollback()
 			},
 			id:    i1.ID,

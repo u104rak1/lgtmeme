@@ -58,11 +58,11 @@ func (h *authzHandler) Authorize(c echo.Context) error {
 		return response.BadRequest(c, err)
 	}
 
-	exists, err := h.oauthClientRepository.ExistsForAuthz(c, *q)
+	valid, err := h.oauthClientRepository.IsValidOAuthClient(c, *q)
 	if err != nil {
 		return response.InternalServerError(c, err)
 	}
-	if !exists {
+	if !valid {
 		err = errors.New("client ID or redirect URI or scope are incorrect")
 		return response.BadRequest(c, err)
 	}
@@ -96,7 +96,7 @@ func (h *authzHandler) Authorize(c echo.Context) error {
 		return c.Redirect(http.StatusFound, redirectURL)
 	}
 
-	exists, err = h.userRepository.ExistsByID(c, userID)
+	exists, err := h.userRepository.ExistsByID(c, userID)
 	if err != nil {
 		return response.InternalServerError(c, err)
 	}

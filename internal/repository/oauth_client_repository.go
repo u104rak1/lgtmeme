@@ -14,8 +14,8 @@ import (
 )
 
 type OauthClientRepository interface {
-	ExistsForAuthz(c echo.Context, q dto.AuthzQuery) (bool, error)
-	FindByClientID(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error)
+	IsValidOAuthClient(c echo.Context, q dto.AuthzQuery) (bool, error)
+	FirstByClientID(c echo.Context, clientID uuid.UUID, columns []string) (*model.OauthClient, error)
 }
 
 type oauthClientRepository struct {
@@ -26,12 +26,12 @@ func NewOauthClientRepository(db *gorm.DB) OauthClientRepository {
 	return &oauthClientRepository{DB: db}
 }
 
-func (r *oauthClientRepository) ExistsForAuthz(c echo.Context, q dto.AuthzQuery) (bool, error) {
+func (r *oauthClientRepository) IsValidOAuthClient(c echo.Context, q dto.AuthzQuery) (bool, error) {
 	var dbScopes []model.OauthClientsScopes
 	if err := r.DB.Raw(`
 			SELECT osc.scope_code
-			FROM oauth_clients oc
-			INNER JOIN oauth_clients_scopes osc ON oc.id = osc.oauth_client_id
+			FROM oauth_clients AS oc
+			INNER JOIN oauth_clients_scopes AS osc ON oc.id = osc.oauth_client_id
 			WHERE oc.client_id = ? AND oc.redirect_uri = ?
 	`, q.ClientID, q.RedirectURI).Scan(&dbScopes).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -57,9 +57,16 @@ func (r *oauthClientRepository) ExistsForAuthz(c echo.Context, q dto.AuthzQuery)
 	return true, nil
 }
 
-func (r *oauthClientRepository) FindByClientID(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error) {
+// If columns is empty, return all columns. However, related records are excluded.
+func (r *oauthClientRepository) FirstByClientID(c echo.Context, clientID uuid.UUID, columns []string) (*model.OauthClient, error) {
 	var oauthClient model.OauthClient
-	if err := r.DB.Model(&model.OauthClient{}).Preload("Scopes").Preload("ApplicationTypes").Where("client_id = ?", clientID).First(&oauthClient).Error; err != nil {
+	q := r.DB.Model(&model.OauthClient{}).Where("client_id = ?", clientID)
+
+	if len(columns) > 0 {
+		q = q.Select(columns)
+	}
+
+	if err := q.First(&oauthClient).Error; err != nil {
 		return nil, err
 	}
 	return &oauthClient, nil

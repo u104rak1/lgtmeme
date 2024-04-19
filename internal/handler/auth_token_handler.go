@@ -49,7 +49,8 @@ func (h *tokenHandler) Generate(c echo.Context) error {
 		return response.BadRequest(c, err)
 	}
 
-	oauthClient, err := h.oauthClientRepository.FindByClientID(c, form.ClientID)
+	columns := []string{"client_id", "client_secret", "application_url"}
+	oauthClient, err := h.oauthClientRepository.FirstByClientID(c, form.ClientID, columns)
 	if err != nil {
 		return response.NotFound(c, err)
 	}

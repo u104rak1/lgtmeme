@@ -51,7 +51,7 @@ func TestHealthRepository_CheckPostgres(t *testing.T) {
 			setupMock: func(key string) {
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
 					WithArgs(key, 1).
-					WillReturnError(testutil.ErrDBConnection)
+					WillReturnError(testutil.ErrDB)
 			},
 			key:    "anyKey",
 			result: "",

@@ -37,32 +37,32 @@ func (m *MockOauthClientRepository) EXPECT() *MockOauthClientRepositoryMockRecor
 	return m.recorder
 }
 
-// ExistsForAuthz mocks base method.
-func (m *MockOauthClientRepository) ExistsForAuthz(c echo.Context, q dto.AuthzQuery) (bool, error) {
+// FirstByClientID mocks base method.
+func (m *MockOauthClientRepository) FirstByClientID(c echo.Context, clientID uuid.UUID, columns []string) (*model.OauthClient, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExistsForAuthz", c, q)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExistsForAuthz indicates an expected call of ExistsForAuthz.
-func (mr *MockOauthClientRepositoryMockRecorder) ExistsForAuthz(c, q interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsForAuthz", reflect.TypeOf((*MockOauthClientRepository)(nil).ExistsForAuthz), c, q)
-}
-
-// FindByClientID mocks base method.
-func (m *MockOauthClientRepository) FindByClientID(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByClientID", c, clientID)
+	ret := m.ctrl.Call(m, "FirstByClientID", c, clientID, columns)
 	ret0, _ := ret[0].(*model.OauthClient)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindByClientID indicates an expected call of FindByClientID.
-func (mr *MockOauthClientRepositoryMockRecorder) FindByClientID(c, clientID interface{}) *gomock.Call {
+// FirstByClientID indicates an expected call of FirstByClientID.
+func (mr *MockOauthClientRepositoryMockRecorder) FirstByClientID(c, clientID, columns interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByClientID", reflect.TypeOf((*MockOauthClientRepository)(nil).FindByClientID), c, clientID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FirstByClientID", reflect.TypeOf((*MockOauthClientRepository)(nil).FirstByClientID), c, clientID, columns)
+}
+
+// IsValidOAuthClient mocks base method.
+func (m *MockOauthClientRepository) IsValidOAuthClient(c echo.Context, q dto.AuthzQuery) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsValidOAuthClient", c, q)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsValidOAuthClient indicates an expected call of IsValidOAuthClient.
+func (mr *MockOauthClientRepositoryMockRecorder) IsValidOAuthClient(c, q interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsValidOAuthClient", reflect.TypeOf((*MockOauthClientRepository)(nil).IsValidOAuthClient), c, q)
 }
