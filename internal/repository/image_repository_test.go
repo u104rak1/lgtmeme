@@ -21,7 +21,7 @@ var (
 	mockTimer  = timer.MockTimer{}
 	testImages = []model.Image{
 		{
-			ID:        uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
+			ID:        testutil.TestUUIDs[0],
 			URL:       "http://example.com/image.jpg",
 			Keyword:   "keyword1",
 			UsedCount: 0,
@@ -30,7 +30,7 @@ var (
 			CreatedAt: mockTimer.Now(),
 		},
 		{
-			ID:        uuid.MustParse("223e4567-e89b-12d3-a456-426614174000"),
+			ID:        testutil.TestUUIDs[1],
 			URL:       "http://example.com/image2.jpg",
 			Keyword:   "keyword2",
 			UsedCount: 1,
@@ -39,7 +39,7 @@ var (
 			CreatedAt: mockTimer.Now(),
 		},
 		{
-			ID:        uuid.MustParse("323e4567-e89b-12d3-a456-426614174000"),
+			ID:        testutil.TestUUIDs[2],
 			URL:       "http://example.com/image3.jpg",
 			Keyword:   "keyword3",
 			UsedCount: 2,
@@ -48,9 +48,9 @@ var (
 			CreatedAt: mockTimer.Now(),
 		},
 	}
-	i1 = testImages[0]
-	i2 = testImages[1]
-	i3 = testImages[2]
+	img1 = testImages[0]
+	img2 = testImages[1]
+	img3 = testImages[2]
 )
 
 func TestImageRepository_Create(t *testing.T) {
@@ -64,22 +64,22 @@ func TestImageRepository_Create(t *testing.T) {
 		isErr     bool
 	}{
 		{
-			name: "positive: Create was successful",
+			name: "Create was successful",
 			setupMock: func() {
 				mock.ExpectBegin()
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
-					WithArgs(i1.URL, i1.Keyword, i1.UsedCount, i1.Reported, i1.Confirmed, i1.ID, i1.CreatedAt).
-					WillReturnRows(sqlmock.NewRows([]string{"id", "created_at"}).AddRow(i1.ID, i1.CreatedAt))
+					WithArgs(img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.ID, img1.CreatedAt).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "created_at"}).AddRow(img1.ID, img1.CreatedAt))
 				mock.ExpectCommit()
 			},
 			isErr: false,
 		},
 		{
-			name: "negative: Return error, because database connection error",
+			name: "Return error, because db error",
 			setupMock: func() {
 				mock.ExpectBegin()
 				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
-					WithArgs(i1.URL, i1.Keyword, i1.UsedCount, i1.Reported, i1.Confirmed, i1.ID, i1.CreatedAt).
+					WithArgs(img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.ID, img1.CreatedAt).
 					WillReturnError(testutil.ErrDB)
 				mock.ExpectRollback()
 			},
@@ -92,7 +92,7 @@ func TestImageRepository_Create(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
 			repo := repository.NewImageRepository(db, &mockTimer)
-			err := repo.Create(c, i1.ID, i1.URL, i1.Keyword)
+			err := repo.Create(c, img1.ID, img1.URL, img1.Keyword)
 
 			if tt.isErr {
 				assert.Error(t, err)
@@ -104,149 +104,163 @@ func TestImageRepository_Create(t *testing.T) {
 	}
 }
 
-func TestImageRepository_FindImages(t *testing.T) {
+func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 	db, mock := testutil.SetupMockDB(t)
 
 	tests := []struct {
 		name      string
 		setupMock func()
-		query     dto.GetImagesQuery
-		result    *[]model.Image
+		arg       func() dto.GetImagesQuery
+		want      *[]model.Image
 		isErr     bool
 	}{
 		{
-			name: "positive: Return images, with basic query",
+			name: "Return images, with basic query",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"}).
-					AddRow(i1.ID, i1.URL, i1.Keyword, i1.UsedCount, i1.Reported, i1.Confirmed, i1.CreatedAt).
-					AddRow(i3.ID, i3.URL, i3.Keyword, i3.UsedCount, i3.Reported, i3.Confirmed, i3.CreatedAt)
+					AddRow(img1.ID, img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.CreatedAt).
+					AddRow(img3.ID, img3.URL, img3.Keyword, img3.UsedCount, img3.Reported, img3.Confirmed, img3.CreatedAt)
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
 					WithArgs(true, false, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
-			query: dto.GetImagesQuery{
-				Page:             0,
-				Keyword:          "",
-				Sort:             "latest",
-				FavoriteImageIDs: "",
-				AuthCheck:        false,
+			arg: func() dto.GetImagesQuery {
+				return dto.GetImagesQuery{
+					Page:             0,
+					Keyword:          "",
+					Sort:             "latest",
+					FavoriteImageIDs: "",
+					AuthCheck:        false,
+				}
 			},
-			result: &[]model.Image{i1, i3},
-			isErr:  false,
+			want:  &[]model.Image{img1, img3},
+			isErr: false,
 		},
 		{
-			name: "positive: Return images, with favoriteImageIDs",
+			name: "Return images, with favoriteImageIDs",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"}).
-					AddRow(i1.ID, i1.URL, i1.Keyword, i1.UsedCount, i1.Reported, i1.Confirmed, i1.CreatedAt).
-					AddRow(i2.ID, i2.URL, i2.Keyword, i2.UsedCount, i2.Reported, i2.Confirmed, i2.CreatedAt)
+					AddRow(img1.ID, img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.CreatedAt).
+					AddRow(img2.ID, img2.URL, img2.Keyword, img2.UsedCount, img2.Reported, img2.Confirmed, img2.CreatedAt)
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE id IN ($1,$2) AND (confirmed = $3 OR reported = $4) ORDER BY created_at DESC LIMIT $5`)).
-					WithArgs(i1.ID, i2.ID, true, false, config.GET_IMAGES_LIMIT).
+					WithArgs(img1.ID, img2.ID, true, false, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
-			query: dto.GetImagesQuery{
-				Page:             0,
-				Keyword:          "",
-				Sort:             "latest",
-				FavoriteImageIDs: fmt.Sprintf("%s,%s", i1.ID, i2.ID),
-				AuthCheck:        false,
+			arg: func() dto.GetImagesQuery {
+				return dto.GetImagesQuery{
+					Page:             0,
+					Keyword:          "",
+					Sort:             "latest",
+					FavoriteImageIDs: fmt.Sprintf("%s,%s", img1.ID, img2.ID),
+					AuthCheck:        false,
+				}
 			},
-			result: &[]model.Image{i1, i2},
-			isErr:  false,
+			want:  &[]model.Image{img1, img2},
+			isErr: false,
 		},
 		{
-			name: "positive: Return images, with keyword",
+			name: "Return images, with keyword",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"}).
-					AddRow(i1.ID, i1.URL, i1.Keyword, i1.UsedCount, i1.Reported, i1.Confirmed, i1.CreatedAt)
+					AddRow(img1.ID, img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.CreatedAt)
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE keyword LIKE $1 AND (confirmed = $2 OR reported = $3) ORDER BY created_at DESC LIMIT $4`)).
 					WithArgs("%keyword1%", true, false, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
-			query: dto.GetImagesQuery{
-				Page:             0,
-				Keyword:          "keyword1",
-				Sort:             "latest",
-				FavoriteImageIDs: "",
-				AuthCheck:        false,
+			arg: func() dto.GetImagesQuery {
+				return dto.GetImagesQuery{
+					Page:             0,
+					Keyword:          "keyword1",
+					Sort:             "latest",
+					FavoriteImageIDs: "",
+					AuthCheck:        false,
+				}
 			},
-			result: &[]model.Image{i1},
-			isErr:  false,
+			want:  &[]model.Image{img1},
+			isErr: false,
 		},
 		{
-			name: "positive: Return images, with authCheck",
+			name: "Return images, with authCheck",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"}).
-					AddRow(i2.ID, i2.URL, i2.Keyword, i2.UsedCount, i2.Reported, i2.Confirmed, i2.CreatedAt)
+					AddRow(img2.ID, img2.URL, img2.Keyword, img2.UsedCount, img2.Reported, img2.Confirmed, img2.CreatedAt)
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 AND reported = $2 ORDER BY created_at DESC LIMIT $3`)).
 					WithArgs(false, true, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
-			query: dto.GetImagesQuery{
-				Page:             0,
-				Keyword:          "",
-				Sort:             "latest",
-				FavoriteImageIDs: "",
-				AuthCheck:        true,
+			arg: func() dto.GetImagesQuery {
+				return dto.GetImagesQuery{
+					Page:             0,
+					Keyword:          "",
+					Sort:             "latest",
+					FavoriteImageIDs: "",
+					AuthCheck:        true,
+				}
 			},
-			result: &[]model.Image{i2},
-			isErr:  false,
+			want:  &[]model.Image{img2},
+			isErr: false,
 		},
 		{
-			name: "positive: Return images, with sort = popular",
+			name: "Return images, with sort is popular",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"}).
-					AddRow(i3.ID, i3.URL, i3.Keyword, i3.UsedCount, i3.Reported, i3.Confirmed, i3.CreatedAt).
-					AddRow(i2.ID, i2.URL, i2.Keyword, i2.UsedCount, i2.Reported, i2.Confirmed, i2.CreatedAt).
-					AddRow(i1.ID, i1.URL, i1.Keyword, i1.UsedCount, i1.Reported, i1.Confirmed, i1.CreatedAt)
+					AddRow(img3.ID, img3.URL, img3.Keyword, img3.UsedCount, img3.Reported, img3.Confirmed, img3.CreatedAt).
+					AddRow(img2.ID, img2.URL, img2.Keyword, img2.UsedCount, img2.Reported, img2.Confirmed, img2.CreatedAt).
+					AddRow(img1.ID, img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.CreatedAt)
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY used_count DESC, created_at DESC LIMIT $3`)).
 					WithArgs(true, false, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
-			query: dto.GetImagesQuery{
-				Page:             0,
-				Keyword:          "",
-				Sort:             "popular",
-				FavoriteImageIDs: "",
-				AuthCheck:        false,
+			arg: func() dto.GetImagesQuery {
+				return dto.GetImagesQuery{
+					Page:             0,
+					Keyword:          "",
+					Sort:             "popular",
+					FavoriteImageIDs: "",
+					AuthCheck:        false,
+				}
 			},
-			result: &[]model.Image{i3, i2, i1},
-			isErr:  false,
+			want:  &[]model.Image{img3, img2, img1},
+			isErr: false,
 		},
 		{
-			name: "positive: Return empty, with no images",
+			name: "Return empty",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"})
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
 					WithArgs(true, false, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
-			query: dto.GetImagesQuery{
-				Page:             0,
-				Keyword:          "",
-				Sort:             "latest",
-				FavoriteImageIDs: "",
-				AuthCheck:        false,
+			arg: func() dto.GetImagesQuery {
+				return dto.GetImagesQuery{
+					Page:             0,
+					Keyword:          "",
+					Sort:             "latest",
+					FavoriteImageIDs: "",
+					AuthCheck:        false,
+				}
 			},
-			result: &[]model.Image{},
-			isErr:  false,
+			want:  &[]model.Image{},
+			isErr: false,
 		},
 		{
-			name: "negative: Return error, because database connection error",
+			name: "Return error, because db error",
 			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
 					WithArgs(true, false, config.GET_IMAGES_LIMIT).
 					WillReturnError(testutil.ErrDB)
 			},
-			query: dto.GetImagesQuery{
-				Page:             0,
-				Keyword:          "",
-				Sort:             "latest",
-				FavoriteImageIDs: "",
-				AuthCheck:        false,
+			arg: func() dto.GetImagesQuery {
+				return dto.GetImagesQuery{
+					Page:             0,
+					Keyword:          "",
+					Sort:             "latest",
+					FavoriteImageIDs: "",
+					AuthCheck:        false,
+				}
 			},
-			result: nil,
-			isErr:  true,
+			want:  nil,
+			isErr: true,
 		},
 	}
 
@@ -255,62 +269,86 @@ func TestImageRepository_FindImages(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
 			repo := repository.NewImageRepository(db, &mockTimer)
-			result, err := repo.FindImages(c, tt.query)
+			q := tt.arg()
+			actual, err := repo.FindByGetImagesQuery(c, q)
 
 			if tt.isErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
-			assert.Equal(t, tt.result, result)
+			assert.Equal(t, tt.want, actual)
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
 }
 
-func TestImageRepository_FindURLByID(t *testing.T) {
+func TestImageRepository_FindByID(t *testing.T) {
 	db, mock := testutil.SetupMockDB(t)
+
+	sqlStatement := `SELECT * FROM "images" WHERE id = $1 ORDER BY "images"."id" LIMIT $2`
 
 	tests := []struct {
 		name      string
 		setupMock func()
-		id        uuid.UUID
-		result    *string
+		arg       func() (uuid.UUID, []string)
+		want      *model.Image
 		isErr     bool
 	}{
 		{
-			name: "positive: Return url",
+			name: "Return image, do not specify columns",
 			setupMock: func() {
-				rows := sqlmock.NewRows([]string{"url"}).AddRow(i1.URL)
-				mock.ExpectQuery(regexp.QuoteMeta(`SELECT "url" FROM "images" WHERE id = $1 ORDER BY "images"."id" LIMIT $2`)).
-					WithArgs(i1.ID, 1).
+				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"}).
+					AddRow(img1.ID, img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.CreatedAt)
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
+					WithArgs(img1.ID, 1).
 					WillReturnRows(rows)
 			},
-			id:     i1.ID,
-			result: &i1.URL,
-			isErr:  false,
+			arg: func() (uuid.UUID, []string) {
+				return img1.ID, []string{}
+			},
+			want:  &img1,
+			isErr: false,
 		},
 		{
-			name: "negative: Return nil, because record not found",
+			name: "Return image, specify columns",
 			setupMock: func() {
+				rows := sqlmock.NewRows([]string{"url"}).AddRow(img1.URL)
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT "url" FROM "images" WHERE id = $1 ORDER BY "images"."id" LIMIT $2`)).
-					WithArgs(i1.ID, 1).
+					WithArgs(img1.ID, 1).
+					WillReturnRows(rows)
+			},
+			arg: func() (uuid.UUID, []string) {
+				return img1.ID, []string{"url"}
+			},
+			want:  &model.Image{URL: img1.URL},
+			isErr: false,
+		},
+		{
+			name: "Return error, because record not found",
+			setupMock: func() {
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
+					WithArgs(img1.ID, 1).
 					WillReturnError(gorm.ErrRecordNotFound)
 			},
-			id:     i1.ID,
-			result: nil,
-			isErr:  true,
+			arg: func() (uuid.UUID, []string) {
+				return img1.ID, []string{}
+			},
+			want:  nil,
+			isErr: true,
 		},
 		{
-			name: "negative: Return error, because database connection error",
+			name: "Return error, because db error",
 			setupMock: func() {
-				mock.ExpectQuery(regexp.QuoteMeta(`SELECT "url" FROM "images" WHERE id = $1 ORDER BY "images"."id" LIMIT $2`)).
-					WithArgs(i1.ID, 1).
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
+					WithArgs(img1.ID, 1).
 					WillReturnError(testutil.ErrDB)
 			},
-			id:     i1.ID,
-			result: nil,
-			isErr:  true,
+			arg: func() (uuid.UUID, []string) {
+				return img1.ID, []string{}
+			},
+			want:  nil,
+			isErr: true,
 		},
 	}
 
@@ -319,14 +357,15 @@ func TestImageRepository_FindURLByID(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
 			repo := repository.NewImageRepository(db, &mockTimer)
-			result, err := repo.FindURLByID(c, tt.id)
+			id, columns := tt.arg()
+			actual, err := repo.FirstByID(c, id, columns)
 
 			if tt.isErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
-			assert.Equal(t, tt.result, result)
+			assert.Equal(t, tt.want, actual)
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
@@ -335,49 +374,55 @@ func TestImageRepository_FindURLByID(t *testing.T) {
 func TestImageRepository_ExistsByID(t *testing.T) {
 	db, mock := testutil.SetupMockDB(t)
 
-	nonExistingID := uuid.MustParse("423e4567-e89b-12d3-a456-426614174000")
+	nonExistingID := testutil.TestUUIDs[3]
 
 	tests := []struct {
 		name      string
 		setupMock func()
-		id        uuid.UUID
-		result    bool
+		arg       func() uuid.UUID
+		want      bool
 		isErr     bool
 	}{
 		{
-			name: "positive: Return true, with existing ID",
+			name: "Return true, with existing ID",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"count"}).AddRow(1)
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "images" WHERE id = $1`)).
-					WithArgs(i1.ID).
+					WithArgs(img1.ID).
 					WillReturnRows(rows)
 			},
-			id:     i1.ID,
-			result: true,
-			isErr:  false,
+			arg: func() uuid.UUID {
+				return img1.ID
+			},
+			want:  true,
+			isErr: false,
 		},
 		{
-			name: "positive: Return false, with non-existing ID",
+			name: "Return false, with non-existing ID",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"count"}).AddRow(0)
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "images" WHERE id = $1`)).
 					WithArgs(nonExistingID).
 					WillReturnRows(rows)
 			},
-			id:     nonExistingID,
-			result: false,
-			isErr:  false,
+			arg: func() uuid.UUID {
+				return nonExistingID
+			},
+			want:  false,
+			isErr: false,
 		},
 		{
-			name: "negative: Return error, because database connection error",
+			name: "Return error, because db error",
 			setupMock: func() {
 				mock.ExpectQuery(regexp.QuoteMeta(`SELECT count(*) FROM "images" WHERE id = $1`)).
-					WithArgs(i1.ID).
+					WithArgs(img1.ID).
 					WillReturnError(testutil.ErrDB)
 			},
-			id:     i1.ID,
-			result: false,
-			isErr:  true,
+			arg: func() uuid.UUID {
+				return img1.ID
+			},
+			want:  false,
+			isErr: true,
 		},
 	}
 
@@ -386,14 +431,15 @@ func TestImageRepository_ExistsByID(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
 			repo := repository.NewImageRepository(db, &mockTimer)
-			result, err := repo.ExistsByID(c, tt.id)
+			id := tt.arg()
+			actual, err := repo.ExistsByID(c, id)
 
 			if tt.isErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
-			assert.Equal(t, tt.result, result)
+			assert.Equal(t, tt.want, actual)
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
@@ -405,81 +451,86 @@ func TestImageRepository_Update(t *testing.T) {
 	tests := []struct {
 		name      string
 		setupMock func()
-		id        uuid.UUID
-		reqType   dto.PatchImageReqType
+		arg       func() (uuid.UUID, dto.PatchImageReqType)
 		isErr     bool
 	}{
 		{
-			name: "positive: Update was successful, with PatchImageReqTypeUsed",
+			name: "Update was successful, with PatchImageReqTypeUsed",
 			setupMock: func() {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "used_count"=used_count + $1 WHERE id = $2`)).
-					WithArgs(1, i1.ID).
+					WithArgs(1, img1.ID).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
-			id:      i1.ID,
-			reqType: dto.PatchImageReqTypeUsed,
-			isErr:   false,
+			arg: func() (uuid.UUID, dto.PatchImageReqType) {
+				return img1.ID, dto.PatchImageReqTypeUsed
+			},
+			isErr: false,
 		},
 		{
-			name: "positive: Update was successful, with PatchImageReqTypeReport",
+			name: "Update was successful, with PatchImageReqTypeReport",
 			setupMock: func() {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "reported"=$1 WHERE id = $2`)).
-					WithArgs(true, i1.ID).
+					WithArgs(true, img1.ID).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
-			id:      i1.ID,
-			reqType: dto.PatchImageReqTypeReport,
-			isErr:   false,
+			arg: func() (uuid.UUID, dto.PatchImageReqType) {
+				return img1.ID, dto.PatchImageReqTypeReport
+			},
+			isErr: false,
 		},
 		{
-			name: "positive: Update was successful, with PatchImageReqTypeConfirm",
+			name: "Update was successful, with PatchImageReqTypeConfirm",
 			setupMock: func() {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "confirmed"=$1 WHERE id = $2`)).
-					WithArgs(true, i2.ID).
+					WithArgs(true, img2.ID).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
-			id:      i2.ID,
-			reqType: dto.PatchImageReqTypeConfirm,
-			isErr:   false,
+			arg: func() (uuid.UUID, dto.PatchImageReqType) {
+				return img2.ID, dto.PatchImageReqTypeConfirm
+			},
+			isErr: false,
 		},
 		{
-			name:      "negative: Return error, because PatchImageReqType is invalid",
+			name:      "Return error, because PatchImageReqType is invalid",
 			setupMock: func() {},
-			id:        i1.ID,
-			reqType:   "invalid",
-			isErr:     true,
+			arg: func() (uuid.UUID, dto.PatchImageReqType) {
+				return img1.ID, "invalid"
+			},
+			isErr: true,
 		},
 		{
-			name: "negative: Return error, because record not found",
+			name: "Return error, because record not found",
 			setupMock: func() {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "used_count"=used_count + $1 WHERE id = $2`)).
-					WithArgs(1, i1.ID).
+					WithArgs(1, img1.ID).
 					WillReturnError(gorm.ErrRecordNotFound)
 				mock.ExpectRollback()
 			},
-			id:      i1.ID,
-			reqType: dto.PatchImageReqTypeUsed,
-			isErr:   true,
+			arg: func() (uuid.UUID, dto.PatchImageReqType) {
+				return img1.ID, dto.PatchImageReqTypeUsed
+			},
+			isErr: true,
 		},
 		{
-			name: "negative: Return error, because database connection error",
+			name: "Return error, because db error",
 			setupMock: func() {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`UPDATE "images" SET "used_count"=used_count + $1 WHERE id = $2`)).
-					WithArgs(1, i1.ID).
+					WithArgs(1, img1.ID).
 					WillReturnError(testutil.ErrDB)
 				mock.ExpectRollback()
 			},
-			id:      i1.ID,
-			reqType: dto.PatchImageReqTypeUsed,
-			isErr:   true,
+			arg: func() (uuid.UUID, dto.PatchImageReqType) {
+				return img1.ID, dto.PatchImageReqTypeUsed
+			},
+			isErr: true,
 		},
 	}
 
@@ -488,7 +539,8 @@ func TestImageRepository_Update(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
 			repo := repository.NewImageRepository(db, &mockTimer)
-			err := repo.Update(c, tt.id, tt.reqType)
+			id, reqType := tt.arg()
+			err := repo.Update(c, id, reqType)
 
 			if tt.isErr {
 				assert.Error(t, err)
@@ -506,43 +558,49 @@ func TestImageRepository_Delete(t *testing.T) {
 	tests := []struct {
 		name      string
 		setupMock func()
-		id        uuid.UUID
+		arg       func() uuid.UUID
 		isErr     bool
 	}{
 		{
-			name: "positive: Delete was successful",
+			name: "Delete was successful",
 			setupMock: func() {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "images" WHERE id = $1`)).
-					WithArgs(i1.ID).
+					WithArgs(img1.ID).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
-			id:    i1.ID,
+			arg: func() uuid.UUID {
+				return img1.ID
+			},
 			isErr: false,
 		},
 		{
-			name: "negative: Return error, because record not found",
+			name: "Return error, because record not found",
 			setupMock: func() {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "images" WHERE id = $1`)).
-					WithArgs(i1.ID).
+					WithArgs(img1.ID).
 					WillReturnError(gorm.ErrRecordNotFound)
 				mock.ExpectRollback()
 			},
-			id:    i1.ID,
+			arg: func() uuid.UUID {
+				return img1.ID
+			},
 			isErr: true,
 		},
 		{
-			name: "negative: Return error, because database connection error",
+			name: "Return error, because db error",
 			setupMock: func() {
 				mock.ExpectBegin()
 				mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "images" WHERE id = $1`)).
-					WithArgs(i1.ID).
+					WithArgs(img1.ID).
 					WillReturnError(testutil.ErrDB)
 				mock.ExpectRollback()
 			},
-			id:    i1.ID,
+			arg: func() uuid.UUID {
+				return img1.ID
+			},
 			isErr: true,
 		},
 	}
@@ -552,7 +610,8 @@ func TestImageRepository_Delete(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
 			repo := repository.NewImageRepository(db, &mockTimer)
-			err := repo.Delete(c, tt.id)
+			id := tt.arg()
+			err := repo.Delete(c, id)
 
 			if tt.isErr {
 				assert.Error(t, err)

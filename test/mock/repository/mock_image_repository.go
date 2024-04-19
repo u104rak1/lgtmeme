@@ -80,34 +80,34 @@ func (mr *MockImageRepositoryMockRecorder) ExistsByID(c, id interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByID", reflect.TypeOf((*MockImageRepository)(nil).ExistsByID), c, id)
 }
 
-// FindImages mocks base method.
-func (m *MockImageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {
+// FindByGetImagesQuery mocks base method.
+func (m *MockImageRepository) FindByGetImagesQuery(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindImages", c, q)
+	ret := m.ctrl.Call(m, "FindByGetImagesQuery", c, q)
 	ret0, _ := ret[0].(*[]model.Image)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindImages indicates an expected call of FindImages.
-func (mr *MockImageRepositoryMockRecorder) FindImages(c, q interface{}) *gomock.Call {
+// FindByGetImagesQuery indicates an expected call of FindByGetImagesQuery.
+func (mr *MockImageRepositoryMockRecorder) FindByGetImagesQuery(c, q interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindImages", reflect.TypeOf((*MockImageRepository)(nil).FindImages), c, q)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByGetImagesQuery", reflect.TypeOf((*MockImageRepository)(nil).FindByGetImagesQuery), c, q)
 }
 
-// FindURLByID mocks base method.
-func (m *MockImageRepository) FindURLByID(c echo.Context, id uuid.UUID) (*string, error) {
+// FirstByID mocks base method.
+func (m *MockImageRepository) FirstByID(c echo.Context, id uuid.UUID, columns []string) (*model.Image, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindURLByID", c, id)
-	ret0, _ := ret[0].(*string)
+	ret := m.ctrl.Call(m, "FirstByID", c, id, columns)
+	ret0, _ := ret[0].(*model.Image)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindURLByID indicates an expected call of FindURLByID.
-func (mr *MockImageRepositoryMockRecorder) FindURLByID(c, id interface{}) *gomock.Call {
+// FirstByID indicates an expected call of FirstByID.
+func (mr *MockImageRepositoryMockRecorder) FirstByID(c, id, columns interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindURLByID", reflect.TypeOf((*MockImageRepository)(nil).FindURLByID), c, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FirstByID", reflect.TypeOf((*MockImageRepository)(nil).FirstByID), c, id, columns)
 }
 
 // Update mocks base method.

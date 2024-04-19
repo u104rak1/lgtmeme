@@ -80,7 +80,7 @@ func (h *resourceImageHandler) BulkGet(c echo.Context) error {
 		return response.BadRequest(c, err)
 	}
 
-	imgs, err := h.imageRepository.FindImages(c, *q)
+	imgs, err := h.imageRepository.FindByGetImagesQuery(c, *q)
 	if err != nil {
 		return response.InternalServerError(c, err)
 	}
@@ -158,8 +158,9 @@ func (h *resourceImageHandler) Delete(c echo.Context) error {
 		return response.Forbidden(c, errors.New("permission denied"))
 	}
 
-	imgURL, err := h.imageRepository.FindURLByID(c, imageID)
-	if imgURL == nil {
+	columns := []string{"url"}
+	img, err := h.imageRepository.FirstByID(c, imageID, columns)
+	if img == nil {
 		return response.NotFound(c, errors.New("image not found"))
 	}
 	if err != nil {
@@ -170,7 +171,7 @@ func (h *resourceImageHandler) Delete(c echo.Context) error {
 		return response.InternalServerError(c, err)
 	}
 
-	if err := h.storageService.Delete(c, *imgURL); err != nil {
+	if err := h.storageService.Delete(c, img.URL); err != nil {
 		return response.InternalServerError(c, err)
 	}
 

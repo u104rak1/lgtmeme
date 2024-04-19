@@ -16,8 +16,8 @@ import (
 
 type ImageRepository interface {
 	Create(c echo.Context, id uuid.UUID, url, keyword string) error
-	FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error)
-	FindURLByID(c echo.Context, id uuid.UUID) (*string, error)
+	FindByGetImagesQuery(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error)
+	FirstByID(c echo.Context, id uuid.UUID, columns []string) (*model.Image, error)
 	ExistsByID(c echo.Context, id uuid.UUID) (bool, error)
 	Update(c echo.Context, id uuid.UUID, reqType dto.PatchImageReqType) error
 	Delete(c echo.Context, id uuid.UUID) error
@@ -49,7 +49,7 @@ func (r *imageRepository) Create(c echo.Context, id uuid.UUID, url, keyword stri
 	return r.DB.Debug().Create(newImage).Error
 }
 
-func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {
+func (r *imageRepository) FindByGetImagesQuery(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {
 	sqlQ := r.DB.Debug().Model(&model.Image{})
 
 	if q.FavoriteImageIDs != "" {
@@ -81,13 +81,19 @@ func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]m
 	return &images, nil
 }
 
-func (r *imageRepository) FindURLByID(c echo.Context, id uuid.UUID) (*string, error) {
-	var url string
-	if err := r.DB.Model(&model.Image{}).Select("url").Where("id = ?", id).First(&url).Error; err != nil {
+func (r *imageRepository) FirstByID(c echo.Context, id uuid.UUID, columns []string) (*model.Image, error) {
+	var image model.Image
+	q := r.DB.Model(&model.Image{}).Where("id = ?", id)
+
+	if len(columns) > 0 {
+		q = q.Select(columns)
+	}
+
+	if err := q.First(&image).Error; err != nil {
 		return nil, err
 	}
 
-	return &url, nil
+	return &image, nil
 }
 
 func (r *imageRepository) ExistsByID(c echo.Context, id uuid.UUID) (bool, error) {
