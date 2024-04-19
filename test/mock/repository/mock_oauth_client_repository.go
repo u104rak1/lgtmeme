@@ -37,19 +37,19 @@ func (m *MockOauthClientRepository) EXPECT() *MockOauthClientRepositoryMockRecor
 	return m.recorder
 }
 
-// FirstByClientID mocks base method.
-func (m *MockOauthClientRepository) FirstByClientID(c echo.Context, clientID uuid.UUID, columns []string) (*model.OauthClient, error) {
+// FirstByClientIDWithScopes mocks base method.
+func (m *MockOauthClientRepository) FirstByClientIDWithScopes(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FirstByClientID", c, clientID, columns)
+	ret := m.ctrl.Call(m, "FirstByClientIDWithScopes", c, clientID)
 	ret0, _ := ret[0].(*model.OauthClient)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FirstByClientID indicates an expected call of FirstByClientID.
-func (mr *MockOauthClientRepositoryMockRecorder) FirstByClientID(c, clientID, columns interface{}) *gomock.Call {
+// FirstByClientIDWithScopes indicates an expected call of FirstByClientIDWithScopes.
+func (mr *MockOauthClientRepositoryMockRecorder) FirstByClientIDWithScopes(c, clientID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FirstByClientID", reflect.TypeOf((*MockOauthClientRepository)(nil).FirstByClientID), c, clientID, columns)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FirstByClientIDWithScopes", reflect.TypeOf((*MockOauthClientRepository)(nil).FirstByClientIDWithScopes), c, clientID)
 }
 
 // IsValidOAuthClient mocks base method.

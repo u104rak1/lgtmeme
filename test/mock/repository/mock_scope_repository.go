@@ -36,10 +36,10 @@ func (m *MockScopeRepository) EXPECT() *MockScopeRepositoryMockRecorder {
 }
 
 // FindByScopesStr mocks base method.
-func (m *MockScopeRepository) FindByScopesStr(c echo.Context, scopesStr string) ([]model.MasterScope, error) {
+func (m *MockScopeRepository) FindByScopesStr(c echo.Context, scopesStr string) (*[]model.MasterScope, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByScopesStr", c, scopesStr)
-	ret0, _ := ret[0].([]model.MasterScope)
+	ret0, _ := ret[0].(*[]model.MasterScope)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
