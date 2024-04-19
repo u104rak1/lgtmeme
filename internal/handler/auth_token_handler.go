@@ -49,7 +49,7 @@ func (h *tokenHandler) Generate(c echo.Context) error {
 		return response.BadRequest(c, err)
 	}
 
-	oauthClient, err := h.oauthClientRepository.FindByClientID(c, form.ClientID)
+	oauthClient, err := h.oauthClientRepository.FirstByClientIDWithScopes(c, form.ClientID)
 	if err != nil {
 		return response.NotFound(c, err)
 	}
@@ -71,7 +71,8 @@ func (h *tokenHandler) Generate(c echo.Context) error {
 			return response.BadRequest(c, err)
 		}
 
-		user, err := h.userRepository.FindByID(c, authzCodeCtx.UserID)
+		columns := []string{"id", "name"}
+		user, err := h.userRepository.FirstByID(c, authzCodeCtx.UserID, columns)
 		if err != nil {
 			return response.InternalServerError(c, err)
 		}
@@ -108,7 +109,7 @@ func (h *tokenHandler) Generate(c echo.Context) error {
 		})
 
 	case "refresh_token":
-		refreshTokenData, err := h.refreshTokenRepository.FindByToken(c, form.RefreshToken)
+		refreshTokenData, err := h.refreshTokenRepository.FirstByToken(c, form.RefreshToken)
 		if err != nil {
 			return response.NotFound(c, err)
 		}

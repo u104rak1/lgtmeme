@@ -5,7 +5,7 @@ if ! command -v jq &> /dev/null; then
     exit 1
 fi
 
-if ! curl --output /dev/null --silent --head --fail http://localhost:8080/auth-api/health; then
+if ! curl --output /dev/null --silent --head --fail http://localhost:8080/api/health; then
     echo "The service at localhost:8080 is not responding to health check. Please start the service and try again."
     exit 1
 else
@@ -18,7 +18,8 @@ echo "Executes the login process..."
 curl -c $COOKIE_FILE -i -X POST http://localhost:8080/auth-api/login \
  -H "Content-Type: application/x-www-form-urlencoded" \
  -d "username=username" \
- -d "password=password"
+ -d "password=password" \
+ -d "scopeConsent=true"
 echo -e "\n"
 
 echo "Perform authorization processing..."

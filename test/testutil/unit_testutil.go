@@ -12,6 +12,7 @@ import (
 	"golang.org/x/exp/slog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func SetupMockDB(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
@@ -21,7 +22,9 @@ func SetupMockDB(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
 	}
 	gormDB, err := gorm.Open(postgres.New(postgres.Config{
 		Conn: db,
-	}), &gorm.Config{})
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		t.Fatalf("An error '%s' was not expected when opening a gorm database", err)
 	}

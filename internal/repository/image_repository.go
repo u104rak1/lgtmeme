@@ -1,34 +1,37 @@
 package repository
 
+// mockgen -source=internal/repository/image_repository.go -destination=test/mock/repository/mock_image_repository.go -package=repository_mock
+
 import (
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/ucho456job/lgtmeme/config"
 	"github.com/ucho456job/lgtmeme/internal/dto"
 	"github.com/ucho456job/lgtmeme/internal/model"
-	"github.com/ucho456job/lgtmeme/internal/util/clock"
+	"github.com/ucho456job/lgtmeme/internal/util/timer"
 	"gorm.io/gorm"
 )
 
 type ImageRepository interface {
 	Create(c echo.Context, id uuid.UUID, url, keyword string) error
-	FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error)
-	FindURLByID(c echo.Context, id uuid.UUID) (*string, error)
+	FindByGetImagesQuery(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error)
+	FirstByID(c echo.Context, id uuid.UUID, columns []string) (*model.Image, error)
 	ExistsByID(c echo.Context, id uuid.UUID) (bool, error)
 	Update(c echo.Context, id uuid.UUID, reqType dto.PatchImageReqType) error
 	Delete(c echo.Context, id uuid.UUID) error
 }
 
 type imageRepository struct {
-	DB      *gorm.DB
-	Clocker clock.Clocker
+	DB    *gorm.DB
+	Timer timer.Timer
 }
 
-func NewImageRepository(db *gorm.DB, clocker clock.Clocker) ImageRepository {
+func NewImageRepository(db *gorm.DB, timer timer.Timer) ImageRepository {
 	return &imageRepository{
-		DB:      db,
-		Clocker: clocker,
+		DB:    db,
+		Timer: timer,
 	}
 }
 
@@ -37,17 +40,16 @@ func (r *imageRepository) Create(c echo.Context, id uuid.UUID, url, keyword stri
 		ID:        id,
 		URL:       url,
 		Keyword:   keyword,
-		CreatedAt: r.Clocker.Now(),
+		UsedCount: 0,
+		Reported:  false,
+		Confirmed: false,
+		CreatedAt: r.Timer.Now(),
 	}
 
-	if err := r.DB.Create(newImage).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return r.DB.Debug().Create(newImage).Error
 }
 
-func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {
+func (r *imageRepository) FindByGetImagesQuery(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {
 	sqlQ := r.DB.Debug().Model(&model.Image{})
 
 	if q.FavoriteImageIDs != "" {
@@ -72,20 +74,26 @@ func (r *imageRepository) FindImages(c echo.Context, q dto.GetImagesQuery) (*[]m
 	}
 
 	var images []model.Image
-	if err := sqlQ.Offset(q.Page * 9).Limit(9).Find(&images).Error; err != nil {
+	if err := sqlQ.Offset(q.Page * config.GET_IMAGES_LIMIT).Limit(config.GET_IMAGES_LIMIT).Find(&images).Error; err != nil {
 		return nil, err
 	}
 
 	return &images, nil
 }
 
-func (r *imageRepository) FindURLByID(c echo.Context, id uuid.UUID) (*string, error) {
+func (r *imageRepository) FirstByID(c echo.Context, id uuid.UUID, columns []string) (*model.Image, error) {
 	var image model.Image
-	if err := r.DB.Model(&model.Image{}).Where("id = ?", id).First(&image).Error; err != nil {
+	q := r.DB.Model(&model.Image{}).Where("id = ?", id)
+
+	if len(columns) > 0 {
+		q = q.Select(columns)
+	}
+
+	if err := q.First(&image).Error; err != nil {
 		return nil, err
 	}
 
-	return &image.URL, nil
+	return &image, nil
 }
 
 func (r *imageRepository) ExistsByID(c echo.Context, id uuid.UUID) (bool, error) {
@@ -107,17 +115,9 @@ func (r *imageRepository) Update(c echo.Context, id uuid.UUID, reqType dto.Patch
 		updateData = map[string]interface{}{"confirmed": true}
 	}
 
-	if err := r.DB.Model(&model.Image{}).Where("id = ?", id).Updates(updateData).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return r.DB.Model(&model.Image{}).Where("id = ?", id).Updates(updateData).Error
 }
 
 func (r *imageRepository) Delete(c echo.Context, id uuid.UUID) error {
-	if err := r.DB.Where("id = ?", id).Delete(&model.Image{}).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return r.DB.Where("id = ?", id).Delete(&model.Image{}).Error
 }

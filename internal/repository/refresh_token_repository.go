@@ -1,5 +1,7 @@
 package repository
 
+// mockgen -source=internal/repository/refresh_token_repository.go -destination=test/mock/repository/mock_refresh_token_repository.go -package=repository_mock
+
 import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -9,7 +11,7 @@ import (
 
 type RefreshTokenRepository interface {
 	Create(c echo.Context, userID uuid.UUID, clientID uuid.UUID, token, scope string) error
-	FindByToken(c echo.Context, token string) (model.RefreshToken, error)
+	FirstByToken(c echo.Context, token string) (*model.RefreshToken, error)
 	Update(c echo.Context, userID uuid.UUID, clientID uuid.UUID, newToken, scope string) error
 }
 
@@ -36,13 +38,13 @@ func (r *refreshTokenRepository) Create(c echo.Context, userID uuid.UUID, client
 	return nil
 }
 
-func (r *refreshTokenRepository) FindByToken(c echo.Context, token string) (model.RefreshToken, error) {
+func (r *refreshTokenRepository) FirstByToken(c echo.Context, token string) (*model.RefreshToken, error) {
 	var refreshToken model.RefreshToken
 	if err := r.DB.Where("token = ?", token).First(&refreshToken).Error; err != nil {
-		return refreshToken, err
+		return nil, err
 	}
 
-	return refreshToken, nil
+	return &refreshToken, nil
 }
 
 func (r *refreshTokenRepository) Update(c echo.Context, userID uuid.UUID, clientID uuid.UUID, newToken, scope string) error {

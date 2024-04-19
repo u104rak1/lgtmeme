@@ -1,7 +1,7 @@
 package repository_test
 
 import (
-	"errors"
+	"regexp"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -11,45 +11,58 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestCheckPostgres(t *testing.T) {
-	gormDB, mock := testutil.SetupMockDB(t)
+func TestHealthRepository_CheckPostgres(t *testing.T) {
+	db, mock := testutil.SetupMockDB(t)
 
-	expectQuery := `SELECT "value" FROM "health_checks" WHERE key = \$1 ORDER BY "health_checks"\."key" LIMIT \$2`
+	sqlStatement := `SELECT "value" FROM "health_checks" WHERE key = $1 ORDER BY "health_checks"."key" LIMIT $2`
+	ckey := "testKey"
 
 	tests := []struct {
-		name          string
-		key           string
-		setupMock     func()
-		expectedValue string
-		expectError   bool
+		name      string
+		setupMock func()
+		arg       func() string
+		want      string
+		isErr     bool
 	}{
 		{
-			name:          "positive: Return value",
-			key:           "testKey",
-			expectedValue: "testValue",
+			name: "Return value",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"value"}).AddRow("testValue")
-				mock.ExpectQuery(expectQuery).WithArgs("testKey", 1).WillReturnRows(rows)
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
+					WithArgs(ckey, 1).
+					WillReturnRows(rows)
 			},
-			expectError: false,
+			arg: func() string {
+				return ckey
+			},
+			want:  "testValue",
+			isErr: false,
 		},
 		{
-			name:          "negative: Return error, because record not found",
-			key:           "missingKey",
-			expectedValue: "",
+			name: "Return error, because record not found",
 			setupMock: func() {
-				mock.ExpectQuery(expectQuery).WithArgs("missingKey", 1).WillReturnError(gorm.ErrRecordNotFound)
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
+					WithArgs("missingKey", 1).
+					WillReturnError(gorm.ErrRecordNotFound)
 			},
-			expectError: true,
+			arg: func() string {
+				return "missingKey"
+			},
+			want:  "",
+			isErr: true,
 		},
 		{
-			name:          "negative: Return error, because database connection error",
-			key:           "anyKey",
-			expectedValue: "",
+			name: "Return error, because db error",
 			setupMock: func() {
-				mock.ExpectQuery(expectQuery).WithArgs("anyKey", 1).WillReturnError(errors.New("database connection failed"))
+				mock.ExpectQuery(regexp.QuoteMeta(sqlStatement)).
+					WithArgs(ckey, 1).
+					WillReturnError(testutil.ErrDB)
 			},
-			expectError: true,
+			arg: func() string {
+				return ckey
+			},
+			want:  "",
+			isErr: true,
 		},
 	}
 
@@ -57,15 +70,17 @@ func TestCheckPostgres(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := testutil.SetupMinEchoContext()
 			tt.setupMock()
-			repo := repository.NewHealthRepository(gormDB)
-			value, err := repo.CheckPostgres(c, tt.key)
+			repo := repository.NewHealthRepository(db)
+			key := tt.arg()
+			actual, err := repo.CheckPostgres(c, key)
 
-			if tt.expectError {
+			if tt.isErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedValue, value)
 			}
+			assert.Equal(t, tt.want, actual)
+			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
 }

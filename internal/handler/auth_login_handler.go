@@ -47,7 +47,7 @@ func (h *loginHandler) Login(c echo.Context) error {
 		return response.BadRequest(c, errors.New("scopeConsent must be true"))
 	}
 
-	user, err := h.userRepository.FindByName(c, form.Username)
+	user, err := h.userRepository.FirstByName(c, form.Username)
 	if err != nil {
 		return response.Unauthorized(c, err)
 	}

@@ -1,5 +1,7 @@
 package repository
 
+// mockgen -source=internal/repository/oauth_client_repository.go -destination=test/mock/repository/mock_oauth_client_repository.go -package=repository_mock
+
 import (
 	"errors"
 	"strings"
@@ -12,8 +14,8 @@ import (
 )
 
 type OauthClientRepository interface {
-	ExistsForAuthz(c echo.Context, q dto.AuthzQuery) (bool, error)
-	FindByClientID(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error)
+	IsValidOAuthClient(c echo.Context, q dto.AuthzQuery) (bool, error)
+	FirstByClientIDWithScopes(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error)
 }
 
 type oauthClientRepository struct {
@@ -24,9 +26,14 @@ func NewOauthClientRepository(db *gorm.DB) OauthClientRepository {
 	return &oauthClientRepository{DB: db}
 }
 
-func (r *oauthClientRepository) ExistsForAuthz(c echo.Context, q dto.AuthzQuery) (bool, error) {
-	var oauthClient model.OauthClient
-	if err := r.DB.Model(&model.OauthClient{}).Preload("Scopes").Where("client_id = ? AND redirect_uri = ?", q.ClientID, q.RedirectURI).First(&oauthClient).Error; err != nil {
+func (r *oauthClientRepository) IsValidOAuthClient(c echo.Context, q dto.AuthzQuery) (bool, error) {
+	var dbScopes []model.OauthClientsScopes
+	if err := r.DB.Raw(`
+			SELECT osc.scope_code
+			FROM oauth_clients AS oc
+			INNER JOIN oauth_clients_scopes AS osc ON oc.id = osc.oauth_client_id
+			WHERE oc.client_id = ? AND oc.redirect_uri = ?
+	`, q.ClientID, q.RedirectURI).Scan(&dbScopes).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return false, nil
 		}
@@ -36,8 +43,8 @@ func (r *oauthClientRepository) ExistsForAuthz(c echo.Context, q dto.AuthzQuery)
 	scopes := strings.Split(q.Scope, " ")
 	for _, s := range scopes {
 		found := false
-		for _, cs := range oauthClient.Scopes {
-			if s == cs.Code {
+		for _, dbS := range dbScopes {
+			if s == dbS.ScopeCode {
 				found = true
 				break
 			}
@@ -50,9 +57,12 @@ func (r *oauthClientRepository) ExistsForAuthz(c echo.Context, q dto.AuthzQuery)
 	return true, nil
 }
 
-func (r *oauthClientRepository) FindByClientID(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error) {
+func (r *oauthClientRepository) FirstByClientIDWithScopes(c echo.Context, clientID uuid.UUID) (*model.OauthClient, error) {
 	var oauthClient model.OauthClient
-	if err := r.DB.Model(&model.OauthClient{}).Preload("Scopes").Preload("ApplicationTypes").Where("client_id = ?", clientID).First(&oauthClient).Error; err != nil {
+	if err := r.DB.Model(&model.OauthClient{}).
+		Preload("Scopes").
+		Where("client_id = ?", clientID).
+		First(&oauthClient).Error; err != nil {
 		return nil, err
 	}
 	return &oauthClient, nil

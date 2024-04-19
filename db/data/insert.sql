@@ -22,7 +22,7 @@ INSERT INTO oauth_clients (id, name, client_id, client_secret, redirect_uri, app
 ('4533d234-5f04-4a03-8171-f1f952736373', 'Admin Private Client', 'a74983c2-c578-41fd-993b-9e4716d244ac', 'admin_client_secret', 'http://localhost:8080/client-api/admin/callback', 'http://localhost:8080', 'confidential')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO oauth_clients_scopes (client_id, scope_code) VALUES
+INSERT INTO oauth_clients_scopes (oauth_client_id, scope_code) VALUES
 ('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'images.read'),
 ('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'images.create'),
 ('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'images.update'),
@@ -30,12 +30,12 @@ INSERT INTO oauth_clients_scopes (client_id, scope_code) VALUES
 ('4533d234-5f04-4a03-8171-f1f952736373', 'images.create'),
 ('4533d234-5f04-4a03-8171-f1f952736373', 'images.update'),
 ('4533d234-5f04-4a03-8171-f1f952736373', 'images.delete')
-ON CONFLICT (client_id, scope_code) DO NOTHING;
+ON CONFLICT (oauth_client_id, scope_code) DO NOTHING;
 
-INSERT INTO oauth_clients_application_types (client_id, application_type) VALUES
+INSERT INTO oauth_clients_application_types (oauth_client_id, application_type) VALUES
 ('b2124953-31a8-4c16-b5cf-fdd1e40edc14', 'web'),
 ('4533d234-5f04-4a03-8171-f1f952736373', 'web')
-ON CONFLICT (client_id, application_type) DO NOTHING;
+ON CONFLICT (oauth_client_id, application_type) DO NOTHING;
 
 INSERT INTO images (id, url, keyword, used_count, reported, confirmed, created_at) VALUES
 ('a2128761-21a8-53c6-b6cd-1578eaf12c14', 'https://placehold.jp/300x300.png', '300 * 300 sample A', 2, false, false, '2024-01-01 00:00:00'),
