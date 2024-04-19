@@ -51,10 +51,10 @@ func (mr *MockRefreshTokenRepositoryMockRecorder) Create(c, userID, clientID, to
 }
 
 // FirstByToken mocks base method.
-func (m *MockRefreshTokenRepository) FirstByToken(c echo.Context, token string) (model.RefreshToken, error) {
+func (m *MockRefreshTokenRepository) FirstByToken(c echo.Context, token string) (*model.RefreshToken, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FirstByToken", c, token)
-	ret0, _ := ret[0].(model.RefreshToken)
+	ret0, _ := ret[0].(*model.RefreshToken)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -51,32 +51,32 @@ func (mr *MockUserRepositoryMockRecorder) ExistsByID(c, userID interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByID", reflect.TypeOf((*MockUserRepository)(nil).ExistsByID), c, userID)
 }
 
-// FindByID mocks base method.
-func (m *MockUserRepository) FindByID(c echo.Context, userID uuid.UUID) (*model.User, error) {
+// FirstByID mocks base method.
+func (m *MockUserRepository) FirstByID(c echo.Context, userID uuid.UUID, columns []string) (*model.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", c, userID)
+	ret := m.ctrl.Call(m, "FirstByID", c, userID, columns)
 	ret0, _ := ret[0].(*model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindByID indicates an expected call of FindByID.
-func (mr *MockUserRepositoryMockRecorder) FindByID(c, userID interface{}) *gomock.Call {
+// FirstByID indicates an expected call of FirstByID.
+func (mr *MockUserRepositoryMockRecorder) FirstByID(c, userID, columns interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockUserRepository)(nil).FindByID), c, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FirstByID", reflect.TypeOf((*MockUserRepository)(nil).FirstByID), c, userID, columns)
 }
 
-// FindByName mocks base method.
-func (m *MockUserRepository) FindByName(c echo.Context, name string) (*model.User, error) {
+// FirstByName mocks base method.
+func (m *MockUserRepository) FirstByName(c echo.Context, name string) (*model.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByName", c, name)
+	ret := m.ctrl.Call(m, "FirstByName", c, name)
 	ret0, _ := ret[0].(*model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindByName indicates an expected call of FindByName.
-func (mr *MockUserRepositoryMockRecorder) FindByName(c, name interface{}) *gomock.Call {
+// FirstByName indicates an expected call of FirstByName.
+func (mr *MockUserRepositoryMockRecorder) FirstByName(c, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockUserRepository)(nil).FindByName), c, name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FirstByName", reflect.TypeOf((*MockUserRepository)(nil).FirstByName), c, name)
 }
