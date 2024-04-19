@@ -72,7 +72,8 @@ func (h *tokenHandler) Generate(c echo.Context) error {
 			return response.BadRequest(c, err)
 		}
 
-		user, err := h.userRepository.FindByID(c, authzCodeCtx.UserID)
+		columns := []string{"id", "name"}
+		user, err := h.userRepository.FirstByID(c, authzCodeCtx.UserID, columns)
 		if err != nil {
 			return response.InternalServerError(c, err)
 		}

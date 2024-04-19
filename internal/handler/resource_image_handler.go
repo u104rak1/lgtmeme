@@ -149,7 +149,8 @@ func (h *resourceImageHandler) Delete(c echo.Context) error {
 		return response.InternalServerError(c, err)
 	}
 
-	user, err := h.userRepository.FindByID(c, userID)
+	columns := []string{"role"}
+	user, err := h.userRepository.FirstByID(c, userID, columns)
 	if err != nil {
 		return response.InternalServerError(c, err)
 	}
@@ -158,7 +159,7 @@ func (h *resourceImageHandler) Delete(c echo.Context) error {
 		return response.Forbidden(c, errors.New("permission denied"))
 	}
 
-	columns := []string{"url"}
+	columns = []string{"url"}
 	img, err := h.imageRepository.FirstByID(c, imageID, columns)
 	if img == nil {
 		return response.NotFound(c, errors.New("image not found"))
