@@ -3,7 +3,7 @@ WORKDIR /app
 COPY view/package.json view/package-lock.json view/panda.config.ts ./
 RUN npm install
 COPY view/ .
-RUN npm run build
+RUN NEXT_PUBLIC_API_URL=https://lgtmeme.onrender.com npm run build
 
 FROM golang:1.21.4 AS go-build
 WORKDIR /go/src/app
