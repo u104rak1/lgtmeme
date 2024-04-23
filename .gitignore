@@ -1,0 +1,4 @@
+__debug*
+/docker/volumes/db/data
+/docker/volumes/storage/stub
+.env.prod

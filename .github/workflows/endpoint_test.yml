@@ -1,0 +1,35 @@
+name: Endpoint Test
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+      - feature/*
+
+jobs:
+  endpoint_test:
+    name: Run Endpoint Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.21'
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Dependencies start
+        run: make dependencies_start
+
+      - name: Run test
+        run: make endpoint_test
