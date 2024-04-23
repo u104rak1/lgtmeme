@@ -227,7 +227,8 @@ const NewPage = () => {
   };
 
   const handleCloseModal = async () => {
-    window.location.href = "http://localhost:8080" + PAGE_ENDPOINTS.home;
+    window.location.href =
+      process.env.NEXT_PUBLIC_API_URL + PAGE_ENDPOINTS.home;
   };
   return (
     <div>

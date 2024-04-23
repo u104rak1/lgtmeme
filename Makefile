@@ -32,7 +32,7 @@ clean: ## Clean the binary
 	go clean -cache -modcache
 
 view_build: ## Build the view files
-	@cd ./view && npm install && npm run build
+	@cd ./view && npm install && NEXT_PUBLIC_API_URL=http://localhost:8080 npm run build
 
 development_start: ## Start the development environment
 	@bash -c './script/start_development.sh'
