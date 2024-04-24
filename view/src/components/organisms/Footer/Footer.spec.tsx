@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import Footer from "@/components/organisms/Footer/Footer";
 import { PAGE_ENDPOINTS } from "@/utils/constants";
-import packageJson from "@@/package.json";
 
 describe("Footer", () => {
   test("Footer is rendered", () => {
@@ -20,9 +19,7 @@ describe("Footer", () => {
       name: "Admin",
     });
     const adminLink = adminButton.closest("a");
-    const copyrightText = screen.getByText(
-      `©2024 ~ LGTMeme version ${packageJson.version}`
-    );
+    const copyrightText = screen.getByText(`©2024 ~ LGTMeme`);
     expect(homeButton).toBeInTheDocument();
     expect(homeLink).toHaveAttribute("href", PAGE_ENDPOINTS.home);
     expect(termsOfServiceButton).toBeInTheDocument();

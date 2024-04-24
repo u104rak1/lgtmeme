@@ -17,14 +17,13 @@ var Pool *redis.Pool
 func NewSessionStore() {
 	var err error
 	secretKey := os.Getenv("SESSION_SECRET_KEY")
-	password := os.Getenv("REDIS_PASSWORD")
 
 	if os.Getenv("ECHO_MODE") == "production" {
 		redisURL := os.Getenv("REDIS_URL")
 
 		Store, err = redistore.NewRediStoreWithPool(&redis.Pool{
 			Dial: func() (redis.Conn, error) {
-				return redis.DialURL(redisURL, redis.DialPassword(password))
+				return redis.DialURL(redisURL)
 			},
 		}, []byte(secretKey))
 	} else {
