@@ -21,7 +21,7 @@ const Footer = () => {
           <Button visual="text">Admin</Button>
         </a>
       </div>
-      <div className={copyrightCss}>©2024 ~ LGTMeme version</div>
+      <div className={copyrightCss}>©2024 ~ LGTMeme</div>
     </footer>
   );
 };
