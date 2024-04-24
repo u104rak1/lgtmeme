@@ -1,10 +1,10 @@
 .PHONY: dependencies_start dependencies_stop migrate_up migrate_down migrate_reset insert_data clear_data clear_redis run view_build development_start get_token unit_test endpoint_test help
 
 dependencies_start: ## Start the postgres and redis
-	@docker compose --env-file .env.local -f ./docker/docker-compose.local.yaml up -d
+	@docker compose --env-file .env.local -f ./docker/docker-compose.yaml up -d
 
 dependencies_stop: ## Stop the postgres and redis
-	@docker compose --env-file .env.local -f ./docker/docker-compose.local.yaml down
+	@docker compose --env-file .env.local -f ./docker/docker-compose.yaml down
 
 migrate_up: ## Run the migration
 	@bash -c 'source .env.local && migrate -path ./db/migration -database "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}:$${POSTGRES_PORT}/$${POSTGRES_DB}?sslmode=$${POSTGRES_SSL_MODE}" up'
@@ -32,7 +32,7 @@ clean: ## Clean the binary
 	go clean -cache -modcache
 
 view_build: ## Build the view files
-	@cd ./view && npm install && npm run build
+	@cd ./view && npm install && NEXT_PUBLIC_API_URL=http://localhost:8080 npm run build
 
 development_start: ## Start the development environment
 	@bash -c './script/start_development.sh'
