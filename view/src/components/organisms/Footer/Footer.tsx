@@ -2,7 +2,6 @@
 
 import Button from "@/components/atoms/Button/Button";
 import { PAGE_ENDPOINTS } from "@/utils/constants";
-import packageJson from "@@/package.json";
 import { css } from "@@/styled-system/css";
 
 const Footer = () => {
@@ -22,9 +21,7 @@ const Footer = () => {
           <Button visual="text">Admin</Button>
         </a>
       </div>
-      <div className={copyrightCss}>
-        ©2024 ~ LGTMeme version {packageJson.version}
-      </div>
+      <div className={copyrightCss}>©2024 ~ LGTMeme version</div>
     </footer>
   );
 };
