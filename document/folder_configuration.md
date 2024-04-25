@@ -6,7 +6,7 @@ lgtmeme/
 ├── .vscode/         # Visual Studio Code settings files
 ├── cmd/             # Application's entry point
 │   └── lgtmeme/
-│       └── main.go  # main function
+│       └── main.go  # Main function
 ├── config/          # Configuration files
 ├── db/              # Migration files and seed data
 ├── docker/          # Docker files
@@ -18,12 +18,12 @@ lgtmeme/
 │   ├── model/       # Data models
 │   ├── repository/  # Data access layer (DB, Redis)
 │   ├── service/     # Internal and external API requests and business logic
-│   ├── setup/       # setup Echo
+│   ├── setup/       # Setup Echo
 │   └── util/        # Utility functions and wrappers
 ├── script/          # Scripts files
 ├── test/            # Test
 │   ├── endpoint/    # Endpoint tests
-│   ├── mock/        # mock files
+│   ├── mock/        # Mock files
 │   └── testutil/    # Utility functions fot test
 └── view/            # Next.js
     ├── out/         # Static files exported by SSG

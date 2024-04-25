@@ -10,18 +10,18 @@ sequenceDiagram
   participant Redis as Redis
 
   autonumber
-  browser->>+client_server: Request home view (GET / )
-  client_server->>+auth_server: Request Access Token (GET /auth-api/token)
+  browser->>+client_server: Request home screen (GET / )
+  client_server->>+auth_server: Request access token (GET /auth-api/token)
   auth_server->>+db: Validate credentials
   db-->>-auth_server: Credentials valid
-  auth_server->>auth_server: Generate Access Token
-  auth_server-->>-client_server: Access Token
-  client_server->>+Redis: Store Access Token
-  Redis-->>-client_server: Cached Access Token
+  auth_server->>auth_server: Generate access token
+  auth_server-->>-client_server: access token
+  client_server->>+Redis: Store access token
+  Redis-->>-client_server: Cached access token
   client_server-->>-browser: HTML, CSS and JS
   browser->>+client_server: Request images (GET /client-api/images)
-  client_server->>+Redis: Load Access Token
-  Redis-->>-client_server: Access Token
+  client_server->>+Redis: Load access token
+  Redis-->>-client_server: access token
   client_server->>+resource_server: Request images (GET /resource-api/images)
   resource_server->>+auth_server: Request public key (GET /auth-api/jwks)
   auth_server-->>-resource_server: public key

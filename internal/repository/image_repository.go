@@ -50,7 +50,7 @@ func (r *imageRepository) Create(c echo.Context, id uuid.UUID, url, keyword stri
 }
 
 func (r *imageRepository) FindByGetImagesQuery(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {
-	sqlQ := r.DB.Debug().Model(&model.Image{})
+	sqlQ := r.DB.Debug().Model(&model.Image{}).Select("id, url")
 
 	if q.FavoriteImageIDs != "" {
 		favoriteImageIDs := strings.Split(q.FavoriteImageIDs, ",")
