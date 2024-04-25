@@ -1,4 +1,4 @@
-# Authorization Code Flow (with transition to admin view)
+# Authorization Code Grant Flow (with transition to admin view)
 
 ```mermaid
 sequenceDiagram
