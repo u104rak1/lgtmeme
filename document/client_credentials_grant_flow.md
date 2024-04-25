@@ -1,4 +1,4 @@
-# Client Credentials Flow (with GET images)
+# Client Credentials Grant Flow (with GET images)
 
 ```mermaid
 sequenceDiagram
