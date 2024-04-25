@@ -1,10 +1,24 @@
 # Developer knowledge
 
+## Quick start
+1. Grant execution permission to the script
+    ```sh
+      chmod +x ./script/*.sh
+    ```
+2. Run the following command to complete development preparation
+    ```sh
+      make development_start
+    ```
+3. Launch the server
+    ```sh
+      make run
+    ```
+
 ## List of services in use
 
 - [Github](https://github.com/ucho456job/lgtmeme)
 - [Render](https://dashboard.render.com)
-- [supabase](https://supabase.com/dashboard/projects)
+- [Supabase](https://supabase.com/dashboard/projects)
 - [Upstash](https://console.upstash.com/redis)
 - [UptimeRobot](https://dashboard.uptimerobot.com/monitors)
 
@@ -19,12 +33,7 @@ set [key] [value]                         // save key value
 FLUSHALL                                  // reset keys
 ```
 
-### Grant execution permission to the script
-```
-chmod +x ./script/*.sh
-```
-
-### Generate new RSA key pair
+### Generate RSA key pair
 ```
 openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048
 openssl rsa -pubout -in private_key.pem -out public_key.pem

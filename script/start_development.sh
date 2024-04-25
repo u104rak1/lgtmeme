@@ -37,3 +37,5 @@ if [ "$status" = "404" ]; then
         "public": true
       }'
 fi
+
+echo -e "\nDevelopment preparation completed!"

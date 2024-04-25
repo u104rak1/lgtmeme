@@ -17,7 +17,7 @@ graph TD;
     monitor[moniter]
   end
   LGTMeme<--connect-->PostgreSQL;
-  LGTMeme--Upload image-->Storage;
+  LGTMeme--upload image-->Storage;
   LGTMeme<--connect-->Redis;
   monitor--health check-->LGTMeme;
 ```

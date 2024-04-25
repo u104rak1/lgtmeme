@@ -89,13 +89,8 @@ func (h *resourceImageHandler) BulkGet(c echo.Context) error {
 	respImgs := make([]dto.GetImagesImages, total)
 	for i, img := range *imgs {
 		respImgs[i] = dto.GetImagesImages{
-			ID:        img.ID,
-			URL:       img.URL,
-			Keyword:   img.Keyword,
-			UsedCount: img.UsedCount,
-			Reported:  img.Reported,
-			Confirmed: img.Confirmed,
-			CreatedAt: img.CreatedAt.Format("2006-01-02 15:04:05"),
+			ID:  img.ID,
+			URL: img.URL,
 		}
 	}
 

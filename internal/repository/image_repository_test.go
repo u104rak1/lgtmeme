@@ -120,7 +120,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"}).
 					AddRow(img1.ID, img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.CreatedAt).
 					AddRow(img3.ID, img3.URL, img3.Keyword, img3.UsedCount, img3.Reported, img3.Confirmed, img3.CreatedAt)
-				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, url FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
 					WithArgs(true, false, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
@@ -142,7 +142,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"}).
 					AddRow(img1.ID, img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.CreatedAt).
 					AddRow(img2.ID, img2.URL, img2.Keyword, img2.UsedCount, img2.Reported, img2.Confirmed, img2.CreatedAt)
-				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE id IN ($1,$2) AND (confirmed = $3 OR reported = $4) ORDER BY created_at DESC LIMIT $5`)).
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, url FROM "images" WHERE id IN ($1,$2) AND (confirmed = $3 OR reported = $4) ORDER BY created_at DESC LIMIT $5`)).
 					WithArgs(img1.ID, img2.ID, true, false, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
@@ -163,7 +163,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"}).
 					AddRow(img1.ID, img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.CreatedAt)
-				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE keyword LIKE $1 AND (confirmed = $2 OR reported = $3) ORDER BY created_at DESC LIMIT $4`)).
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, url FROM "images" WHERE keyword LIKE $1 AND (confirmed = $2 OR reported = $3) ORDER BY created_at DESC LIMIT $4`)).
 					WithArgs("%keyword1%", true, false, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
@@ -184,7 +184,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"}).
 					AddRow(img2.ID, img2.URL, img2.Keyword, img2.UsedCount, img2.Reported, img2.Confirmed, img2.CreatedAt)
-				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 AND reported = $2 ORDER BY created_at DESC LIMIT $3`)).
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, url FROM "images" WHERE confirmed = $1 AND reported = $2 ORDER BY created_at DESC LIMIT $3`)).
 					WithArgs(false, true, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
@@ -207,7 +207,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 					AddRow(img3.ID, img3.URL, img3.Keyword, img3.UsedCount, img3.Reported, img3.Confirmed, img3.CreatedAt).
 					AddRow(img2.ID, img2.URL, img2.Keyword, img2.UsedCount, img2.Reported, img2.Confirmed, img2.CreatedAt).
 					AddRow(img1.ID, img1.URL, img1.Keyword, img1.UsedCount, img1.Reported, img1.Confirmed, img1.CreatedAt)
-				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY used_count DESC, created_at DESC LIMIT $3`)).
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, url FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY used_count DESC, created_at DESC LIMIT $3`)).
 					WithArgs(true, false, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
@@ -227,7 +227,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 			name: "Return empty",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "url", "keyword", "used_count", "reported", "confirmed", "created_at"})
-				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, url FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
 					WithArgs(true, false, config.GET_IMAGES_LIMIT).
 					WillReturnRows(rows)
 			},
@@ -246,7 +246,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 		{
 			name: "Return error, because db error",
 			setupMock: func() {
-				mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
+				mock.ExpectQuery(regexp.QuoteMeta(`SELECT id, url FROM "images" WHERE confirmed = $1 OR reported = $2 ORDER BY created_at DESC LIMIT $3`)).
 					WithArgs(true, false, config.GET_IMAGES_LIMIT).
 					WillReturnError(testutil.ErrDB)
 			},
