@@ -1,6 +1,6 @@
 module github.com/ucho456job/lgtmeme
 
-go 1.21.4
+go 1.22.2
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2

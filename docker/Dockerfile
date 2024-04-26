@@ -1,11 +1,11 @@
-FROM node:18.17.1 AS nextjs-build
+FROM node:20.12.2 AS nextjs-build
 WORKDIR /app
 COPY view/package.json view/package-lock.json view/panda.config.ts ./
 RUN npm install
 COPY view/ .
 RUN NEXT_PUBLIC_API_URL=https://lgtmeme.onrender.com npm run build
 
-FROM golang:1.21.4 AS go-build
+FROM golang:1.22.2 AS go-build
 WORKDIR /go/src/app
 COPY go.mod go.sum ./
 RUN go mod download
