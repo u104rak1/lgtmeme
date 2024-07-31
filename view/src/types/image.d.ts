@@ -15,6 +15,7 @@ type GetImagesQuery = {
   sort: "popular" | "latest";
   favoriteImageIds: string[];
   authCheck: boolean;
+  activeTabId: ActiveTabId;
 };
 type GetImagesRespBody = {
   images: Image[];

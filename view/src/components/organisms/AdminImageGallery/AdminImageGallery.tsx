@@ -37,6 +37,7 @@ const AdminImageGallery = ({ css }: Props) => {
       sort: ACTIVE_TAB_ID.latest,
       favoriteImageIds: [],
       authCheck: true,
+      activeTabId: ACTIVE_TAB_ID.latest,
     });
     if (!result.ok) {
       setIsLoading(false);

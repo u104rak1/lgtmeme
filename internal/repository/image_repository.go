@@ -50,9 +50,13 @@ func (r *imageRepository) Create(c echo.Context, id uuid.UUID, url, keyword stri
 }
 
 func (r *imageRepository) FindByGetImagesQuery(c echo.Context, q dto.GetImagesQuery) (*[]model.Image, error) {
+	var images []model.Image
 	sqlQ := r.DB.Debug().Model(&model.Image{}).Select("id, url")
 
-	if q.FavoriteImageIDs != "" {
+	if q.ActiveTabID == "favorite" {
+		if q.FavoriteImageIDs == "" {
+			return &images, nil
+		}
 		favoriteImageIDs := strings.Split(q.FavoriteImageIDs, ",")
 		sqlQ = sqlQ.Where("id IN ?", favoriteImageIDs)
 	}
@@ -73,7 +77,6 @@ func (r *imageRepository) FindByGetImagesQuery(c echo.Context, q dto.GetImagesQu
 		sqlQ = sqlQ.Order("used_count DESC, created_at DESC")
 	}
 
-	var images []model.Image
 	if err := sqlQ.Offset(q.Page * config.GET_IMAGES_LIMIT).Limit(config.GET_IMAGES_LIMIT).Find(&images).Error; err != nil {
 		return nil, err
 	}

@@ -17,6 +17,7 @@ type GetImagesQuery struct {
 	Sort             string `query:"sort" validate:"oneof=latest popular" default:"latest"`
 	FavoriteImageIDs string `query:"favorite_image_ids" validate:"uuidStrings"`
 	AuthCheck        bool   `query:"auth_check"`
+	ActiveTabID      string `query:"active_tab_id" validate:"oneof=latest popular favorite"`
 }
 
 type GetImagesImages struct {
