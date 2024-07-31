@@ -131,6 +131,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 					Sort:             "latest",
 					FavoriteImageIDs: "",
 					AuthCheck:        false,
+					ActiveTabID:      "latest",
 				}
 			},
 			want:  &[]model.Image{img1, img3},
@@ -153,6 +154,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 					Sort:             "latest",
 					FavoriteImageIDs: fmt.Sprintf("%s,%s", img1.ID, img2.ID),
 					AuthCheck:        false,
+					ActiveTabID:      "favorite",
 				}
 			},
 			want:  &[]model.Image{img1, img2},
@@ -174,6 +176,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 					Sort:             "latest",
 					FavoriteImageIDs: "",
 					AuthCheck:        false,
+					ActiveTabID:      "latest",
 				}
 			},
 			want:  &[]model.Image{img1},
@@ -195,6 +198,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 					Sort:             "latest",
 					FavoriteImageIDs: "",
 					AuthCheck:        true,
+					ActiveTabID:      "latest",
 				}
 			},
 			want:  &[]model.Image{img2},
@@ -218,6 +222,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 					Sort:             "popular",
 					FavoriteImageIDs: "",
 					AuthCheck:        false,
+					ActiveTabID:      "popular",
 				}
 			},
 			want:  &[]model.Image{img3, img2, img1},
@@ -238,6 +243,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 					Sort:             "latest",
 					FavoriteImageIDs: "",
 					AuthCheck:        false,
+					ActiveTabID:      "latest",
 				}
 			},
 			want:  &[]model.Image{},
@@ -257,6 +263,7 @@ func TestImageRepository_FindByGetImagesQuery(t *testing.T) {
 					Sort:             "latest",
 					FavoriteImageIDs: "",
 					AuthCheck:        false,
+					ActiveTabID:      "latest",
 				}
 			},
 			want:  nil,
