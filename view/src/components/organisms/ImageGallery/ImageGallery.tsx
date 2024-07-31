@@ -65,9 +65,9 @@ const ImageGallery = ({ css }: Props) => {
         activeTabId === ACTIVE_TAB_ID.popular
           ? ACTIVE_TAB_ID.popular
           : ACTIVE_TAB_ID.latest,
-      favoriteImageIds:
-        activeTabId === ACTIVE_TAB_ID.favorite ? favoriteImageIds : [],
+      favoriteImageIds,
       authCheck: false,
+      activeTabId,
     });
     if (!result.ok) {
       setIsLoading(false);

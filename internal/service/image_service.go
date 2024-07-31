@@ -71,6 +71,7 @@ func (s *imageService) BulkGet(c echo.Context, q dto.GetImagesQuery, token strin
 	reqDataParts = append(reqDataParts, fmt.Sprintf("sort=%s", q.Sort))
 	reqDataParts = append(reqDataParts, fmt.Sprintf("favorite_image_ids=%s", q.FavoriteImageIDs))
 	reqDataParts = append(reqDataParts, fmt.Sprintf("auth_check=%t", q.AuthCheck))
+	reqDataParts = append(reqDataParts, fmt.Sprintf("active_tab_id=%s", q.ActiveTabID))
 	reqData := strings.Join(reqDataParts, "&")
 
 	baseURL := os.Getenv("BASE_URL")
